@@ -19,49 +19,37 @@ def get_pages(book, page, chapter, posY=2, posX=2):
     maxY, maxX = page.getmaxyx()
     max_lines = maxY - (posY * 2)
     max_cols = maxX - (posX * 2)
-    line = 0
 
     if book.has_text(chapter):
         content = book.get_chapter_text(chapter)
+
+        for paragraph in content:
+            lines_of_text = wrap(paragraph, max_cols)
+            if len(lines_of_text) + len(on_page) + 1 <= max_lines:
+                for text in lines_of_text:
+                    on_page.append(text)
+                on_page.append('')
+            else:
+                pages.append(on_page)
+                on_page = []
+        if len(on_page) != 0:
+            pages.append(on_page)
+        return pages
     else:
         content = book.get_chapter_title(chapter)
 
         for line_of_text in wrap(content, max_cols):
             on_page.append(line_of_text)
+
         pages.append(on_page)
         return pages
 
-    for paragraph in content:
-        if len(on_page) <= max_lines:
-            if len(paragraph) > max_cols:
-                splited_text = wrap(paragraph, max_cols)
-                if line + len(splited_text) > max_lines:
-                    pages.append(on_page)
-                    on_page = []
-                    line = 0
-                else:
-                    for line_of_text in splited_text:
-                        on_page.append(line_of_text)
-                        line += 1
-                    on_page.append('')
-                    line += 1
-            else:
-                on_page.append(paragraph)
-                on_page.append('')
-                line += 2
-
-        else:
-            pages.append(on_page)
-            on_page = []
-            line = 0
-
-    return pages
-
 def print_page_content(page, pages, page_number, posY=2, posX=2):
     try:
-        for line_of_text in pages[page_number]:
-            page.addstr(posY, posX, line_of_text, curses.A_NORMAL)
-            posY += 1
+        if pages[page_number]:
+            for line_of_text in pages[page_number]:
+                page.addstr(posY, posX, line_of_text, curses.A_NORMAL)
+                posY += 1
     except:
         pass
 
@@ -117,7 +105,7 @@ def main(argv):
 
     init_chapter = True
     current_page = 0
-    current_chapter = 2
+    current_chapter = 0
     number_of_chapters = book.get_number_of_chapters()
 
     screen.addstr(1, 1, str(number_of_chapters), curses.A_UNDERLINE)
