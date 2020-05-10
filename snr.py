@@ -4,89 +4,113 @@ from textwrap import wrap
 from reader import FileReader
 from parser import TocContent
 
-def get_page(screen, maxY, maxX):
-    nlines = maxY - 3
-    ncols = maxX - 40
-    begin_y = 2
-    begin_x = 20
-    page = screen.subwin(nlines, ncols, begin_y, begin_x)
-    page.box()
-    return page
+class Pager:
+    def __init__(self, screen, book, chapter, v_padding=2, h_padding=2):
+        self.screen = screen
+        self.book = book
+        self.chapter = chapter
+        self.v_padding = v_padding
+        self.h_padding = h_padding
+        self.screen_max_y, self.screen_max_x = screen.getmaxyx()
+        self._set_page_max_y()
+        self._set_page_max_x()
+        self._set_page_pos_y()
+        self._set_page_pos_x()
+        self._set_page_lines()
+        self._set_page_columns()
+        self._set_page()
+        self._set_pages()
 
-def get_pages(book, page, chapter, posY=2, posX=2):
-    pages = []
-    on_page = []
-    maxY, maxX = page.getmaxyx()
-    max_lines = maxY - (posY * 2)
-    max_cols = maxX - (posX * 2)
+    def _set_page_max_y(self):
+        self.page_max_y = self.screen_max_y - 4
 
-    if book.has_text(chapter):
-        content = book.get_chapter_text(chapter)
+    def _set_page_max_x(self):
+        self.page_max_x = int(self.screen_max_x / 2)
 
-        for paragraph in content:
-            lines_of_text = wrap(paragraph, max_cols)
-            if len(lines_of_text) + len(on_page) + 1 <= max_lines:
-                for text in lines_of_text:
-                    on_page.append(text)
-                on_page.append('')
-            else:
+    def _set_page_pos_y(self):
+        self.page_pos_y = 2
+
+    def _set_page_pos_x(self):
+        self.page_pos_x = int(self.page_max_x / 2)
+
+    def _set_page_lines(self):
+        self.page_lines = self.page_max_y - (self.v_padding * 2)
+
+    def _set_page_columns(self):
+        self.page_columns = self.page_max_x - (self.h_padding * 2)
+
+    def _set_page(self):
+        self.page = self.screen.subwin(self.page_max_y, self.page_max_x,
+            self.page_pos_y, self.page_pos_x)
+
+    def _set_pages(self):
+        pages = []
+        on_page = []
+        if self.book.has_text(self.chapter):
+            content = self.book.get_chapter_text(self.chapter)
+            for paragraph in content:
+                lines_of_text = wrap(paragraph, self.page_columns)
+                if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
+                    for text in lines_of_text:
+                        on_page.append(text)
+                    on_page.append('')
+                else:
+                    pages.append(on_page)
+                    on_page = []
+            if len(on_page) != 0:
                 pages.append(on_page)
-                on_page = []
-        if len(on_page) != 0:
+            self.pages = pages
+        else:
+            content = self.book.get_chapter_title(self.chapter)
+            for line_of_text in wrap(content, max_cols):
+                on_page.append(line_of_text)
             pages.append(on_page)
-        return pages
-    else:
-        content = book.get_chapter_title(chapter)
+            self.pages = pages
 
-        for line_of_text in wrap(content, max_cols):
-            on_page.append(line_of_text)
+    def get_number_of_pages(self):
+        return len(self.pages)
 
-        pages.append(on_page)
-        return pages
+    def print_page_text(self, current_page):
+        pos_y = self.page_pos_y
+        try:
+            if self.pages[current_page]:
+                for line_of_text in self.pages[current_page]:
+                    self.page.addstr(pos_y, self.h_padding,
+                        line_of_text, curses.A_NORMAL)
+                    pos_y += 1
+        except:
+            pass
 
-def print_page_content(page, pages, page_number, posY=2, posX=2):
-    try:
-        if pages[page_number]:
-            for line_of_text in pages[page_number]:
-                page.addstr(posY, posX, line_of_text, curses.A_NORMAL)
-                posY += 1
-    except:
-        pass
+    def print_page_number(self, current_page):
+        current_page += 1
+        page_number = str(current_page) + '/' + str(self.get_number_of_pages())
+        pos_y = self.page_max_y - 1
+        pos_x = self.page_max_x - len(page_number) - self.h_padding
+        self.page.addstr(pos_y, pos_x, page_number, curses.A_REVERSE)
 
-def print_page_number(page, pages, current):
-    maxY, maxX = page.getmaxyx()
-    max_pages = len(pages)
-    current += 1
-    page_num = str(current) + '/' + str(max_pages)
-    posY = maxY - 1
-    posX = maxX - len(page_num) - 2
-    page.addstr(posY, posX, page_num, curses.A_REVERSE)
+    def print_page_title(self):
+        chapter_title = self.book.get_chapter_title(self.chapter)
+        chapter_id = self.book.get_id(self.chapter)
+        page_title = str(chapter_id) + ' - ' + chapter_title
+        if len(page_title) >= self.page_columns - 3:
+            page_title = page_title[:self.page_columns - 3] + '...'
+        self.page.addstr(0, self.h_padding, page_title, curses.A_REVERSE)
 
-def print_page_title(book, page, chapter, posX = 2):
-    maxY, maxX = page.getmaxyx()
-    max_cols = maxX - (posX * 2)
-    chapter_title = book.get_chapter_title(chapter)
-    chapter_id = book.get_id(chapter)
-
-    page_title = str(chapter_id) + ': ' + chapter_title
-
-    if len(page_title) >= max_cols - 3:
-        page_title = page_title[:max_cols - 3] + '...'
-
-    page.addstr(0, 2, page_title, curses.A_REVERSE)
-
+    def print_page(self, current_page):
+        self.page.erase()
+        self.page.box()
+        self.print_page_title()
+        self.print_page_text(current_page)
+        self.print_page_number(current_page)
+        self.page.refresh()
 
 def main(argv):
     escape = False
-    # try:
     fileinput = argv[1]
     reader = FileReader(fileinput)
     toc_file = reader.get_toc_file()
     path = reader.get_directory_path(toc_file)
     book = TocContent(path, toc_file)
-    # except:
-        # print('Something went wrong.')
-    # exit()
 
     VERSION = '0.1-dev'
     APPLICATION = 'Simple Novel Reader'
@@ -115,56 +139,43 @@ def main(argv):
             curses.endwin()
             break
 
-        maxY, maxX = screen.getmaxyx()
-        page = get_page(screen, maxY, maxX)
-
         if init_chapter:
-            pages = get_pages(book, page, current_chapter)
+            page = Pager(screen, book, current_chapter)
             init_chapter = False
 
-        print_page_title(book, page, current_chapter)
-        print_page_number(page, pages, current_page)
-        print_page_content(page, pages, current_page)
+        page.print_page(current_page)
 
         x = screen.getch()
 
         if x == ord('n'):
-            if current_page == len(pages) - 1:
+            if current_page == page.get_number_of_pages() - 1:
                 current_chapter += 1
                 current_page = 0
                 init_chapter = True
             else:
                 current_page += 1
-            page.erase()
-            page.refresh()
 
         if x == ord('p'):
             if current_page == 0 and current_chapter != 0:
                 current_chapter -= 1
-                current_page = len(get_pages(book, page, current_chapter)) - 1
-                init_chapter = True
+                page = Pager(screen, book, current_chapter)
+                current_page = page.get_number_of_pages() - 1
             elif current_page == 0 and current_chapter == 0:
                 current_page = 0
             else:
                 current_page -= 1
-            page.erase()
-            page.refresh()
 
         if x == ord('N'):
             if current_chapter != number_of_chapters:
                 current_chapter += 1
                 current_page = 0
                 init_chapter = True
-                page.erase()
-                page.refresh()
 
         if x == ord('P'):
             if current_chapter != 0:
                 current_chapter -= 1
                 current_page = 0
                 init_chapter = True
-                page.erase()
-                page.refresh()
 
         if x == ord('q'):
             escape = True
