@@ -16,7 +16,6 @@ class FileReader:
         if not os.path.exists(self.path):
             try:
                 os.mkdir(self.path, self.access_rights)
-                print('Temporary directory created as: %s' % self.path)
             except OSError:
                 print ("Creation of the directory %s failed" % self.path)
         else:
@@ -27,15 +26,12 @@ class FileReader:
                         os.unlink(file_path)
                     elif os.path.isdir(file_path):
                         shutil.rmtree(file_path)
-                    print('Removing: %s' % file_path)
                 except OSError as e:
                     print('Failed to delete %s, because of %s' % (file_path, e))
 
     def unzip_file(self):
         with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
-            print('Unziping file: %s' % self.file_path)
             zip_ref.extractall(self.path)
-            print('File unziped to: %s' % self.path)
 
     def get_content_list(self):
         for path in Path(self.path).rglob('*.html'):

@@ -8,9 +8,9 @@
 # gzygmanski@hotmail.com:::::::: #
 
 import os, sys, curses
-from reader import FileReader
-from parser import TocContent
-from screen import Screen, Pager
+from imports.reader import FileReader
+from imports.parser import TocContent
+from imports.screen import Screen, Pager
 
 # :::: APP INFO :::::::::::::::: #
 

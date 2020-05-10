@@ -71,7 +71,7 @@ class Pager:
             curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
         else:
             curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-            curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_WHITE)
+            curses.init_pair(2, curses.COLOR_RED, curses.COLOR_WHITE)
         self.background_colors = curses.color_pair(1)
         self.info_colors = curses.color_pair(2)
 
@@ -127,8 +127,8 @@ class Pager:
         chapter_title = self.book.get_chapter_title(self.chapter)
         chapter_id = self.book.get_id(self.chapter)
         page_title = '[' +  str(chapter_id) + '][' + chapter_title + ']'
-        if len(page_title) >= self.page_columns - 3:
-            page_title = page_title[:self.page_columns - 3] + '...'
+        if len(page_title) >= self.page_columns - 4:
+            page_title = page_title[:self.page_columns - 4] + '...]'
         self.page.addstr(0, self.h_padding, page_title, self.info_colors)
 
     def print_page(self, current_page):
