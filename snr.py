@@ -65,7 +65,7 @@ class Pager:
             self.pages = pages
         else:
             content = self.book.get_chapter_title(self.chapter)
-            for line_of_text in wrap(content, max_cols):
+            for line_of_text in wrap(content, self.page_columns):
                 on_page.append(line_of_text)
             pages.append(on_page)
             self.pages = pages
