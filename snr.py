@@ -1,8 +1,52 @@
 #!/bin/python3
+
+# :::::::::::::::[]::::::::::::: #
+# :::: /_> |U_U| || /_> /_> :::: #
+# :::: <=/ |T-T| || <=/ <=/ :::: #
+# ::::::::SHISS DOTFILES:::::::: #
+# https://github.com/gzygmanski: #
+# gzygmanski@hotmail.com:::::::: #
+
 import os, sys, curses
 from textwrap import wrap
 from reader import FileReader
 from parser import TocContent
+
+# :::: APP INFO :::::::::::::::: #
+
+VERSION = '0.1-dev'
+APP = 'Simple Novel Reader'
+
+# :::: KEYBINDINGS ::::::::::::: #
+
+PAGE_UP = {ord('n'), ord('j')}
+PAGE_DOWN = {ord('p'), ord('k'), ord(' ')}
+NEXT_CHAPTER = {ord('N'), ord('l')}
+PREVIOUS_CHAPTER = {ord('P'), ord('h')}
+START_OF_CHAPTER = {ord('g'), ord('0')}
+END_OF_CHAPTER = {ord('G'), ord('$')}
+QUIT = {ord('q'), 27}
+
+
+class Screen:
+    def __init__(self, version='2020', app_name='[snr] Simple Novel Reader'):
+        self.version = version
+        self.app_name = app_name
+        self._set_screen()
+
+    def _set_screen(self):
+        self.screen = curses.initscr()
+        self.screen.keypad(1)
+
+    def get_screen(self):
+        return self.screen
+
+    def redraw(self):
+        self.screen.erase()
+        # self.screen.box()
+        self.screen.addstr(0, 2, self.app_name + ' ' + self.version, curses.A_UNDERLINE)
+        self.screen.refresh()
+
 
 class Pager:
     def __init__(self, screen, book, chapter, v_padding=2, h_padding=2):
@@ -115,50 +159,47 @@ def main(argv):
     path = reader.get_directory_path(toc_file)
     book = TocContent(path, toc_file)
 
-    VERSION = '0.1-dev'
-    APPLICATION = 'Simple Novel Reader'
-    screen = curses.initscr()
-    # curses.start_color()
-    # curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-    # highlightText = curses.color_pair(1)
-    # normalText = curses.A_NORMAL
+    init_screen = Screen(VERSION, APP)
+    screen = init_screen.get_screen()
 
     curses.noecho()
     curses.cbreak()
     curses.nonl()
     curses.curs_set(0)
-    screen.keypad(1)
-    screen.addstr(0, 1, APPLICATION + ' ' + VERSION, curses.A_UNDERLINE)
 
-    init_chapter = True
+
+    init_screen_update = True
+    init_chapter_update = True
     current_page = 0
     current_chapter = 0
     number_of_chapters = book.get_number_of_chapters()
-
-    screen.addstr(1, 1, str(number_of_chapters), curses.A_UNDERLINE)
 
     while escape == False:
         if current_chapter == number_of_chapters:
             curses.endwin()
             break
 
-        if init_chapter:
+        if init_screen_update:
+            init_screen.redraw()
+            init_screen_update = False
+
+        if init_chapter_update:
             page = Pager(screen, book, current_chapter)
-            init_chapter = False
+            init_chapter_update = False
 
         page.print_page(current_page)
 
         x = screen.getch()
 
-        if x == ord('n'):
+        if x in PAGE_UP:
             if current_page == page.get_number_of_pages() - 1:
                 current_chapter += 1
                 current_page = 0
-                init_chapter = True
+                init_chapter_update = True
             else:
                 current_page += 1
 
-        if x == ord('p'):
+        if x in PAGE_DOWN:
             if current_page == 0 and current_chapter != 0:
                 current_chapter -= 1
                 page = Pager(screen, book, current_chapter)
@@ -168,23 +209,24 @@ def main(argv):
             else:
                 current_page -= 1
 
-        if x == ord('N'):
+        if x in NEXT_CHAPTER:
             if current_chapter != number_of_chapters:
                 current_chapter += 1
                 current_page = 0
-                init_chapter = True
+                init_chapter_update = True
 
-        if x == ord('P'):
+        if x in PREVIOUS_CHAPTER:
             if current_chapter != 0:
                 current_chapter -= 1
                 current_page = 0
-                init_chapter = True
+                init_chapter_update = True
 
-        if x == ord('q'):
+        if x in QUIT:
             escape = True
             curses.endwin()
         elif x == curses.KEY_RESIZE:
-            screen.erase()
+            init_screen_update = True
+            init_chapter_update = True
 
 if __name__ == '__main__':
     main(sys.argv)
