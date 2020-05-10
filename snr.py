@@ -57,6 +57,9 @@ class Pager:
                 else:
                     pages.append(on_page)
                     on_page = []
+                    for text in lines_of_text:
+                        on_page.append(text)
+                    on_page.append('')
             if len(on_page) != 0:
                 pages.append(on_page)
             self.pages = pages
@@ -71,7 +74,7 @@ class Pager:
         return len(self.pages)
 
     def print_page_text(self, current_page):
-        pos_y = self.page_pos_y
+        pos_y = self.v_padding
         try:
             if self.pages[current_page]:
                 for line_of_text in self.pages[current_page]:
