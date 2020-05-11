@@ -4,7 +4,7 @@ import curses
 from textwrap import wrap
 
 class Screen:
-    def __init__(self, title, version='2020', app_name='[snr] Simple Novel Reader'):
+    def __init__(self, title, version='2020', app_name='Simple Novel Reader'):
         self.title = title
         self.version = version
         self.app_name = app_name
@@ -15,24 +15,30 @@ class Screen:
         self.screen.keypad(1)
         self.max_y, self.max_x = self.screen.getmaxyx()
 
+    def _get_colors(self, dark_mode):
+        curses.start_color()
+        if dark_mode:
+            curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+        else:
+            curses.init_pair(2, curses.COLOR_RED, curses.COLOR_WHITE)
+        return curses.color_pair(2)
+
     def get_screen(self):
         return self.screen
 
-    def redraw(self):
+    def redraw(self, dark_mode):
         self.screen.erase()
-        # self.screen.box()
-        self.print_info()
+        self.screen.bkgd(' ', self._get_colors(dark_mode))
+        self.print_info(dark_mode)
         self.screen.refresh()
 
-    def print_info(self):
+    def print_info(self, dark_mode):
         app_text = self.app_name + ' ' + self.version
         title_text = '[' + self.title + ']'
         keys = '[str:j/k][chp:h/l][quit:q]'
-        self.screen.addstr(0, 2, app_text, curses.A_UNDERLINE)
-        self.screen.addstr(0, self.max_x - len(keys) - 2, keys, curses.A_UNDERLINE)
-        self.screen.hline(1, 0, curses.ACS_HLINE, self.max_x)
-        self.screen.hline(self.max_y - 2, 0, curses.ACS_HLINE, self.max_x)
-        self.screen.addstr(self.max_y - 1, 2, title_text, curses.A_UNDERLINE)
+        self.screen.addstr(0, 2, app_text, self._get_colors(dark_mode))
+        self.screen.addstr(0, self.max_x - len(keys) - 2, keys, self._get_colors(dark_mode))
+        self.screen.addstr(self.max_y - 1, 2, title_text, self._get_colors(dark_mode))
 
 class Pager:
     def __init__(self, screen, book, chapter, dark_mode=False, v_padding=2, h_padding=2):
@@ -57,13 +63,21 @@ class Pager:
         self.page_max_y = self.screen_max_y - 4
 
     def _set_page_max_x(self):
-        self.page_max_x = int(self.screen_max_x / 2)
+        max_x = int(self.page_max_y * 1.6)
+        if max_x > self.screen_max_x:
+            self.page_max_x = self.screen_max_x - 2
+        else:
+            self.page_max_x = max_x
 
     def _set_page_pos_y(self):
         self.page_pos_y = 2
 
     def _set_page_pos_x(self):
-        self.page_pos_x = int(self.page_max_x / 2)
+        pos_x = int(self.page_max_x / 2)
+        if pos_x % 2 == 0:
+            self.page_pos_x = pos_x - 1
+        else:
+            self.page_pos_x = pos_x
 
     def _set_page_lines(self):
         self.page_lines = self.page_max_y - (self.v_padding * 2)

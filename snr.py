@@ -19,8 +19,8 @@ APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
 
-PAGE_UP = {ord('n'), ord('j')}
-PAGE_DOWN = {ord('p'), ord('k'), ord(' ')}
+PAGE_UP = {ord('n'), ord('j'), ord(' ')}
+PAGE_DOWN = {ord('p'), ord('k')}
 NEXT_CHAPTER = {ord('N'), ord('l')}
 PREVIOUS_CHAPTER = {ord('P'), ord('h')}
 START_OF_CHAPTER = {ord('g'), ord('0')}
@@ -65,7 +65,7 @@ def main(argv):
             break
 
         if init_screen_update:
-            init_screen.redraw()
+            init_screen.redraw(dark_mode)
             init_screen_update = False
 
         if init_chapter_update:
@@ -105,6 +105,12 @@ def main(argv):
                 current_chapter -= 1
                 current_page = 0
                 init_chapter_update = True
+
+        if x in START_OF_CHAPTER:
+            current_page = 0
+
+        if x in END_OF_CHAPTER:
+            current_page = page.get_number_of_pages() - 1
 
         if x in DARK_MODE:
             dark_mode = not dark_mode
