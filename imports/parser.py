@@ -128,6 +128,9 @@ class BookContent:
     def get_id(self, chapter):
         return self.toc_list[chapter]['id']
 
+    def get_document_title(self):
+        return self.content_soup.find('title').text
+
     def get_chapter_title(self, chapter):
         return self.toc_list[chapter]['name']
 

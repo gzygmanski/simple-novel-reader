@@ -29,18 +29,10 @@ DARK_MODE = {ord('r')}
 QUIT = {ord('q'), 27}
 
 
-# :::: CURSES CONFIG ::::::::::: #
-
-init_screen = Screen(VERSION, APP)
-screen = init_screen.get_screen()
-curses.noecho()
-curses.cbreak()
-curses.nonl()
-curses.curs_set(0)
-
-
 def main(argv):
-    escape = False
+
+    # :::: BOOK INIT ::::::::::::::: #
+
     fileinput = argv[1]
     reader = FileReader(fileinput)
     toc_file = reader.get_toc_file()
@@ -48,6 +40,18 @@ def main(argv):
     path = reader.get_directory_path(toc_file)
     book = BookContent(path, toc_file, content_file)
 
+    # :::: CURSES CONFIG ::::::::::: #
+
+    init_screen = Screen(book.get_document_title(), VERSION, APP)
+    screen = init_screen.get_screen()
+    curses.noecho()
+    curses.cbreak()
+    curses.nonl()
+    curses.curs_set(0)
+
+    # :::: VARS :::::::::::::::::::: #
+
+    escape = False
     init_screen_update = True
     init_chapter_update = True
     dark_mode = True

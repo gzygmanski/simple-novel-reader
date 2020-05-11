@@ -4,7 +4,8 @@ import curses
 from textwrap import wrap
 
 class Screen:
-    def __init__(self, version='2020', app_name='[snr] Simple Novel Reader'):
+    def __init__(self, title, version='2020', app_name='[snr] Simple Novel Reader'):
+        self.title = title
         self.version = version
         self.app_name = app_name
         self._set_screen()
@@ -12,6 +13,7 @@ class Screen:
     def _set_screen(self):
         self.screen = curses.initscr()
         self.screen.keypad(1)
+        self.max_y, self.max_x = self.screen.getmaxyx()
 
     def get_screen(self):
         return self.screen
@@ -19,9 +21,18 @@ class Screen:
     def redraw(self):
         self.screen.erase()
         # self.screen.box()
-        self.screen.addstr(0, 2, self.app_name + ' ' + self.version, curses.A_UNDERLINE)
+        self.print_info()
         self.screen.refresh()
 
+    def print_info(self):
+        app_text = self.app_name + ' ' + self.version
+        title_text = '[' + self.title + ']'
+        keys = '[str:j/k][chp:h/l][quit:q]'
+        self.screen.addstr(0, 2, app_text, curses.A_UNDERLINE)
+        self.screen.addstr(0, self.max_x - len(keys) - 2, keys, curses.A_UNDERLINE)
+        self.screen.hline(1, 0, curses.ACS_HLINE, self.max_x)
+        self.screen.hline(self.max_y - 2, 0, curses.ACS_HLINE, self.max_x)
+        self.screen.addstr(self.max_y - 1, 2, title_text, curses.A_UNDERLINE)
 
 class Pager:
     def __init__(self, screen, book, chapter, dark_mode=False, v_padding=2, h_padding=2):

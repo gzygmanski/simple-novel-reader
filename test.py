@@ -9,6 +9,7 @@ path = reader.get_directory_path(toc_file)
 book = BookContent(path, toc_file, content_file)
 
 toc = book.get_toc_list()
+print(book.get_title())
 
 print(toc[3]['name'])
 print(toc[3]['src'])
