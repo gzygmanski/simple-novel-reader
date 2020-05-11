@@ -69,11 +69,14 @@ class Pager:
         if self.dark_mode:
             curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
             curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+            curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
         else:
             curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
             curses.init_pair(2, curses.COLOR_RED, curses.COLOR_WHITE)
+            curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_WHITE)
         self.background_colors = curses.color_pair(1)
         self.info_colors = curses.color_pair(2)
+        self.dialogue_colors = curses.color_pair(3)
 
     def _set_pages(self):
         pages = []
@@ -81,17 +84,24 @@ class Pager:
         if self.book.has_text(self.chapter):
             content = self.book.get_chapter_text(self.chapter)
             for paragraph in content:
+
                 lines_of_text = wrap(paragraph, self.page_columns)
                 if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                     for text in lines_of_text:
                         on_page.append(text)
-                    on_page.append('')
+                    if len(on_page) != 0:
+                        on_page.append('')
                 else:
+                    for i in range(len(on_page), self.page_lines):
+                        on_page.append(lines_of_text[0])
+                        lines_of_text.pop(0)
+
                     pages.append(on_page)
                     on_page = []
                     for text in lines_of_text:
                         on_page.append(text)
-                    on_page.append('')
+                    if len(on_page) != 0:
+                        on_page.append('')
             if len(on_page) != 0:
                 pages.append(on_page)
             self.pages = pages
@@ -107,6 +117,7 @@ class Pager:
 
     def print_page_text(self, current_page):
         pos_y = self.v_padding
+        continue_dialogue = False
         try:
             if self.pages[current_page]:
                 for line_of_text in self.pages[current_page]:

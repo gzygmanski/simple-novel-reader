@@ -49,7 +49,7 @@ def main(argv):
 
     init_screen_update = True
     init_chapter_update = True
-    dark_mode = False
+    dark_mode = True
     current_page = 0
     current_chapter = 0
     number_of_chapters = book.get_number_of_chapters()
