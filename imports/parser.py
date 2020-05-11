@@ -11,21 +11,23 @@ class BookContent:
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         # self.paragraph_tags = ['p', 'b', 'i', 's', 'em', 'strong', 'del', 'ins']
         self.paragraph_tags = ['p']
+        self._set_toc_soup()
+        self._set_content_soup()
         self._set_toc_list()
         self._set_content_list()
         self._set_order_list()
         self.add_content()
         self.add_paragraphs()
 
-    def make_soup(self, path, parser):
-        with open(path) as f:
-            doc = f.read()
-        return BeautifulSoup(doc, parser)
+    def _set_toc_soup(self):
+        self.toc_soup = self.make_soup(self.toc_file, 'xml')
+
+    def _set_content_soup(self):
+        self.content_soup = self.make_soup(self.content_file, 'xml')
 
     def _set_toc_list(self):
         self.toc_list = []
-        soup = self.make_soup(self.toc_file, 'xml')
-        for nav_item in soup.find_all(True):
+        for nav_item in self.toc_soup.find_all(True):
             if nav_item.name == 'navPoint':
                 toc_id = int(nav_item['playOrder'])
                 toc_name = nav_item.select('navLabel > text')[0].string
@@ -46,8 +48,7 @@ class BookContent:
 
     def _set_content_list(self):
         self.content_list = {}
-        soup = self.make_soup(self.content_file, 'xml')
-        for item in soup.find_all('item'):
+        for item in self.content_soup.find_all('item'):
             if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
                 content_id = item['id']
                 content_src = self.path + '/' + urllib.parse.unquote(item['href'])
@@ -55,8 +56,7 @@ class BookContent:
 
     def _set_order_list(self):
         self.order_list = []
-        soup = self.make_soup(self.content_file, 'xml')
-        for item in soup.find_all('itemref'):
+        for item in self.content_soup.find_all('itemref'):
             if item.has_attr('idref'):
                 self.order_list.append(item['idref'])
 
@@ -142,3 +142,8 @@ class BookContent:
             if item['inner_id'] is not None:
                 return True
         return False
+
+    def make_soup(self, path, parser):
+        with open(path) as f:
+            doc = f.read()
+        return BeautifulSoup(doc, parser)
