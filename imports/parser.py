@@ -3,80 +3,115 @@
 from bs4 import BeautifulSoup
 import urllib
 
-class TocContent:
-    def __init__(self, path, toc_file):
+class BookContent:
+    def __init__(self, path, toc_file, content_file):
         self.path = path
         self.toc_file = toc_file
-        self.toc_list = []
+        self.content_file = content_file
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-        self.paragraph_tags = ['p', 'b', 'i', 's', 'em', 'strong', 'del', 'ins']
-
-        self.parse_content()
+        # self.paragraph_tags = ['p', 'b', 'i', 's', 'em', 'strong', 'del', 'ins']
+        self.paragraph_tags = ['p']
+        self._set_toc_list()
+        self._set_content_list()
+        self._set_order_list()
+        self.add_content()
         self.add_paragraphs()
 
-
-    def get_soup(self, path, parser):
+    def make_soup(self, path, parser):
         with open(path) as f:
             doc = f.read()
-
         return BeautifulSoup(doc, parser)
 
-    def parse_content(self):
-        soup = self.get_soup(self.toc_file, 'xml')
-
+    def _set_toc_list(self):
+        self.toc_list = []
+        soup = self.make_soup(self.toc_file, 'xml')
         for nav_item in soup.find_all(True):
             if nav_item.name == 'navPoint':
                 toc_id = int(nav_item['playOrder'])
                 toc_name = nav_item.select('navLabel > text')[0].string
                 toc_content = nav_item.content['src'].split('#')
                 toc_content[0] = self.path + '/' + urllib.parse.unquote(toc_content[0])
-
+                if len(toc_content) == 2:
+                    toc_inner_id = toc_content[1]
+                else:
+                    toc_inner_id = None
                 toc_dict = {
                     'id': toc_id,
+                    'inner_id': toc_inner_id,
                     'name': toc_name,
-                    'content': toc_content,
+                    'src': [toc_content[0]],
                     'text': []
                 }
-
                 self.toc_list.append(toc_dict)
+
+    def _set_content_list(self):
+        self.content_list = {}
+        soup = self.make_soup(self.content_file, 'xml')
+        for item in soup.find_all('item'):
+            if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
+                content_id = item['id']
+                content_src = self.path + '/' + urllib.parse.unquote(item['href'])
+                self.content_list[content_id] = content_src
+
+    def _set_order_list(self):
+        self.order_list = []
+        soup = self.make_soup(self.content_file, 'xml')
+        for item in soup.find_all('itemref'):
+            if item.has_attr('idref'):
+                self.order_list.append(item['idref'])
+
+    def add_content(self):
+        paths_continue = False
+        for index in range(len(self.toc_list)):
+            for idref in self.order_list:
+                if self.toc_list[index]['src'][0] == self.content_list[idref]:
+                    paths_continue = True
+                if paths_continue:
+                    if index != len(self.toc_list) - 1 and \
+                        self.toc_list[index + 1]['src'][0] != self.content_list[idref]:
+                        self.toc_list[index]['src'].append(self.content_list[idref])
+                    else:
+                        paths_continue = False
+                        break
+            if len(self.toc_list[index]['src']) > 1 and self.toc_list[index]['src'][0] == \
+                self.toc_list[index]['src'][1]:
+                self.toc_list[index]['src'].pop(0)
+
 
     def add_paragraphs(self):
         current_file = ''
         current_heading = ''
         current_id = ''
         has_content = False
-        has_id = self.has_id()
-
-        for document in self.toc_list:
-            new_file = document['content'][0]
-            current_heading = document['name']
-            if len(document['content']) == 2:
-                current_id = document['content'][1]
-
-            if new_file != current_file:
-                soup = self.get_soup(document['content'][0], 'html.parser')
-                current_file = new_file
-
-            for tag in soup.find_all():
-                if tag.name in self.heading_tags:
-                    if tag.text == current_heading:
-                        has_content = True
+        has_inner_id = self.has_inner_id()
+        for item in self.toc_list:
+            for document in item['src']:
+                new_file = document
+                current_heading = item['name']
+                if item['inner_id'] is not None:
+                    current_id = item['inner_id']
+                if new_file != current_file:
+                    soup = self.make_soup(document, 'html.parser')
+                    current_file = new_file
+                for tag in soup.find_all():
+                    if tag.name in self.heading_tags:
+                        if tag.text == current_heading:
+                            has_content = True
+                        else:
+                            has_content = False
+                    elif tag.has_attr('id'):
+                        if tag['id'] == current_id:
+                            has_content = True
+                        else:
+                            has_content = False
+                    elif not has_inner_id:
+                        if tag.name in self.paragraph_tags:
+                            if tag.text != '' and tag.text != '\xa0':
+                                item['text'].append(tag.text)
                     else:
-                        has_content = False
-                elif tag.has_attr('id'):
-                    if tag['id'] == current_id:
-                        print(tag.name)
-                        has_content = True
-                    else:
-                        has_content = False
-                elif not has_id:
-                    if tag.name in self.paragraph_tags:
-                        if tag.text != '' and tag.text != '\xa0':
-                            document['text'].append(tag.text)
-                else:
-                    if tag.name in self.paragraph_tags and has_content:
-                        if tag.text != '' and tag.text != '\xa0':
-                            document['text'].append(tag.text)
+                        if tag.name in self.paragraph_tags and has_content:
+                            if tag.text != '' and tag.text != '\xa0':
+                                item['text'].append(tag.text)
 
     def get_toc_list(self):
         return self.toc_list
@@ -85,7 +120,6 @@ class TocContent:
         toc = []
         for item in toc_list:
             toc.append(item['name'])
-
         return toc
 
     def get_number_of_chapters(self):
@@ -103,41 +137,8 @@ class TocContent:
     def has_text(self, chapter):
         return False if len(self.toc_list[chapter]['text']) == 0 else True
 
-    def has_id(self):
-        for content in self.toc_list:
-            if len(content['content']) == 2:
+    def has_inner_id(self):
+        for item in self.toc_list:
+            if item['inner_id'] is not None:
                 return True
         return False
-
-class BookContent:
-    def __init__(self, content_list):
-        self.content_list = content_list
-        self.paragraphs = []
-        self.headings = []
-        self.parse_content()
-
-    def parse_content(self):
-        for chapter in self.content_list:
-            with open(chapter) as f:
-                html_doc = f.read()
-
-            soup = BeautifulSoup(html_doc, 'html.parser')
-            chapter_content = []
-
-            for heading in soup.find_all('h1'):
-                self.headings.append(heading.string)
-            for paragraph in soup.find_all('p'):
-                chapter_content.append(paragraph.string)
-            self.paragraphs.append(chapter_content)
-
-    def count_chapters(self):
-        print(len(self.headings))
-
-    def get_toc(self):
-        return self.headings
-
-    def get_heading(self, chapter):
-        return self.headings[chapter]
-
-    def get_content(self, chapter):
-        return self.paragraphs[chapter]

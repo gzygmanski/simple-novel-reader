@@ -9,7 +9,7 @@
 
 import os, sys, curses
 from imports.reader import FileReader
-from imports.parser import TocContent
+from imports.parser import BookContent
 from imports.screen import Screen, Pager
 
 # :::: APP INFO :::::::::::::::: #
@@ -44,8 +44,9 @@ def main(argv):
     fileinput = argv[1]
     reader = FileReader(fileinput)
     toc_file = reader.get_toc_file()
+    content_file = reader.get_content_file()
     path = reader.get_directory_path(toc_file)
-    book = TocContent(path, toc_file)
+    book = BookContent(path, toc_file, content_file)
 
     init_screen_update = True
     init_chapter_update = True
