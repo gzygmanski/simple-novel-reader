@@ -58,7 +58,8 @@ class Pager:
         self._set_page()
         self._set_colors()
         self._set_pages()
-        self._set_dialogue_map()
+        self._set_speech_map()
+        self._set_info_map()
 
     def _set_page_max_y(self):
         self.page_max_y = self.screen_max_y - 4
@@ -102,7 +103,7 @@ class Pager:
             curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_WHITE)
         self.background_colors = curses.color_pair(1)
         self.info_colors = curses.color_pair(2)
-        self.dialogue_colors = curses.color_pair(3)
+        self.speech_colors = curses.color_pair(3)
 
     def _set_pages(self):
         pages = []
@@ -138,17 +139,21 @@ class Pager:
             pages.append(on_page)
             self.pages = pages
 
-    def _set_dialogue_map(self):
-        dialogue_open = ['\'', '"', '‘', '“']
-        dialogue_close = ['\'', '"', '’', '”']
-        dialogue_after = [' ', '.', ',',  ';', ':', '!', '?', dialogue_close]
-        self.dialogue_map = self._get_coordinates_map(dialogue_open, dialogue_close, \
-            dialogue_after)
+    def _set_speech_map(self):
+        speech_open = ['\'', '"', '‘', '“']
+        speech_close = ['\'', '"', '’', '”']
+        speech_after = [' ', '.', ',',  ';', ':', '!', '?', speech_close]
+        self.speech_map = self._get_coordinates_map(speech_open, speech_close, \
+            speech_after)
 
-    def get_dialogue_map(self):
-        return self.dialogue_map
+    def _set_info_map(self):
+        info_open = ['<', '(', '[', '{']
+        info_close = ['>', ')', ']', '}']
+        info_after = [' ', '.', ',',  ';', ':', '!', '?', info_close]
+        self.info_map = self._get_coordinates_map(info_open, info_close, \
+            info_after)
 
-    def _get_coordinates_map(self, opening_tags, closing_tags, closing_after):
+    def _get_coordinates_map(self, opening_marks, closing_marks, closing_after):
         coordinates_map = {}
         is_opened = False
         for index, page in enumerate(self.pages):
@@ -161,15 +166,15 @@ class Pager:
                     coordinates_map[index]['opening_coordinates'].append([y, 0])
                 for x, character in enumerate(line):
                     try:
-                        if character in opening_tags \
+                        if character in opening_marks \
                             and not is_opened \
                             and (x == 0 or line[x - 1] == ' '):
                             is_opened = True
-                            current_tag = opening_tags.index(character)
+                            current_mark = opening_marks.index(character)
                             coordinates_map[index]['opening_coordinates'].append([y, x])
                     except IndexError:
                         pass
-                    if is_opened and character == closing_tags[current_tag]:
+                    if is_opened and character == closing_marks[current_mark]:
                         if x == len(line) - 1 or line[x + 1] in closing_after:
                             is_opened = False
                             coordinates_map[index]['closing_coordinates'].append([y, x])
@@ -182,23 +187,44 @@ class Pager:
 
     def print_page_text(self, current_page):
         is_open = False
+        is_speech = False
+        is_info = False
         for y, line in enumerate(self.pages[current_page]):
             for x, character in enumerate(line):
                 if not is_open:
-                    if [y, x] in self.dialogue_map[current_page]['opening_coordinates']:
+                    if [y, x] in self.speech_map[current_page]['opening_coordinates']:
                         self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                            character, self.dialogue_colors)
+                            character, self.speech_colors)
                         is_open = True
-                        is_dialogue = True
-                    else:
+                        is_speech = True
+                    if [y, x] in self.info_map[current_page]['opening_coordinates']:
+                        self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                            character, self.info_colors)
+                        is_open = True
+                        is_info = True
+                    if not is_info and not is_speech:
                         self.page.addstr(y + self.v_padding, x + self.h_padding, \
                             character, curses.A_NORMAL)
-                elif is_dialogue:
-                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                        character, self.dialogue_colors)
-                    if [y, x] in self.dialogue_map[current_page]['closing_coordinates']:
-                        is_open = False
-                        is_dialogue = False
+                else:
+                    if is_info and not is_speech:
+                        self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                            character, self.info_colors)
+                        if [y, x] in self.info_map[current_page]['closing_coordinates']:
+                            is_open = False
+                            is_info = False
+                    elif is_speech and not is_info:
+                        self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                            character, self.speech_colors)
+                        if [y, x] in self.speech_map[current_page]['closing_coordinates']:
+                            is_open = False
+                            is_speech = False
+                    else:
+                        self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                            character, self.info_colors)
+                        if [y, x] in self.info_map[current_page]['closing_coordinates']:
+                            is_open = False
+                            is_speech = False
+                            is_info = False
 
     def print_page_number(self, current_page):
         current_page += 1
