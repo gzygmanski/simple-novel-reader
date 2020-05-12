@@ -37,7 +37,9 @@ class Screen:
         title_text = '[' + self.title + ']'
         keys = '[str:j/k][chp:h/l][quit:q]'
         self.screen.addstr(0, 2, app_text, self._get_colors(dark_mode))
-        self.screen.addstr(0, self.max_x - len(keys) - 2, keys, self._get_colors(dark_mode))
+        if self.max_x > len(keys) + len(app_text) + 4:
+            self.screen.addstr(0, self.max_x - len(keys) - 2, \
+                keys, self._get_colors(dark_mode))
         self.screen.addstr(self.max_y - 1, 2, title_text, self._get_colors(dark_mode))
 
 class Pager:
@@ -75,11 +77,7 @@ class Pager:
         self.page_pos_y = 2
 
     def _set_page_pos_x(self):
-        pos_x = int(self.page_max_x / 2)
-        if pos_x % 2 == 0:
-            self.page_pos_x = pos_x - 1
-        else:
-            self.page_pos_x = pos_x
+        self.page_pos_x = int(self.screen_max_x / 2 - self.page_max_x / 2)
 
     def _set_page_lines(self):
         self.page_lines = self.page_max_y - (self.v_padding * 2)
