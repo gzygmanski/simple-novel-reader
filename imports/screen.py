@@ -49,9 +49,6 @@ class Pager:
         self.v_padding = v_padding
         self.h_padding = h_padding
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
-        self.dialogue_open = ['\'', '"', '‘', '“']
-        self.dialogue_close = ['\'', '"', '’', '”']
-        self.dialogue_after = [' ', '.', ',',  ';', ':', '!', '?', self.dialogue_close]
         self._set_page_max_y()
         self._set_page_max_x()
         self._set_page_pos_y()
@@ -61,6 +58,7 @@ class Pager:
         self._set_page()
         self._set_colors()
         self._set_pages()
+        self._set_dialogue_map()
 
     def _set_page_max_y(self):
         self.page_max_y = self.screen_max_y - 4
@@ -140,40 +138,67 @@ class Pager:
             pages.append(on_page)
             self.pages = pages
 
+    def _set_dialogue_map(self):
+        dialogue_open = ['\'', '"', '‘', '“']
+        dialogue_close = ['\'', '"', '’', '”']
+        dialogue_after = [' ', '.', ',',  ';', ':', '!', '?', dialogue_close]
+        self.dialogue_map = self._get_coordinates_map(dialogue_open, dialogue_close, \
+            dialogue_after)
+
+    def get_dialogue_map(self):
+        return self.dialogue_map
+
+    def _get_coordinates_map(self, opening_tags, closing_tags, closing_after):
+        coordinates_map = {}
+        is_opened = False
+        for index, page in enumerate(self.pages):
+            coordinates_map[index] = {
+                'opening_coordinates': [],
+                'closing_coordinates': []
+            }
+            for y, line in enumerate(page):
+                if is_opened and y == 0:
+                    coordinates_map[index]['opening_coordinates'].append([y, 0])
+                for x, character in enumerate(line):
+                    try:
+                        if character in opening_tags \
+                            and not is_opened \
+                            and (x == 0 or line[x - 1] == ' '):
+                            is_opened = True
+                            current_tag = opening_tags.index(character)
+                            coordinates_map[index]['opening_coordinates'].append([y, x])
+                    except IndexError:
+                        pass
+                    if is_opened and character == closing_tags[current_tag]:
+                        if x == len(line) - 1 or line[x + 1] in closing_after:
+                            is_opened = False
+                            coordinates_map[index]['closing_coordinates'].append([y, x])
+                if is_opened and y == len(page) - 1:
+                    coordinates_map[index]['closing_coordinates'].append([y, len(line) - 1])
+        return coordinates_map
+
     def get_number_of_pages(self):
         return len(self.pages)
 
     def print_page_text(self, current_page):
-        pos_y = self.v_padding
-        continue_dialogue = False
-        if self.pages[current_page]:
-            for line_of_text in self.pages[current_page]:
-                pos_x = self.h_padding
-                for index in range(len(line_of_text)):
-                    try:
-                        if line_of_text[index] in self.dialogue_open \
-                            and not continue_dialogue \
-                            and (index == 0 or line_of_text[index - 1] == ' '):
-                            continue_dialogue = True
-                            tag_index = self.dialogue_open.index(line_of_text[index])
-                    except IndexError:
-                        pass
-                    if continue_dialogue:
-                        self.page.addstr(pos_y, pos_x, line_of_text[index], \
-                            self.dialogue_colors)
-                        pos_x += 1
-                        try:
-                            if line_of_text[index] == self.dialogue_close[tag_index] \
-                                and line_of_text[index + 1] in self.dialogue_after:
-                                continue_dialogue = False
-                        except IndexError:
-                            if line_of_text[index] == self.dialogue_close[tag_index]:
-                                continue_dialogue = False
+        is_open = False
+        for y, line in enumerate(self.pages[current_page]):
+            for x, character in enumerate(line):
+                if not is_open:
+                    if [y, x] in self.dialogue_map[current_page]['opening_coordinates']:
+                        self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                            character, self.dialogue_colors)
+                        is_open = True
+                        is_dialogue = True
                     else:
-                        self.page.addstr(pos_y, pos_x, line_of_text[index], \
-                            curses.A_NORMAL)
-                        pos_x += 1
-                pos_y += 1
+                        self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                            character, curses.A_NORMAL)
+                elif is_dialogue:
+                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                        character, self.dialogue_colors)
+                    if [y, x] in self.dialogue_map[current_page]['closing_coordinates']:
+                        is_open = False
+                        is_dialogue = False
 
     def print_page_number(self, current_page):
         current_page += 1
