@@ -29,13 +29,16 @@ class Screen:
     def redraw(self, dark_mode):
         self.screen.erase()
         self.screen.bkgd(' ', self._get_colors(dark_mode))
-        self.print_info(dark_mode)
+        try:
+            self.print_info(dark_mode)
+        except:
+            pass
         self.screen.refresh()
 
     def print_info(self, dark_mode):
         app_text = self.app_name + ' ' + self.version
         title_text = '[' + self.title + ']'
-        keys = '[str:j/k][chp:h/l][quit:q]'
+        keys = '[page:j/k][chapter:h/l][quit:q]'
         self.screen.addstr(0, 2, app_text, self._get_colors(dark_mode))
         if self.max_x > len(keys) + len(app_text) + 4:
             self.screen.addstr(0, self.max_x - len(keys) - 2, \
@@ -43,11 +46,13 @@ class Screen:
         self.screen.addstr(self.max_y - 1, 2, title_text, self._get_colors(dark_mode))
 
 class Pager:
-    def __init__(self, screen, book, chapter, dark_mode=False, v_padding=2, h_padding=2):
+    def __init__(self, screen, book, chapter, dark_mode=False, highlight=False, \
+        v_padding=2, h_padding=2):
         self.screen = screen
         self.book = book
         self.chapter = chapter
         self.dark_mode = dark_mode
+        self.highlight = highlight
         self.v_padding = v_padding
         self.h_padding = h_padding
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
@@ -190,12 +195,14 @@ class Pager:
         for y, line in enumerate(self.pages[current_page]):
             for x, character in enumerate(line):
                 if not is_open:
-                    if [y, x] in self.speech_map[current_page]['opening_coordinates']:
+                    if [y, x] in self.speech_map[current_page]['opening_coordinates'] \
+                        and self.highlight:
                         self.page.addstr(y + self.v_padding, x + self.h_padding, \
                             character, self.speech_colors)
                         is_open = True
                         is_speech = True
-                    if [y, x] in self.info_map[current_page]['opening_coordinates']:
+                    if [y, x] in self.info_map[current_page]['opening_coordinates'] \
+                        and self.highlight:
                         self.page.addstr(y + self.v_padding, x + self.h_padding, \
                             character, self.info_colors)
                         is_open = True
@@ -228,7 +235,7 @@ class Pager:
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
         pos_y = self.page_max_y - 1
-        pos_x = self.page_max_x - len(page_number) - self.h_padding
+        pos_x = self.page_max_x - len(page_number) - 2
         self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
     def print_page_title(self):
@@ -237,7 +244,7 @@ class Pager:
         page_title = '[' +  str(chapter_id) + '][' + chapter_title + ']'
         if len(page_title) >= self.page_columns - 4:
             page_title = page_title[:self.page_columns - 4] + '...]'
-        self.page.addstr(0, self.h_padding, page_title, self.info_colors)
+        self.page.addstr(0, 2, page_title, self.info_colors)
 
     def print_page(self, current_page):
         self.page.erase()

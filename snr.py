@@ -14,7 +14,7 @@ from imports.screen import Screen, Pager
 
 # :::: APP INFO :::::::::::::::: #
 
-VERSION = '0.1-dev'
+VERSION = 'v0.1.1-alpha'
 APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
@@ -26,6 +26,9 @@ PREVIOUS_CHAPTER = {ord('P'), ord('h')}
 START_OF_CHAPTER = {ord('g'), ord('0')}
 END_OF_CHAPTER = {ord('G'), ord('$')}
 DARK_MODE = {ord('r')}
+HIGHLIGHT = {ord('v')}
+PADDING_UP = {ord('>')}
+PADDING_DOWN = {ord('<')}
 QUIT = {ord('q'), 27}
 
 
@@ -55,6 +58,8 @@ def main(argv):
     init_screen_update = True
     init_chapter_update = True
     dark_mode = True
+    highlight = True
+    padding = 2
     current_page = 0
     current_chapter = 0
     number_of_chapters = book.get_number_of_chapters()
@@ -69,7 +74,8 @@ def main(argv):
             init_screen_update = False
 
         if init_chapter_update:
-            page = Pager(screen, book, current_chapter, dark_mode)
+            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                padding, padding)
             init_chapter_update = False
 
         page.print_page(current_page)
@@ -87,7 +93,8 @@ def main(argv):
         if x in PAGE_DOWN:
             if current_page == 0 and current_chapter != 0:
                 current_chapter -= 1
-                page = Pager(screen, book, current_chapter, dark_mode)
+                page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                    padding, padding)
                 current_page = page.get_number_of_pages() - 1
             elif current_page == 0 and current_chapter == 0:
                 current_page = 0
@@ -116,6 +123,23 @@ def main(argv):
             dark_mode = not dark_mode
             init_screen_update = True
             init_chapter_update = True
+
+        if x in HIGHLIGHT:
+            highlight = not highlight
+            init_screen_update = True
+            init_chapter_update = True
+
+        if x in PADDING_UP:
+            if padding < 6:
+                padding += 1
+                init_screen_update = True
+                init_chapter_update = True
+
+        if x in PADDING_DOWN:
+            if padding > 1:
+                padding -= 1
+                init_screen_update = True
+                init_chapter_update = True
 
         if x in QUIT:
             escape = True
