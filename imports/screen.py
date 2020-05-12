@@ -49,6 +49,9 @@ class Pager:
         self.v_padding = v_padding
         self.h_padding = h_padding
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
+        self.dialogue_open = ['\'', '"', '‘', '“']
+        self.dialogue_close = ['\'', '"', '’', '”']
+        self.dialogue_after = [' ', '.', ',',  ';', ':', '!', '?', self.dialogue_close]
         self._set_page_max_y()
         self._set_page_max_x()
         self._set_page_pos_y()
@@ -143,14 +146,34 @@ class Pager:
     def print_page_text(self, current_page):
         pos_y = self.v_padding
         continue_dialogue = False
-        try:
-            if self.pages[current_page]:
-                for line_of_text in self.pages[current_page]:
-                    self.page.addstr(pos_y, self.h_padding,
-                        line_of_text, curses.A_NORMAL)
-                    pos_y += 1
-        except:
-            pass
+        if self.pages[current_page]:
+            for line_of_text in self.pages[current_page]:
+                pos_x = self.h_padding
+                for index in range(len(line_of_text)):
+                    try:
+                        if line_of_text[index] in self.dialogue_open \
+                            and not continue_dialogue \
+                            and (index == 0 or line_of_text[index - 1] == ' '):
+                            continue_dialogue = True
+                            tag_index = self.dialogue_open.index(line_of_text[index])
+                    except IndexError:
+                        pass
+                    if continue_dialogue:
+                        self.page.addstr(pos_y, pos_x, line_of_text[index], \
+                            self.dialogue_colors)
+                        pos_x += 1
+                        try:
+                            if line_of_text[index] == self.dialogue_close[tag_index] \
+                                and line_of_text[index + 1] in self.dialogue_after:
+                                continue_dialogue = False
+                        except IndexError:
+                            if line_of_text[index] == self.dialogue_close[tag_index]:
+                                continue_dialogue = False
+                    else:
+                        self.page.addstr(pos_y, pos_x, line_of_text[index], \
+                            curses.A_NORMAL)
+                        pos_x += 1
+                pos_y += 1
 
     def print_page_number(self, current_page):
         current_page += 1
