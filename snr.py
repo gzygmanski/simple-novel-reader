@@ -29,6 +29,8 @@ DARK_MODE = {ord('r')}
 HIGHLIGHT = {ord('v')}
 PADDING_UP = {ord('>')}
 PADDING_DOWN = {ord('<')}
+TOC = {ord('t'), 9}
+SELECT = {curses.KEY_ENTER, ord('o'), 13}
 QUIT = {ord('q'), 27}
 
 
@@ -62,6 +64,8 @@ def main(argv):
     padding = 2
     current_page = 0
     current_chapter = 0
+    current_toc_page = 0
+    current_toc_pos = 0
     number_of_chapters = book.get_number_of_chapters()
 
     while escape == False:
@@ -140,6 +144,48 @@ def main(argv):
                 padding -= 1
                 init_screen_update = True
                 init_chapter_update = True
+
+        if x in TOC:
+            escape_toc = False
+            while escape_toc == False:
+                page.print_toc_page(current_toc_page, current_toc_pos)
+
+                y = screen.getch()
+
+                if y in PAGE_UP:
+                    current_toc_pos += 1
+                    if current_toc_pos == \
+                        page.get_number_of_toc_positions(current_toc_page):
+                        current_toc_pos = 0
+                        if current_toc_page < page.get_number_of_toc_pages() - 1:
+                            current_toc_page += 1
+                        else:
+                            current_toc_page = 0
+
+                if y in PAGE_DOWN:
+                    current_toc_pos -= 1
+                    if current_toc_pos == -1:
+                        if current_toc_page > 0:
+                            current_toc_page -= 1
+                        else:
+                            current_toc_page = page.get_number_of_toc_pages() - 1
+                        current_toc_pos = \
+                            page.get_number_of_toc_positions(current_toc_page) - 1
+
+                if y in SELECT:
+                    current_page = 0
+                    current_chapter = \
+                        page.get_toc_position_id(current_toc_page, current_toc_pos) - 1
+                    escape_toc = True
+                    init_chapter_update = True
+
+                if y in TOC:
+                    escape_toc = True
+
+                if y in QUIT:
+                    escape = True
+                    escape_toc = True
+                    curses.endwin()
 
         if x in QUIT:
             escape = True
