@@ -63,12 +63,17 @@ class Pager:
         self._set_page_lines()
         self._set_page_columns()
         self._set_page()
+        self._set_toc_page()
         self._set_selector()
         self._set_colors()
         self._set_toc()
         self._set_pages()
         self._set_speech_map()
         self._set_info_map()
+
+    # :::::::::::::::::::::::::::::: #
+    # :::: SETTERS ::::::::::::::::: #
+    # :::::::::::::::::::::::::::::: #
 
     def _set_page_max_y(self):
         self.page_max_y = self.screen_max_y - 4
@@ -93,9 +98,20 @@ class Pager:
         self.page_columns = self.page_max_x - (self.h_padding * 2)
 
     def _set_page(self):
-        self.page = self.screen.subwin(self.page_max_y, self.page_max_x,
-            self.page_pos_y, self.page_pos_x)
+        self.page = self.screen.subwin(
+            self.page_max_y,
+            self.page_max_x,
+            self.page_pos_y,
+            self.page_pos_x
+        )
 
+    def _set_toc_page(self):
+        self.toc_page = self.screen.subwin(
+            self.page_max_y,
+            self.page_max_x,
+            self.page_pos_y,
+            self.page_pos_x
+        )
     def _set_selector(self):
         self.pointer = '>'
         self.pointer_margin = len(self.pointer)
@@ -181,6 +197,10 @@ class Pager:
         self.info_map = self._get_coordinates_map(info_open, info_close, \
             info_after)
 
+    # :::::::::::::::::::::::::::::: #
+    # :::: GETTERS ::::::::::::::::: #
+    # :::::::::::::::::::::::::::::: #
+
     def _get_coordinates_map(self, opening_marks, closing_marks, closing_after):
         coordinates_map = {}
         is_opened = False
@@ -212,6 +232,34 @@ class Pager:
 
     def get_number_of_pages(self):
         return len(self.pages)
+
+    # :::::::::::::::::::::::::::::: #
+    # :::: OTHER ::::::::::::::::::: #
+    # :::::::::::::::::::::::::::::: #
+
+    # :::: PRINTERS :::::::::::::::: #
+
+    def print_toc_content(self, current_page, pointer_pos):
+        pos_y = self.h_padding
+        for y, chapter in enumerate(self.toc_pages[current_page]):
+            if pointer_pos == y:
+                self.toc_page.addstr(pos_y, self.v_padding, self.pointer, self.info_colors)
+            chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
+                + str(chapter['id']) + ':'
+            self.toc_page.addstr(
+                pos_y,
+                self.v_padding + self.pointer_margin,
+                chapter_index,
+                self.info_colors
+            )
+            for line in chapter['name']:
+                self.toc_page.addstr(pos_y, self.page_select_margin,
+                    line, self.background_colors)
+                pos_y += 1
+
+    def print_toc_title(self):
+        toc_title = '[Table of Contents]'
+        self.toc_page.addstr(0, 2, toc_title, self.info_colors)
 
     def print_page_text(self, current_page):
         is_open = False
@@ -271,6 +319,8 @@ class Pager:
             page_title = page_title[:self.page_columns - 4] + '...]'
         self.page.addstr(0, 2, page_title, self.info_colors)
 
+    # :::: SPAWNERS :::::::::::::::: #
+
     def print_page(self, current_page):
         self.page.erase()
         self.page.bkgd(' ', self.background_colors)
@@ -280,38 +330,12 @@ class Pager:
         self.print_page_number(current_page)
         self.page.refresh()
 
-    def print_toc(self, pad, current_page, pointer_pos):
-        pad.erase()
+    def print_toc_page(self, current_page, pointer_pos):
+        self.toc_page.erase()
         self.page.clear()
-        pad.bkgd(' ', self.info_colors)
-        pad.box()
-        self.print_toc_title(pad)
-        self.print_toc_content(pad, current_page, pointer_pos)
-        pad.refresh()
+        self.toc_page.bkgd(' ', self.info_colors)
+        self.toc_page.box()
+        self.print_toc_title()
+        self.print_toc_content(current_page, pointer_pos)
+        self.toc_page.refresh()
 
-    def print_toc_content(self, pad, current_page, pointer_pos):
-        pos_y = self.h_padding
-        for y, chapter in enumerate(self.toc_pages[current_page]):
-            if pointer_pos == y:
-                pad.addstr(pos_y, self.v_padding, self.pointer, self.info_colors)
-            chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
-                + str(chapter['id']) + ':'
-            pad.addstr(
-                pos_y,
-                self.v_padding + self.pointer_margin,
-                chapter_index,
-                self.info_colors
-            )
-            for line in chapter['name']:
-                pad.addstr(pos_y, self.page_select_margin,
-                    line, self.background_colors)
-                pos_y += 1
-
-    def print_toc_title(self, pad):
-        toc_title = '[Table of Contents]'
-        pad.addstr(0, 2, toc_title, self.info_colors)
-
-    def get_toc_pad(self):
-        return self.screen.subpad(self.page_max_y, self.page_max_x, \
-            self.page_pos_y, \
-            self.page_pos_x)

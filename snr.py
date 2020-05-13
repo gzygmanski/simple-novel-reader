@@ -143,10 +143,8 @@ def main(argv):
                 init_chapter_update = True
 
         if x in TOC:
-            pad = page.get_toc_pad()
-            page.print_toc(pad, 1, 0)
-            y = pad.getch()
-
+            page.print_toc_page(1, 0)
+            y = screen.getch()
 
         if x in QUIT:
             escape = True
