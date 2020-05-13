@@ -123,13 +123,16 @@ class Pager:
             curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
             curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
             curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+            curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
         else:
             curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
             curses.init_pair(2, curses.COLOR_RED, curses.COLOR_WHITE)
             curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_WHITE)
-        self.background_colors = curses.color_pair(1)
+            curses.init_pair(4, curses.COLOR_BLUE, curses.COLOR_WHITE)
+        self.normal_colors = curses.color_pair(1)
         self.info_colors = curses.color_pair(2)
         self.speech_colors = curses.color_pair(3)
+        self.select_colors = curses.color_pair(4)
 
     def _set_toc(self):
         toc = self.book.get_toc()
@@ -256,23 +259,46 @@ class Pager:
                     pos_y,
                     self.v_padding,
                     self.pointer,
+                    self.select_colors
+                )
+                chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
+                    + str(chapter['id']) + ':'
+                self.toc_page.addstr(
+                    pos_y,
+                    self.v_padding + self.pointer_margin,
+                    chapter_index,
+                    self.select_colors
+                )
+                for line in chapter['name']:
+                    self.toc_page.addstr(pos_y,
+                        self.v_padding + self.page_id_margin,
+                        line,
+                        self.select_colors
+                    )
+                    pos_y += 1
+            else:
+                chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
+                    + str(chapter['id']) + ':'
+                self.toc_page.addstr(
+                    pos_y,
+                    self.v_padding + self.pointer_margin,
+                    chapter_index,
                     self.info_colors
                 )
-            chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
-                + str(chapter['id']) + ':'
-            self.toc_page.addstr(
-                pos_y,
-                self.v_padding + self.pointer_margin,
-                chapter_index,
-                self.info_colors
-            )
-            for line in chapter['name']:
-                self.toc_page.addstr(pos_y,
-                    self.v_padding + self.page_id_margin,
-                    line,
-                    self.background_colors
-                )
-                pos_y += 1
+                for line in chapter['name']:
+                    self.toc_page.addstr(pos_y,
+                        self.v_padding + self.page_id_margin,
+                        line,
+                        self.normal_colors
+                    )
+                    pos_y += 1
+
+    def print_toc_page_number(self, current_page):
+        current_page += 1
+        page_number = '[' + str(current_page) + '/' + str(self.get_number_of_toc_pages()) + ']'
+        pos_y = self.page_max_y - 1
+        pos_x = self.page_max_x - len(page_number) - 2
+        self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
     def print_toc_title(self):
         toc_title = '[Table of Contents]'
@@ -340,7 +366,7 @@ class Pager:
 
     def print_page(self, current_page):
         self.page.erase()
-        self.page.bkgd(' ', self.background_colors)
+        self.page.bkgd(' ', self.normal_colors)
         self.page.box()
         self.print_page_title()
         self.print_page_text(current_page)
@@ -354,5 +380,6 @@ class Pager:
         self.toc_page.box()
         self.print_toc_title()
         self.print_toc_content(current_page, pointer_pos)
+        self.print_toc_page_number(current_page)
         self.toc_page.refresh()
 

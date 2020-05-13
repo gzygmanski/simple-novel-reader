@@ -29,8 +29,8 @@ DARK_MODE = {ord('r')}
 HIGHLIGHT = {ord('v')}
 PADDING_UP = {ord('>')}
 PADDING_DOWN = {ord('<')}
-TOC = {ord('t')}
-SELECT = {curses.KEY_ENTER, ord('o')}
+TOC = {ord('t'), 9}
+SELECT = {curses.KEY_ENTER, ord('o'), 13}
 QUIT = {ord('q'), 27}
 
 
@@ -173,6 +173,7 @@ def main(argv):
                             page.get_number_of_toc_positions(current_toc_page) - 1
 
                 if y in SELECT:
+                    current_page = 0
                     current_chapter = \
                         page.get_toc_position_id(current_toc_page, current_toc_pos) - 1
                     escape_toc = True
