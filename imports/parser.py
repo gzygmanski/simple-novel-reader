@@ -117,9 +117,9 @@ class BookContent:
         return self.toc_list
 
     def get_toc(self):
-        toc = []
-        for item in toc_list:
-            toc.append(item['name'])
+        toc = {}
+        for chapter in self.toc_list:
+            toc[chapter['id']] = chapter['name']
         return toc
 
     def get_number_of_chapters(self):

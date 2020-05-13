@@ -29,6 +29,7 @@ DARK_MODE = {ord('r')}
 HIGHLIGHT = {ord('v')}
 PADDING_UP = {ord('>')}
 PADDING_DOWN = {ord('<')}
+TOC = {ord('t')}
 QUIT = {ord('q'), 27}
 
 
@@ -140,6 +141,12 @@ def main(argv):
                 padding -= 1
                 init_screen_update = True
                 init_chapter_update = True
+
+        if x in TOC:
+            pad = page.get_toc_pad()
+            page.print_toc(pad, 1, 0)
+            y = pad.getch()
+
 
         if x in QUIT:
             escape = True

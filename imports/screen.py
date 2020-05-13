@@ -63,7 +63,9 @@ class Pager:
         self._set_page_lines()
         self._set_page_columns()
         self._set_page()
+        self._set_selector()
         self._set_colors()
+        self._set_toc()
         self._set_pages()
         self._set_speech_map()
         self._set_info_map()
@@ -94,6 +96,11 @@ class Pager:
         self.page = self.screen.subwin(self.page_max_y, self.page_max_x,
             self.page_pos_y, self.page_pos_x)
 
+    def _set_selector(self):
+        self.pointer = '>'
+        self.pointer_margin = len(self.pointer)
+        self.page_select_margin = 7 + self.pointer_margin
+
     def _set_colors(self):
         curses.start_color()
         if self.dark_mode:
@@ -108,13 +115,32 @@ class Pager:
         self.info_colors = curses.color_pair(2)
         self.speech_colors = curses.color_pair(3)
 
+    def _set_toc(self):
+        toc = self.book.get_toc()
+        self.toc_pages = []
+        page = []
+        lines = 0
+        for key in toc.keys():
+            chapter = wrap(toc[key], self.page_max_x - self.page_select_margin - self.v_padding)
+            if lines + len(chapter) <= self.page_lines:
+                page.append({
+                    'id': key,
+                    'name': chapter
+                })
+                lines += len(chapter)
+            else:
+                self.toc_pages.append(page)
+                page = []
+                lines = 0
+        if len(page) != 0:
+            self.toc_pages.append(page)
+
     def _set_pages(self):
         pages = []
         on_page = []
         if self.book.has_text(self.chapter):
             content = self.book.get_chapter_text(self.chapter)
             for paragraph in content:
-
                 lines_of_text = wrap(paragraph, self.page_columns)
                 if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                     for text in lines_of_text:
@@ -122,10 +148,9 @@ class Pager:
                     if len(on_page) != 0:
                         on_page.append('')
                 else:
-                    for i in range(len(on_page), self.page_lines):
+                    for _ in range(len(on_page), self.page_lines):
                         on_page.append(lines_of_text[0])
                         lines_of_text.pop(0)
-
                     pages.append(on_page)
                     on_page = []
                     for text in lines_of_text:
@@ -255,4 +280,38 @@ class Pager:
         self.print_page_number(current_page)
         self.page.refresh()
 
+    def print_toc(self, pad, current_page, pointer_pos):
+        pad.erase()
+        self.page.clear()
+        pad.bkgd(' ', self.info_colors)
+        pad.box()
+        self.print_toc_title(pad)
+        self.print_toc_content(pad, current_page, pointer_pos)
+        pad.refresh()
 
+    def print_toc_content(self, pad, current_page, pointer_pos):
+        pos_y = self.h_padding
+        for y, chapter in enumerate(self.toc_pages[current_page]):
+            if pointer_pos == y:
+                pad.addstr(pos_y, self.v_padding, self.pointer, self.info_colors)
+            chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
+                + str(chapter['id']) + ':'
+            pad.addstr(
+                pos_y,
+                self.v_padding + self.pointer_margin,
+                chapter_index,
+                self.info_colors
+            )
+            for line in chapter['name']:
+                pad.addstr(pos_y, self.page_select_margin,
+                    line, self.background_colors)
+                pos_y += 1
+
+    def print_toc_title(self, pad):
+        toc_title = '[Table of Contents]'
+        pad.addstr(0, 2, toc_title, self.info_colors)
+
+    def get_toc_pad(self):
+        return self.screen.subpad(self.page_max_y, self.page_max_x, \
+            self.page_pos_y, \
+            self.page_pos_x)
