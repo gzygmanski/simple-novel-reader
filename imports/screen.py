@@ -230,6 +230,15 @@ class Pager:
                     coordinates_map[index]['closing_coordinates'].append([y, len(line) - 1])
         return coordinates_map
 
+    def get_number_of_toc_pages(self):
+        return len(self.toc_pages)
+
+    def get_number_of_toc_positions(self, current_page):
+        return len(self.toc_pages[current_page])
+
+    def get_toc_position_id(self, current_page, current_pos):
+        return self.toc_pages[current_page][current_pos]['id']
+
     def get_number_of_pages(self):
         return len(self.pages)
 
