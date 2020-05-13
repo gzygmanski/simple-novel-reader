@@ -115,7 +115,7 @@ class Pager:
     def _set_selector(self):
         self.pointer = '>'
         self.pointer_margin = len(self.pointer)
-        self.page_select_margin = 7 + self.pointer_margin
+        self.page_id_margin = 7 + self.pointer_margin
 
     def _set_colors(self):
         curses.start_color()
@@ -137,7 +137,7 @@ class Pager:
         page = []
         lines = 0
         for key in toc.keys():
-            chapter = wrap(toc[key], self.page_max_x - self.page_select_margin - self.v_padding)
+            chapter = wrap(toc[key], self.page_columns - self.page_id_margin - self.v_padding)
             if lines + len(chapter) <= self.page_lines:
                 page.append({
                     'id': key,
@@ -252,7 +252,12 @@ class Pager:
         pos_y = self.h_padding
         for y, chapter in enumerate(self.toc_pages[current_page]):
             if pointer_pos == y:
-                self.toc_page.addstr(pos_y, self.v_padding, self.pointer, self.info_colors)
+                self.toc_page.addstr(
+                    pos_y,
+                    self.v_padding,
+                    self.pointer,
+                    self.info_colors
+                )
             chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
                 + str(chapter['id']) + ':'
             self.toc_page.addstr(
@@ -262,8 +267,11 @@ class Pager:
                 self.info_colors
             )
             for line in chapter['name']:
-                self.toc_page.addstr(pos_y, self.page_select_margin,
-                    line, self.background_colors)
+                self.toc_page.addstr(pos_y,
+                    self.v_padding + self.page_id_margin,
+                    line,
+                    self.background_colors
+                )
                 pos_y += 1
 
     def print_toc_title(self):

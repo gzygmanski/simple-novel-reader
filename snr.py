@@ -30,7 +30,7 @@ HIGHLIGHT = {ord('v')}
 PADDING_UP = {ord('>')}
 PADDING_DOWN = {ord('<')}
 TOC = {ord('t')}
-SELECT = {curses.KEY_ENTER, ord(' '), ord('o')}
+SELECT = {curses.KEY_ENTER, ord('o')}
 QUIT = {ord('q'), 27}
 
 
