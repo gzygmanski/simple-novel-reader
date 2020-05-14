@@ -8,7 +8,7 @@
 # gzygmanski@hotmail.com:::::::: #
 
 import os, sys, curses
-from imports.reader import FileReader
+from imports.reader import ConfigReader, FileReader
 from imports.parser import BookContent
 from imports.screen import Screen, Pager
 
@@ -61,13 +61,14 @@ def main(argv):
     escape = False
     init_screen_update = True
     init_chapter_update = True
-    dark_mode = True
-    highlight = True
-    padding = 2
     current_page = 0
     current_chapter = 0
-
     number_of_chapters = book.get_number_of_chapters()
+
+    config = ConfigReader()
+    dark_mode = config.get_dark_mode()
+    highlight = config.get_highlight()
+    padding = config.get_horizontal_padding()
 
     while escape == False:
         if current_chapter == number_of_chapters:
