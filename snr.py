@@ -14,7 +14,7 @@ from imports.screen import Screen, Pager
 
 # :::: APP INFO :::::::::::::::: #
 
-VERSION = 'v0.2.30-alpha'
+VERSION = 'v0.3.36-alpha'
 APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
