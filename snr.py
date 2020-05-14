@@ -35,7 +35,6 @@ HELP = [ord('?')]
 ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
 QUIT = [ord('q')]
 
-
 def main(argv):
 
     # :::: BOOK INIT ::::::::::::::: #
@@ -190,6 +189,12 @@ def main(argv):
                     escape = True
                     escape_toc = True
                     curses.endwin()
+                elif y == curses.KEY_RESIZE:
+                    init_screen = Screen(book.get_document_title(), VERSION, APP)
+                    screen = init_screen.get_screen()
+                    init_screen.redraw(dark_mode)
+                    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                        padding, padding)
 
         if x in HELP:
             escape_help = False
@@ -216,11 +221,18 @@ def main(argv):
                     escape = True
                     escape_help = True
                     curses.endwin()
-
+                elif y == curses.KEY_RESIZE:
+                    init_screen = Screen(book.get_document_title(), VERSION, APP)
+                    screen = init_screen.get_screen()
+                    init_screen.redraw(dark_mode)
+                    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                        padding, padding)
         if x in QUIT:
             escape = True
             curses.endwin()
         elif x == curses.KEY_RESIZE:
+            init_screen = Screen(book.get_document_title(), VERSION, APP)
+            screen = init_screen.get_screen()
             init_screen_update = True
             init_chapter_update = True
 
