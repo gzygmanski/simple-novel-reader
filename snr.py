@@ -8,13 +8,13 @@
 # gzygmanski@hotmail.com:::::::: #
 
 import os, sys, curses
-from imports.reader import FileReader
+from imports.reader import ConfigReader, StateReader, FileReader
 from imports.parser import BookContent
 from imports.screen import Screen, Pager
 
 # :::: APP INFO :::::::::::::::: #
 
-VERSION = 'v0.2.30-alpha'
+VERSION = 'v0.3.36-alpha'
 APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
@@ -35,12 +35,20 @@ HELP = [ord('?')]
 ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
 QUIT = [ord('q')]
 
-
 def main(argv):
 
     # :::: BOOK INIT ::::::::::::::: #
 
-    fileinput = argv[1]
+    state = StateReader()
+    try:
+        fileinput = argv[1]
+        current_chapter = 0
+        current_page = 0
+    except IndexError:
+        fileinput = state.get_path()
+        current_chapter = state.get_chapter()
+        current_page = state.get_page()
+
     reader = FileReader(fileinput)
     toc_file = reader.get_toc_file()
     content_file = reader.get_content_file()
@@ -61,12 +69,12 @@ def main(argv):
     escape = False
     init_screen_update = True
     init_chapter_update = True
-    dark_mode = True
-    highlight = True
-    padding = 2
-    current_page = 0
-    current_chapter = 0
 
+
+    config = ConfigReader()
+    dark_mode = config.get_dark_mode()
+    highlight = config.get_highlight()
+    padding = config.get_horizontal_padding()
     number_of_chapters = book.get_number_of_chapters()
 
     while escape == False:
@@ -189,6 +197,12 @@ def main(argv):
                     escape = True
                     escape_toc = True
                     curses.endwin()
+                elif y == curses.KEY_RESIZE:
+                    init_screen = Screen(book.get_document_title(), VERSION, APP)
+                    screen = init_screen.get_screen()
+                    init_screen.redraw(dark_mode)
+                    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                        padding, padding)
 
         if x in HELP:
             escape_help = False
@@ -215,13 +229,22 @@ def main(argv):
                     escape = True
                     escape_help = True
                     curses.endwin()
-
+                elif y == curses.KEY_RESIZE:
+                    init_screen = Screen(book.get_document_title(), VERSION, APP)
+                    screen = init_screen.get_screen()
+                    init_screen.redraw(dark_mode)
+                    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                        padding, padding)
         if x in QUIT:
             escape = True
             curses.endwin()
         elif x == curses.KEY_RESIZE:
+            init_screen = Screen(book.get_document_title(), VERSION, APP)
+            screen = init_screen.get_screen()
             init_screen_update = True
             init_chapter_update = True
+
+    state.save_state(fileinput, book.get_document_title(), current_chapter, current_page)
 
 if __name__ == '__main__':
     main(sys.argv)
