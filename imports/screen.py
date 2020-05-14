@@ -38,7 +38,7 @@ class Screen:
     def print_info(self, dark_mode):
         app_text = self.app_name + ' ' + self.version
         title_text = '[' + self.title + ']'
-        keys = '[page:j/k][chapter:h/l][quit:q]'
+        keys = 'quit:[q] help:[?]'
         self.screen.addstr(0, 2, app_text, self._get_colors(dark_mode))
         if self.max_x > len(keys) + len(app_text) + 4:
             self.screen.addstr(0, self.max_x - len(keys) - 2, \
@@ -64,9 +64,11 @@ class Pager:
         self._set_page_columns()
         self._set_page()
         self._set_toc_page()
+        self._set_help_page()
         self._set_selector()
         self._set_colors()
         self._set_toc()
+        self._set_help()
         self._set_pages()
         self._set_speech_map()
         self._set_info_map()
@@ -112,6 +114,15 @@ class Pager:
             self.page_pos_y,
             self.page_pos_x
         )
+
+    def _set_help_page(self):
+        self.help_page = self.screen.subwin(
+            self.page_max_y,
+            self.page_max_x,
+            self.page_pos_y,
+            self.page_pos_x
+        )
+
     def _set_selector(self):
         self.pointer = '>'
         self.pointer_margin = len(self.pointer)
@@ -133,6 +144,51 @@ class Pager:
         self.info_colors = curses.color_pair(2)
         self.speech_colors = curses.color_pair(3)
         self.select_colors = curses.color_pair(4)
+
+    def _set_help(self):
+        navigation = {
+            'READER NAVIGATION': {
+                'PAGE UP': 'j, n, Space',
+                'PAGE DOWN': 'k, p',
+                'NEXT CHAPTER': 'l, N',
+                'PREVIOUS CHAPTER': 'h, P',
+                'BEGGINING OF CHAPTER': 'g',
+                'END OF CHAPTER': 'G',
+                'DARK MODE': 'r',
+                'HIGHLIGHT': 'v',
+                'INCREASE PAGE PADDING': '>',
+                'DECREASE PAGE PADDING': '<',
+                'TABLE OF CONTENTS': 't, Tab',
+                'ESCAPE': 'Esc, BackSpace',
+                'QUIT': 'q'
+            },
+            'TABLE OF CONTENTS NAVIGATION': {
+                'MOVE UP': 'j, n, Space',
+                'MOVE DOWN': 'k, p',
+                'SELECT': 'o, Enter',
+                'ESCAPE': 't, Tab, Esc'
+            }
+        }
+        self.help_pages = []
+        self.help_sections = {}
+        page = []
+        lines = 0
+        for section in navigation.keys():
+            self.help_sections[len(self.help_pages) - 1] = section
+            for command in navigation[section].keys():
+                command_text = wrap(command + ': ' + navigation[section][command],
+                    self.page_columns - self.v_padding)
+                lines += len(command_text)
+                if lines <= self.page_lines:
+                    for line_of_text in command_text:
+                        page.append(line_of_text)
+                else:
+                    self.help_pages.append(page)
+                    page = []
+                    lines = 0
+            if len(page) != 0:
+                self.help_pages.append(page)
+                page = []
 
     def _set_toc(self):
         toc = self.book.get_toc()
@@ -233,6 +289,9 @@ class Pager:
                     coordinates_map[index]['closing_coordinates'].append([y, len(line) - 1])
         return coordinates_map
 
+    def get_number_of_help_pages(self):
+        return len(self.help_pages)
+
     def get_number_of_toc_pages(self):
         return len(self.toc_pages)
 
@@ -250,6 +309,27 @@ class Pager:
     # :::::::::::::::::::::::::::::: #
 
     # :::: PRINTERS :::::::::::::::: #
+
+    def print_help_content(self, current_page):
+        for y, line_of_text in enumerate(self.help_pages[current_page]):
+            self.page.addstr(
+                y + self.h_padding,
+                self.v_padding,
+                line_of_text,
+                self.normal_colors
+            )
+
+    def print_help_title(self, current_page):
+        help_title = '[HELP][' + self.help_sections[current_page - 1] + ']'
+        self.toc_page.addstr(0, 2, help_title, self.info_colors)
+
+    def print_help_page_number(self, current_page):
+        current_page += 1
+        page_number = '[' + str(current_page) + '/' + str(self.get_number_of_help_pages()) + ']'
+        pos_y = self.page_max_y - 1
+        pos_x = self.page_max_x - len(page_number) - 2
+        self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
+
 
     def print_toc_content(self, current_page, pointer_pos):
         pos_y = self.h_padding
@@ -363,6 +443,16 @@ class Pager:
         self.page.addstr(0, 2, page_title, self.info_colors)
 
     # :::: SPAWNERS :::::::::::::::: #
+
+    def print_help_page(self, current_page):
+        self.help_page.erase()
+        self.page.clear()
+        self.help_page.bkgd(' ', self.info_colors)
+        self.help_page.box()
+        self.print_help_title(current_page)
+        self.print_help_content(current_page)
+        self.print_help_page_number(current_page)
+        self.help_page.refresh()
 
     def print_page(self, current_page):
         self.page.erase()

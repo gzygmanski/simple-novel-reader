@@ -19,19 +19,21 @@ APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
 
-PAGE_UP = {ord('n'), ord('j'), ord(' ')}
-PAGE_DOWN = {ord('p'), ord('k')}
-NEXT_CHAPTER = {ord('N'), ord('l')}
-PREVIOUS_CHAPTER = {ord('P'), ord('h')}
-START_OF_CHAPTER = {ord('g'), ord('0')}
-END_OF_CHAPTER = {ord('G'), ord('$')}
-DARK_MODE = {ord('r')}
-HIGHLIGHT = {ord('v')}
-PADDING_UP = {ord('>')}
-PADDING_DOWN = {ord('<')}
-TOC = {ord('t'), 9}
-SELECT = {curses.KEY_ENTER, ord('o'), 13}
-QUIT = {ord('q'), 27}
+PAGE_UP = [ord('n'), ord('j'), ord(' ')]
+PAGE_DOWN = [ord('p'), ord('k')]
+NEXT_CHAPTER = [ord('N'), ord('l')]
+PREVIOUS_CHAPTER = [ord('P'), ord('h')]
+START_OF_CHAPTER = [ord('g'), ord('0')]
+END_OF_CHAPTER = [ord('G'), ord('$')]
+DARK_MODE = [ord('r')]
+HIGHLIGHT = [ord('v')]
+PADDING_UP = [ord('>')]
+PADDING_DOWN = [ord('<')]
+TOC = [ord('t'), 9]
+SELECT = [curses.KEY_ENTER, ord('o'), 13]
+HELP = [ord('?')]
+ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
+QUIT = [ord('q')]
 
 
 def main(argv):
@@ -64,8 +66,7 @@ def main(argv):
     padding = 2
     current_page = 0
     current_chapter = 0
-    current_toc_page = 0
-    current_toc_pos = 0
+
     number_of_chapters = book.get_number_of_chapters()
 
     while escape == False:
@@ -147,6 +148,8 @@ def main(argv):
 
         if x in TOC:
             escape_toc = False
+            current_toc_page = 0
+            current_toc_pos = 0
             while escape_toc == False:
                 page.print_toc_page(current_toc_page, current_toc_pos)
 
@@ -179,12 +182,38 @@ def main(argv):
                     escape_toc = True
                     init_chapter_update = True
 
-                if y in TOC:
+                if y in TOC or y in ESCAPE:
                     escape_toc = True
 
                 if y in QUIT:
                     escape = True
                     escape_toc = True
+                    curses.endwin()
+
+        if x in HELP:
+            escape_help = False
+            current_help_page = 0
+            while escape_help == False:
+                page.print_help_page(current_help_page)
+
+                y = screen.getch()
+
+                if y in PAGE_UP:
+                    current_help_page += 1
+                    if current_help_page == page.get_number_of_help_pages():
+                        current_help_page = 0
+
+                if y in PAGE_DOWN:
+                    current_help_page -= 1
+                    if current_help_page <= 0:
+                        current_help_page = page.get_number_of_help_pages() - 1
+
+                if y in HELP or y in ESCAPE:
+                    escape_help = True
+
+                if y in QUIT:
+                    escape = True
+                    escape_help = True
                     curses.endwin()
 
         if x in QUIT:
