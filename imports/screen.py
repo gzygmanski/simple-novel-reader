@@ -196,7 +196,7 @@ class Pager:
     def _set_info_map(self):
         info_open = ['<', '(', '[', '{']
         info_close = ['>', ')', ']', '}']
-        info_after = [' ', '.', ',',  ';', ':', '!', '?', info_close]
+        info_after = [' ', '.', ',',  ';', ':', '!', '?', '-', '—', info_close]
         self.info_map = self._get_coordinates_map(info_open, info_close, \
             info_after)
 
