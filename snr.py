@@ -8,7 +8,7 @@
 # gzygmanski@hotmail.com:::::::: #
 
 import os, sys, curses
-from imports.reader import ConfigReader, FileReader
+from imports.reader import ConfigReader, StateReader, FileReader
 from imports.parser import BookContent
 from imports.screen import Screen, Pager
 
@@ -39,7 +39,16 @@ def main(argv):
 
     # :::: BOOK INIT ::::::::::::::: #
 
-    fileinput = argv[1]
+    state = StateReader()
+    try:
+        fileinput = argv[1]
+        current_chapter = 0
+        current_page = 0
+    except IndexError:
+        fileinput = state.get_path()
+        current_chapter = state.get_chapter()
+        current_page = state.get_page()
+
     reader = FileReader(fileinput)
     toc_file = reader.get_toc_file()
     content_file = reader.get_content_file()
@@ -60,14 +69,13 @@ def main(argv):
     escape = False
     init_screen_update = True
     init_chapter_update = True
-    current_page = 0
-    current_chapter = 0
-    number_of_chapters = book.get_number_of_chapters()
+
 
     config = ConfigReader()
     dark_mode = config.get_dark_mode()
     highlight = config.get_highlight()
     padding = config.get_horizontal_padding()
+    number_of_chapters = book.get_number_of_chapters()
 
     while escape == False:
         if current_chapter == number_of_chapters:
@@ -235,6 +243,8 @@ def main(argv):
             screen = init_screen.get_screen()
             init_screen_update = True
             init_chapter_update = True
+
+    state.save_state(fileinput, book.get_document_title(), current_chapter, current_page)
 
 if __name__ == '__main__':
     main(sys.argv)
