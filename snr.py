@@ -42,8 +42,6 @@ def main(argv):
     state = StateReader()
     try:
         fileinput = argv[1]
-        current_chapter = 0
-        current_page = 0
     except IndexError:
         fileinput = state.get_path()
         current_chapter = state.get_chapter()
@@ -54,10 +52,18 @@ def main(argv):
     content_file = reader.get_content_file()
     path = reader.get_directory_path(toc_file)
     book = BookContent(path, toc_file, content_file)
+    book_title = book.get_document_title()
+
+    if state.exists(book_title):
+        current_chapter = state.get_chapter(book_title)
+        current_page= state.get_page(book_title)
+    else:
+        current_chapter = 0
+        current_page = 0
 
     # :::: CURSES CONFIG ::::::::::: #
 
-    init_screen = Screen(book.get_document_title(), VERSION, APP)
+    init_screen = Screen(book_title, VERSION, APP)
     screen = init_screen.get_screen()
     curses.noecho()
     curses.cbreak()
@@ -196,9 +202,10 @@ def main(argv):
                 if y in QUIT:
                     escape = True
                     escape_toc = True
+                    state.save(fileinput, book_title, current_chapter, current_page)
                     curses.endwin()
                 elif y == curses.KEY_RESIZE:
-                    init_screen = Screen(book.get_document_title(), VERSION, APP)
+                    init_screen = Screen(book_title, VERSION, APP)
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
@@ -229,8 +236,9 @@ def main(argv):
                     escape = True
                     escape_help = True
                     curses.endwin()
+                    state.save(fileinput, book_title, current_chapter, current_page)
                 elif y == curses.KEY_RESIZE:
-                    init_screen = Screen(book.get_document_title(), VERSION, APP)
+                    init_screen = Screen(book_title, VERSION, APP)
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
@@ -238,13 +246,13 @@ def main(argv):
         if x in QUIT:
             escape = True
             curses.endwin()
+            state.save(fileinput, book_title, current_chapter, current_page)
         elif x == curses.KEY_RESIZE:
-            init_screen = Screen(book.get_document_title(), VERSION, APP)
+            init_screen = Screen(book_title, VERSION, APP)
             screen = init_screen.get_screen()
             init_screen_update = True
             init_chapter_update = True
 
-    state.save_state(fileinput, book.get_document_title(), current_chapter, current_page)
 
 if __name__ == '__main__':
     main(sys.argv)
