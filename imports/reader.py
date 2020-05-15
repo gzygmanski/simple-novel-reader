@@ -6,7 +6,8 @@ from gi.repository import GLib
 from pathlib import Path
 
 class Config:
-    def __init__(self):
+    def __init__(self, access_rights=0o755):
+        self.access_rights = access_rights
         self._set_config_dir()
 
     def _set_config_dir(self):
@@ -19,10 +20,9 @@ class Config:
 
 
 class ConfigReader(Config):
-    def __init__(self, config_file=None, access_rights=0o755):
-        self.access_rights = access_rights
+    def __init__(self, config_file=None):
+        Config.__init__(self)
         self.general_section = 'DEFAULT'
-        self._set_config_dir()
         self._set_config_file(config_file)
         self._set_config()
 
@@ -58,7 +58,7 @@ class ConfigReader(Config):
 
 class StateReader(Config):
     def __init__(self):
-        self._set_config_dir()
+        Config.__init__(self)
         self._set_state_file()
         self._set_state()
 
@@ -70,27 +70,41 @@ class StateReader(Config):
             with open(self.state_file, 'r') as f:
                 self.state = json.load(f)
         else:
-            self.state = {'last_open': {}}
+            self.state = {'default': {}}
 
-    def save_state(self, path, title, chapter, page):
-        self.state['last_open']['path'] = path
-        self.state['last_open']['title'] = title
-        self.state['last_open']['chapter'] = chapter
-        self.state['last_open']['page'] = page
+    def save(self, path, title, chapter, page):
+        new_key = self.key_parser(title)
+        self.state['default']['path'] = path
+        self.state['default']['title'] = title
+        self.state['default']['chapter'] = chapter
+        self.state['default']['page'] = page
+        self.state[new_key] = {
+            'path': path,
+            'title': title,
+            'chapter': chapter,
+            'page': page
+        }
         with open (self.state_file, 'w') as f:
             json.dump(self.state, f)
 
-    def get_path(self):
-        return self.state['last_open']['path']
+    def exists(self, title):
+        if self.key_parser(title) in self.state.keys():
+            return True
 
-    def get_title(self):
-        return self.state['last_open']['title']
+    def key_parser(self, key):
+        return ''.join(x for x in key if x.isalnum()).lower()
 
-    def get_chapter(self):
-        return self.state['last_open']['chapter']
+    def get_path(self, book='default'):
+        return self.state[self.key_parser(book)]['path']
 
-    def get_page(self):
-        return self.state['last_open']['page']
+    def get_title(self, book='default'):
+        return self.state[self.key_parser(book)]['title']
+
+    def get_chapter(self, book='default'):
+        return self.state[self.key_parser(book)]['chapter']
+
+    def get_page(self, book='default'):
+        return self.state[self.key_parser(book)]['page']
 
 class FileReader:
     def __init__(self, file_path, path='/tmp/reader', access_rights=0o755):
