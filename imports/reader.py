@@ -72,17 +72,17 @@ class StateReader(Config):
         else:
             self.state = {'default': {}}
 
-    def save(self, path, title, chapter, page):
+    def save(self, path, title, chapter, index):
         new_key = self.key_parser(title)
         self.state['default']['path'] = path
         self.state['default']['title'] = title
         self.state['default']['chapter'] = chapter
-        self.state['default']['page'] = page
+        self.state['default']['index'] = index
         self.state[new_key] = {
             'path': path,
             'title': title,
             'chapter': chapter,
-            'page': page
+            'index': index
         }
         with open (self.state_file, 'w') as f:
             json.dump(self.state, f)
@@ -103,8 +103,8 @@ class StateReader(Config):
     def get_chapter(self, book='default'):
         return self.state[self.key_parser(book)]['chapter']
 
-    def get_page(self, book='default'):
-        return self.state[self.key_parser(book)]['page']
+    def get_index(self, book='default'):
+        return self.state[self.key_parser(book)]['index']
 
 class FileReader:
     def __init__(self, file_path, path='/tmp/reader', access_rights=0o755):

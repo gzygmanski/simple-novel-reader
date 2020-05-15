@@ -215,37 +215,37 @@ class Pager:
         on_page = []
         if self.book.has_text(self.chapter):
             content = self.book.get_chapter_text(self.chapter)
-            for paragraph in content:
+            for index, paragraph in enumerate(content):
                 lines_of_text = wrap(paragraph, self.page_columns)
                 if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                     for text in lines_of_text:
-                        on_page.append(text)
+                        on_page.append([index, text])
                     if len(on_page) != 0:
-                        on_page.append('')
+                        on_page.append([index, ''])
                 else:
                     for _ in range(len(on_page), self.page_lines):
-                        on_page.append(lines_of_text[0])
+                        on_page.append([index, lines_of_text[0]])
                         lines_of_text.pop(0)
                     pages.append(on_page)
                     on_page = []
                     for text in lines_of_text:
-                        on_page.append(text)
+                        on_page.append([index, text])
                     if len(on_page) != 0:
-                        on_page.append('')
+                        on_page.append([index, ''])
             if len(on_page) != 0:
                 pages.append(on_page)
             self.pages = pages
         else:
             content = self.book.get_chapter_title(self.chapter)
             for line_of_text in wrap(content, self.page_columns):
-                on_page.append(line_of_text)
+                on_page.append([0, line_of_text])
             pages.append(on_page)
             self.pages = pages
 
     def _set_speech_map(self):
         speech_open = ['\'', '"', '‘', '“']
         speech_close = ['\'', '"', '’', '”']
-        speech_after = [' ', '.', ',',  ';', ':', '!', '?', speech_close]
+        speech_after = [' ', '.', ',',  ';', ':', '!', '?', '-', '—', speech_close]
         self.speech_map = self._get_coordinates_map(speech_open, speech_close, \
             speech_after)
 
@@ -271,22 +271,22 @@ class Pager:
             for y, line in enumerate(page):
                 if is_opened and y == 0:
                     coordinates_map[index]['opening_coordinates'].append([y, 0])
-                for x, character in enumerate(line):
+                for x, character in enumerate(line[1]):
                     try:
                         if character in opening_marks \
                             and not is_opened \
-                            and (x == 0 or line[x - 1] == ' '):
+                            and (x == 0 or line[1][x - 1] == ' '):
                             is_opened = True
                             current_mark = opening_marks.index(character)
                             coordinates_map[index]['opening_coordinates'].append([y, x])
                     except IndexError:
                         pass
                     if is_opened and character == closing_marks[current_mark]:
-                        if x == len(line) - 1 or line[x + 1] in closing_after:
+                        if x == len(line[1]) - 1 or line[1][x + 1] in closing_after:
                             is_opened = False
                             coordinates_map[index]['closing_coordinates'].append([y, x])
                 if is_opened and y == len(page) - 1:
-                    coordinates_map[index]['closing_coordinates'].append([y, len(line) - 1])
+                    coordinates_map[index]['closing_coordinates'].append([y, len(line[1]) - 1])
         return coordinates_map
 
     def get_number_of_help_pages(self):
@@ -303,6 +303,15 @@ class Pager:
 
     def get_number_of_pages(self):
         return len(self.pages)
+
+    def get_page_by_index(self, index):
+        for current_page, page in enumerate(self.pages):
+            for line in page:
+                if index == line[0]:
+                    return current_page
+
+    def get_current_page_index(self, current_page):
+        return self.pages[current_page][0][0]
 
     # :::::::::::::::::::::::::::::: #
     # :::: OTHER ::::::::::::::::::: #
@@ -389,7 +398,7 @@ class Pager:
         is_speech = False
         is_info = False
         for y, line in enumerate(self.pages[current_page]):
-            for x, character in enumerate(line):
+            for x, character in enumerate(line[1]):
                 if not is_open:
                     if [y, x] in self.speech_map[current_page]['opening_coordinates'] \
                         and self.highlight:
