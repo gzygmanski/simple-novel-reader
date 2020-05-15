@@ -44,8 +44,9 @@ def main(argv):
         fileinput = argv[1]
     except IndexError:
         fileinput = state.get_path()
-        current_chapter = state.get_chapter()
-        current_page = state.get_page()
+        default = True
+    else:
+        default = False
 
     reader = FileReader(fileinput)
     toc_file = reader.get_toc_file()
@@ -53,13 +54,6 @@ def main(argv):
     path = reader.get_directory_path(toc_file)
     book = BookContent(path, toc_file, content_file)
     book_title = book.get_document_title()
-
-    if state.exists(book_title):
-        current_chapter = state.get_chapter(book_title)
-        current_page= state.get_page(book_title)
-    else:
-        current_chapter = 0
-        current_page = 0
 
     # :::: CURSES CONFIG ::::::::::: #
 
@@ -70,18 +64,33 @@ def main(argv):
     curses.nonl()
     curses.curs_set(0)
 
-    # :::: VARS :::::::::::::::::::: #
-
-    escape = False
-    init_screen_update = True
-    init_chapter_update = True
-
+    # :::: READER CONFIG ::::::::::: #
 
     config = ConfigReader()
     dark_mode = config.get_dark_mode()
     highlight = config.get_highlight()
     padding = config.get_horizontal_padding()
     number_of_chapters = book.get_number_of_chapters()
+
+    # :::: VARS :::::::::::::::::::: #
+
+    escape = False
+    init_screen_update = True
+    init_chapter_update = False
+
+    if default:
+        current_chapter = state.get_chapter()
+        page_index = state.get_index()
+    elif state.exists(book_title):
+        current_chapter = state.get_chapter(book_title)
+        page_index = state.get_index(book_title)
+    else:
+        current_chapter = 0
+        page_index = 0
+
+    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+        padding, padding)
+    current_page = page.get_page_by_index(page_index)
 
     while escape == False:
         if current_chapter == number_of_chapters:
@@ -202,7 +211,12 @@ def main(argv):
                 if y in QUIT:
                     escape = True
                     escape_toc = True
-                    state.save(fileinput, book_title, current_chapter, current_page)
+                    state.save(
+                        fileinput,
+                        book_title,
+                        current_chapter,
+                        page.get_current_page_index(current_page)
+                    )
                     curses.endwin()
                 elif y == curses.KEY_RESIZE:
                     init_screen = Screen(book_title, VERSION, APP)
@@ -236,7 +250,12 @@ def main(argv):
                     escape = True
                     escape_help = True
                     curses.endwin()
-                    state.save(fileinput, book_title, current_chapter, current_page)
+                    state.save(
+                        fileinput,
+                        book_title,
+                        current_chapter,
+                        page.get_current_page_index(current_page)
+                    )
                 elif y == curses.KEY_RESIZE:
                     init_screen = Screen(book_title, VERSION, APP)
                     screen = init_screen.get_screen()
@@ -246,7 +265,12 @@ def main(argv):
         if x in QUIT:
             escape = True
             curses.endwin()
-            state.save(fileinput, book_title, current_chapter, current_page)
+            state.save(
+                fileinput,
+                book_title,
+                current_chapter,
+                page.get_current_page_index(current_page)
+            )
         elif x == curses.KEY_RESIZE:
             init_screen = Screen(book_title, VERSION, APP)
             screen = init_screen.get_screen()
