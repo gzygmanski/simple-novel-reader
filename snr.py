@@ -14,7 +14,7 @@ from imports.screen import Screen, Pager, Quickmarks
 
 # :::: APP INFO :::::::::::::::: #
 
-VERSION = 'v0.3.36-alpha'
+VERSION = 'v0.4.46-alpha'
 APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
