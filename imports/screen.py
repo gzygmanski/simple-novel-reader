@@ -513,6 +513,11 @@ class Quickmarks:
             return quickmarks
 
     def set_quickmark(self, mark, chapter, index):
+        for slot in self.get_slots():
+            if self.get_quickmark_chapter(slot) == chapter \
+                and self.get_quickmark_index(slot) == index:
+                    self.quickmarks[str(slot)]['chapter'] = None
+                    self.quickmarks[str(slot)]['index'] = None
         self.quickmarks[str(mark)]['chapter'] = chapter
         self.quickmarks[str(mark)]['index'] = index
 
