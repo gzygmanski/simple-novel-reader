@@ -530,4 +530,8 @@ class Quickmarks:
         if self.quickmarks[str(mark)]['index']:
             return self.quickmarks[str(mark)]['index']
 
-
+    def is_set(self, mark):
+        if self.quickmarks[str(mark)]['chapter'] is None:
+            return False
+        else:
+            return True

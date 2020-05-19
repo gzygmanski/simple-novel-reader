@@ -33,7 +33,7 @@ TOC = [ord('t'), 9]
 SELECT = [curses.KEY_ENTER, ord('o'), 13]
 HELP = [ord('?')]
 QUICKMARK = [ord('m')]
-QUICKMARK_SLOT = [ord(str(x)) for x in range(10)]
+QUICKMARK_SLOT = [ord(str(x)) for x in range(1, 10)]
 ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
 QUIT = [ord('q')]
 
@@ -171,6 +171,13 @@ def main(argv):
         if x in PADDING_DOWN:
             if padding > 1:
                 padding -= 1
+                init_screen_update = True
+                init_chapter_update = True
+
+        if x in QUICKMARK_SLOT:
+            if quickmarks.is_set(chr(x)):
+                current_chapter = quickmarks.get_quickmark_chapter(chr(x))
+                current_page = page.get_page_by_index(quickmarks.get_quickmark_index(chr(x)))
                 init_screen_update = True
                 init_chapter_update = True
 
