@@ -72,17 +72,19 @@ class StateReader(Config):
         else:
             self.state = {'default': {}}
 
-    def save(self, path, title, chapter, index):
+    def save(self, path, title, chapter, index, quickmarks):
         new_key = self.key_parser(title)
         self.state['default']['path'] = path
         self.state['default']['title'] = title
         self.state['default']['chapter'] = chapter
         self.state['default']['index'] = index
+        self.state['default']['quicmarks'] = quickmarks
         self.state[new_key] = {
             'path': path,
             'title': title,
             'chapter': chapter,
-            'index': index
+            'index': index,
+            'quickmarks': quickmarks
         }
         with open (self.state_file, 'w') as f:
             json.dump(self.state, f)
@@ -105,6 +107,9 @@ class StateReader(Config):
 
     def get_index(self, book='default'):
         return self.state[self.key_parser(book)]['index']
+
+    def get_quickmarks(self, book='default'):
+        return self.state[self.key_parser(book)]['quickmarks']
 
 class FileReader:
     def __init__(self, file_path, path='/tmp/reader', access_rights=0o755):
