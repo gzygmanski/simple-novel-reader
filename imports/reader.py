@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import os, tempfile, shutil, zipfile, configparser, json
+import os, tempfile, shutil, zipfile, configparser, json, tempfile
 from distutils.util import strtobool
 from gi.repository import GLib
 from pathlib import Path
@@ -112,15 +112,17 @@ class StateReader(Config):
         return self.state[self.key_parser(book)]['quickmarks']
 
 class FileReader:
-    def __init__(self, file_path, path='/tmp/reader', access_rights=0o755):
-        self.path = path
+    def __init__(self, file_path, access_rights=0o755):
         self.file_path = file_path
         self.access_rights = access_rights
-        self.content_list = []
-        self.create_temp_dir()
-        self.unzip_file()
+        self._set_path()
+        self._set_temp_dir()
+        self._unzip_file()
 
-    def create_temp_dir(self):
+    def _set_path(self):
+        self.path = os.path.join(tempfile.gettempdir(), 'snr/')
+
+    def _set_temp_dir(self):
         if not os.path.exists(self.path):
             try:
                 os.mkdir(self.path, self.access_rights)
@@ -137,15 +139,9 @@ class FileReader:
                 except OSError as e:
                     print('Failed to delete %s, because of %s' % (file_path, e))
 
-    def unzip_file(self):
+    def _unzip_file(self):
         with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
             zip_ref.extractall(self.path)
-
-    def get_content_list(self):
-        for path in Path(self.path).rglob('*.html'):
-            self.content_list.append(str(path))
-        self.content_list.sort()
-        return self.content_list
 
     def get_toc_file(self):
         for path in Path(self.path).rglob('*.ncx'):

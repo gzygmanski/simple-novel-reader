@@ -1,7 +1,7 @@
 #!/bin/python3
 
 from bs4 import BeautifulSoup
-import urllib
+import urllib, os
 
 class BookContent:
     def __init__(self, path, toc_file, content_file):
@@ -9,15 +9,14 @@ class BookContent:
         self.toc_file = toc_file
         self.content_file = content_file
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-        # self.paragraph_tags = ['p', 'b', 'i', 's', 'em', 'strong', 'del', 'ins']
         self.paragraph_tags = ['p']
         self._set_toc_soup()
         self._set_content_soup()
         self._set_toc_list()
         self._set_content_list()
         self._set_order_list()
-        self.add_content()
-        self.add_paragraphs()
+        self._set_content()
+        self._set_paragraphs()
 
     def _set_toc_soup(self):
         self.toc_soup = self.make_soup(self.toc_file, 'xml')
@@ -36,7 +35,7 @@ class BookContent:
                     toc_id = index
                 toc_name = nav_item.select('navLabel > text')[0].string
                 toc_content = nav_item.content['src'].split('#')
-                toc_content[0] = self.path + '/' + urllib.parse.unquote(toc_content[0])
+                toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
                 if len(toc_content) == 2:
                     toc_inner_id = toc_content[1]
                 else:
@@ -65,7 +64,7 @@ class BookContent:
             if item.has_attr('idref'):
                 self.order_list.append(item['idref'])
 
-    def add_content(self):
+    def _set_content(self):
         paths_continue = False
         for index in range(len(self.toc_list)):
             for idref in self.order_list:
@@ -82,13 +81,11 @@ class BookContent:
                 self.toc_list[index]['src'][1]:
                 self.toc_list[index]['src'].pop(0)
 
-
-    def add_paragraphs(self):
+    def _set_paragraphs(self):
         current_file = ''
         current_heading = ''
         current_id = ''
         has_content = False
-        has_inner_id = self.has_inner_id()
         for item in self.toc_list:
             for document in item['src']:
                 new_file = document
@@ -109,7 +106,7 @@ class BookContent:
                             has_content = True
                         else:
                             has_content = False
-                    elif not has_inner_id:
+                    elif not self.has_inner_id():
                         if tag.name in self.paragraph_tags:
                             if tag.text != '' and tag.text != '\xa0':
                                 item['text'].append(tag.text)
