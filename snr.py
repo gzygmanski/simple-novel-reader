@@ -10,11 +10,11 @@
 import os, sys, curses
 from imports.reader import ConfigReader, StateReader, FileReader
 from imports.parser import BookContent
-from imports.screen import Screen, Pager
+from imports.screen import Screen, Pager, Quickmarks
 
 # :::: APP INFO :::::::::::::::: #
 
-VERSION = 'v0.3.36-alpha'
+VERSION = 'v0.4.46-alpha'
 APP = 'Simple Novel Reader'
 
 # :::: KEYBINDINGS ::::::::::::: #
@@ -32,6 +32,8 @@ PADDING_DOWN = [ord('<')]
 TOC = [ord('t'), 9]
 SELECT = [curses.KEY_ENTER, ord('o'), 13]
 HELP = [ord('?')]
+QUICKMARK = [ord('m')]
+QUICKMARK_SLOT = [ord(str(x)) for x in range(1, 10)]
 ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
 QUIT = [ord('q')]
 
@@ -81,12 +83,15 @@ def main(argv):
     if default:
         current_chapter = state.get_chapter()
         page_index = state.get_index()
+        quickmarks = Quickmarks(state.get_quickmarks())
     elif state.exists(book_title):
         current_chapter = state.get_chapter(book_title)
         page_index = state.get_index(book_title)
+        quickmarks = Quickmarks(state.get_quickmarks(book_title))
     else:
         current_chapter = 0
         page_index = 0
+        quickmarks = Quickmarks()
 
     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
         padding, padding)
@@ -106,7 +111,7 @@ def main(argv):
                 padding, padding)
             init_chapter_update = False
 
-        page.print_page(current_page)
+        page.print_page(current_page, quickmarks)
 
         x = screen.getch()
 
@@ -169,6 +174,25 @@ def main(argv):
                 init_screen_update = True
                 init_chapter_update = True
 
+        if x in QUICKMARK_SLOT:
+            if quickmarks.is_set(chr(x)):
+                current_chapter = quickmarks.get_quickmark_chapter(chr(x))
+                current_page = page.get_page_by_index(quickmarks.get_quickmark_index(chr(x)))
+                init_screen_update = True
+                init_chapter_update = True
+
+        if x in QUICKMARK:
+            page.print_page(current_page, quickmarks, True)
+
+            y = screen.getch()
+
+            if y in QUICKMARK_SLOT:
+                quickmarks.set_quickmark(
+                    chr(y),
+                    current_chapter,
+                    page.get_current_page_index(current_page)
+                )
+
         if x in TOC:
             escape_toc = False
             current_toc_page = 0
@@ -215,7 +239,8 @@ def main(argv):
                         fileinput,
                         book_title,
                         current_chapter,
-                        page.get_current_page_index(current_page)
+                        page.get_current_page_index(current_page),
+                        quickmarks.get_quickmarks()
                     )
                     curses.endwin()
                 elif y == curses.KEY_RESIZE:
@@ -254,7 +279,8 @@ def main(argv):
                         fileinput,
                         book_title,
                         current_chapter,
-                        page.get_current_page_index(current_page)
+                        page.get_current_page_index(current_page),
+                        quickmarks.get_quickmarks()
                     )
                 elif y == curses.KEY_RESIZE:
                     init_screen = Screen(book_title, VERSION, APP)
@@ -269,7 +295,8 @@ def main(argv):
                 fileinput,
                 book_title,
                 current_chapter,
-                page.get_current_page_index(current_page)
+                page.get_current_page_index(current_page),
+                quickmarks.get_quickmarks()
             )
         elif x == curses.KEY_RESIZE:
             init_screen = Screen(book_title, VERSION, APP)

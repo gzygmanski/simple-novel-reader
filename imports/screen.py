@@ -152,13 +152,15 @@ class Pager:
                 'PAGE DOWN': 'k, p',
                 'NEXT CHAPTER': 'l, N',
                 'PREVIOUS CHAPTER': 'h, P',
-                'BEGGINING OF CHAPTER': 'g',
-                'END OF CHAPTER': 'G',
+                'BEGGINING OF CHAPTER': 'g, 0',
+                'END OF CHAPTER': 'G, $',
                 'DARK MODE': 'r',
                 'HIGHLIGHT': 'v',
                 'INCREASE PAGE PADDING': '>',
                 'DECREASE PAGE PADDING': '<',
                 'TABLE OF CONTENTS': 't, Tab',
+                'SAVE QUICKMARK': 'm, then [1-9]',
+                'OPEN QUICKMARK': '[1-9]',
                 'ESCAPE': 'Esc, BackSpace',
                 'QUIT': 'q'
             },
@@ -239,6 +241,7 @@ class Pager:
             content = self.book.get_chapter_title(self.chapter)
             for line_of_text in wrap(content, self.page_columns):
                 on_page.append([0, line_of_text])
+            on_page.append([1, '***'])
             pages.append(on_page)
             self.pages = pages
 
@@ -311,7 +314,10 @@ class Pager:
                     return current_page
 
     def get_current_page_index(self, current_page):
-        return self.pages[current_page][0][0]
+        if len(self.pages) != 1:
+            return self.pages[current_page][0][0] + 1
+        else:
+            return self.pages[current_page][0][0]
 
     # :::::::::::::::::::::::::::::: #
     # :::: OTHER ::::::::::::::::::: #
@@ -328,11 +334,11 @@ class Pager:
                 self.normal_colors
             )
 
-    def print_help_title(self, current_page):
+    def print_help_header(self, current_page):
         help_title = '[HELP][' + self.help_sections[current_page - 1] + ']'
         self.toc_page.addstr(0, 2, help_title, self.info_colors)
 
-    def print_help_page_number(self, current_page):
+    def print_help_footer(self, current_page):
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_help_pages()) + ']'
         pos_y = self.page_max_y - 1
@@ -382,18 +388,18 @@ class Pager:
                     )
                     pos_y += 1
 
-    def print_toc_page_number(self, current_page):
+    def print_toc_footer(self, current_page):
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_toc_pages()) + ']'
         pos_y = self.page_max_y - 1
         pos_x = self.page_max_x - len(page_number) - 2
         self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
-    def print_toc_title(self):
+    def print_toc_header(self):
         toc_title = '[Table of Contents]'
         self.toc_page.addstr(0, 2, toc_title, self.info_colors)
 
-    def print_page_text(self, current_page):
+    def print_page_content(self, current_page):
         is_open = False
         is_speech = False
         is_info = False
@@ -436,14 +442,24 @@ class Pager:
                             is_speech = False
                             is_info = False
 
-    def print_page_number(self, current_page):
+    def print_page_footer(self, current_page, quickmarks, quickmark_change):
+        mark_tag = ''
+        for mark in quickmarks.get_slots():
+            if quickmark_change:
+                mark_tag = '[+]'
+            elif quickmarks.get_quickmark_chapter(mark) == self.chapter \
+                and self.get_page_by_index(quickmarks.get_quickmark_index(mark)) \
+                == current_page:
+                mark_tag = '[' + str(mark) + ']'
+
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
         pos_y = self.page_max_y - 1
-        pos_x = self.page_max_x - len(page_number) - 2
-        self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
+        pos_x = self.page_max_x - len(mark_tag) - 2
+        self.page.addstr(pos_y, pos_x, mark_tag, self.info_colors)
+        self.page.addstr(pos_y, pos_x - len(page_number), page_number, self.info_colors)
 
-    def print_page_title(self):
+    def print_page_header(self):
         chapter_title = self.book.get_chapter_title(self.chapter)
         chapter_id = self.book.get_id(self.chapter)
         page_title = '[' +  str(chapter_id) + '][' + chapter_title + ']'
@@ -458,18 +474,18 @@ class Pager:
         self.page.clear()
         self.help_page.bkgd(' ', self.info_colors)
         self.help_page.box()
-        self.print_help_title(current_page)
+        self.print_help_header(current_page)
         self.print_help_content(current_page)
-        self.print_help_page_number(current_page)
+        self.print_help_footer(current_page)
         self.help_page.refresh()
 
-    def print_page(self, current_page):
+    def print_page(self, current_page, quickmarks, quickmark_change=False):
         self.page.erase()
         self.page.bkgd(' ', self.normal_colors)
         self.page.box()
-        self.print_page_title()
-        self.print_page_text(current_page)
-        self.print_page_number(current_page)
+        self.print_page_header()
+        self.print_page_content(current_page)
+        self.print_page_footer(current_page, quickmarks, quickmark_change)
         self.page.refresh()
 
     def print_toc_page(self, current_page, pointer_pos):
@@ -477,8 +493,52 @@ class Pager:
         self.page.clear()
         self.toc_page.bkgd(' ', self.info_colors)
         self.toc_page.box()
-        self.print_toc_title()
+        self.print_toc_header()
         self.print_toc_content(current_page, pointer_pos)
-        self.print_toc_page_number(current_page)
+        self.print_toc_footer(current_page)
         self.toc_page.refresh()
 
+class Quickmarks:
+    def __init__(self, quickmarks=None):
+        self.quickmarks = self._set_quickmarks(quickmarks)
+
+    def _set_quickmarks(self, quickmarks):
+        if quickmarks is None:
+            quickmarks = {}
+            for mark in range(1, 10):
+                quickmarks[str(mark)] = {
+                    'chapter': None,
+                    'index': None
+                }
+            return quickmarks
+        else:
+            return quickmarks
+
+    def set_quickmark(self, mark, chapter, index):
+        for slot in self.get_slots():
+            if self.get_quickmark_chapter(slot) == chapter \
+                and self.get_quickmark_index(slot) == index:
+                    self.quickmarks[str(slot)]['chapter'] = None
+                    self.quickmarks[str(slot)]['index'] = None
+        self.quickmarks[str(mark)]['chapter'] = chapter
+        self.quickmarks[str(mark)]['index'] = index
+
+    def get_quickmarks(self):
+        return self.quickmarks
+
+    def get_slots(self):
+        return self.quickmarks.keys()
+
+    def get_quickmark_chapter(self, mark):
+        if self.quickmarks[str(mark)]['chapter']:
+            return self.quickmarks[str(mark)]['chapter']
+
+    def get_quickmark_index(self, mark):
+        if self.quickmarks[str(mark)]['index']:
+            return self.quickmarks[str(mark)]['index']
+
+    def is_set(self, mark):
+        if self.quickmarks[str(mark)]['chapter'] is None:
+            return False
+        else:
+            return True
