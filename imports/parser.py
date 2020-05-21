@@ -26,13 +26,12 @@ class BookContent:
 
     def _set_toc_list(self):
         self.toc_list = []
-        index = 1
-        for nav_item in self.toc_soup.find_all(True):
+        for index, nav_item in enumerate(self.toc_soup.find_all(True)):
             if nav_item.name == 'navPoint':
                 if nav_item.has_attr('playOrder'):
                     toc_id = int(nav_item['playOrder'])
                 else:
-                    toc_id = index
+                    toc_id = index + 1
                 toc_name = nav_item.select('navLabel > text')[0].string
                 toc_content = nav_item.content['src'].split('#')
                 toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
@@ -48,7 +47,6 @@ class BookContent:
                     'text': []
                 }
                 self.toc_list.append(toc_dict)
-                index += 1
 
     def _set_content_list(self):
         self.content_list = {}

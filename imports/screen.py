@@ -54,7 +54,8 @@ class Pager:
         self.dark_mode = dark_mode
         self.highlight = highlight
         self.v_padding = v_padding
-        self.h_padding = h_padding
+        self.h_padding = h_padding * 2
+        self.static_padding = 2
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
         self._set_page_max_y()
         self._set_page_max_x()
@@ -125,8 +126,11 @@ class Pager:
 
     def _set_selector(self):
         self.pointer = '->'
+        self.index_suffix = ': '
+        max_index = 3
         self.pointer_margin = len(self.pointer)
-        self.page_id_margin = 7 + self.pointer_margin
+        self.toc_id_margin = self.pointer_margin + self.static_padding + max_index \
+            + len(self.index_suffix)
 
     def _set_colors(self):
         curses.start_color()
@@ -179,7 +183,7 @@ class Pager:
             self.help_sections[len(self.help_pages) - 1] = section
             for command in navigation[section].keys():
                 command_text = wrap(command + ': ' + navigation[section][command],
-                    self.page_columns - self.v_padding)
+                    self.page_columns - self.static_padding)
                 lines += len(command_text)
                 if lines <= self.page_lines:
                     for line_of_text in command_text:
@@ -198,7 +202,7 @@ class Pager:
         page = []
         lines = 0
         for key in toc.keys():
-            chapter = wrap(toc[key], self.page_columns - self.page_id_margin - self.v_padding)
+            chapter = wrap(toc[key], self.page_max_x - self.toc_id_margin)
             if lines + len(chapter) <= self.page_lines:
                 page.append({
                     'id': key,
@@ -213,7 +217,7 @@ class Pager:
             self.toc_pages.append(page)
 
     def _set_pages(self):
-        pages = []
+        self.pages = []
         on_page = []
         if self.book.has_text(self.chapter):
             content = self.book.get_chapter_text(self.chapter)
@@ -228,22 +232,20 @@ class Pager:
                     for _ in range(len(on_page), self.page_lines):
                         on_page.append([index, lines_of_text[0]])
                         lines_of_text.pop(0)
-                    pages.append(on_page)
+                    self.pages.append(on_page)
                     on_page = []
                     for text in lines_of_text:
                         on_page.append([index, text])
                     if len(on_page) != 0:
                         on_page.append([index, ''])
             if len(on_page) != 0:
-                pages.append(on_page)
-            self.pages = pages
+                self.pages.append(on_page)
         else:
             content = self.book.get_chapter_title(self.chapter)
             for line_of_text in wrap(content, self.page_columns):
                 on_page.append([0, line_of_text])
-            on_page.append([1, '***'])
-            pages.append(on_page)
-            self.pages = pages
+            on_page.append([1, '* * *'])
+            self.pages.append(on_page)
 
     def _set_speech_map(self):
         speech_open = ['\'', '"', '‘', '“']
@@ -323,50 +325,62 @@ class Pager:
     # :::: OTHER ::::::::::::::::::: #
     # :::::::::::::::::::::::::::::: #
 
+    def shorten_title(self, title):
+        if len(title) >= self.page_max_x - self.static_padding * 2:
+            return title[:self.page_max_x - self.static_padding * 2 - 4] + '...]'
+        else:
+            return title
+
     # :::: PRINTERS :::::::::::::::: #
 
     def print_help_content(self, current_page):
         for y, line_of_text in enumerate(self.help_pages[current_page]):
             self.page.addstr(
-                y + self.h_padding,
-                self.v_padding,
+                y + self.static_padding,
+                self.static_padding,
                 line_of_text,
                 self.normal_colors
             )
 
     def print_help_header(self, current_page):
         help_title = '[HELP][' + self.help_sections[current_page - 1] + ']'
-        self.toc_page.addstr(0, 2, help_title, self.info_colors)
+        self.toc_page.addstr(
+            0,
+            self.static_padding,
+            self.shorten_title(help_title),
+            self.info_colors
+        )
 
     def print_help_footer(self, current_page):
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_help_pages()) + ']'
         pos_y = self.page_max_y - 1
-        pos_x = self.page_max_x - len(page_number) - 2
+        pos_x = self.page_max_x - len(page_number) - self.static_padding
         self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
 
     def print_toc_content(self, current_page, pointer_pos):
-        pos_y = self.h_padding
+        pos_y = self.static_padding
         for y, chapter in enumerate(self.toc_pages[current_page]):
             if pointer_pos == y:
                 self.toc_page.addstr(
                     pos_y,
-                    self.v_padding,
+                    self.static_padding,
                     self.pointer,
                     self.select_colors
                 )
                 chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
-                    + str(chapter['id']) + ':'
+                    + str(chapter['id']) + self.index_suffix
                 self.toc_page.addstr(
                     pos_y,
-                    self.v_padding + self.pointer_margin,
+                    self.static_padding + self.pointer_margin,
                     chapter_index,
                     self.select_colors
                 )
                 for line in chapter['name']:
-                    self.toc_page.addstr(pos_y,
-                        self.v_padding + len(chapter_index) + self.pointer_margin + 1,
+                    self.toc_page.addstr(
+                        pos_y,
+                        self.toc_id_margin,
                         line,
                         self.select_colors
                     )
@@ -376,13 +390,14 @@ class Pager:
                     + str(chapter['id']) + ':'
                 self.toc_page.addstr(
                     pos_y,
-                    self.v_padding + self.pointer_margin,
+                    self.static_padding + self.pointer_margin,
                     chapter_index,
                     self.info_colors
                 )
                 for line in chapter['name']:
-                    self.toc_page.addstr(pos_y,
-                        self.v_padding + len(chapter_index) + self.pointer_margin + 1,
+                    self.toc_page.addstr(
+                        pos_y,
+                        self.toc_id_margin,
                         line,
                         self.normal_colors
                     )
@@ -392,12 +407,17 @@ class Pager:
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_toc_pages()) + ']'
         pos_y = self.page_max_y - 1
-        pos_x = self.page_max_x - len(page_number) - 2
+        pos_x = self.page_max_x - len(page_number) - self.static_padding
         self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
     def print_toc_header(self):
         toc_title = '[Table of Contents]'
-        self.toc_page.addstr(0, 2, toc_title, self.info_colors)
+        self.toc_page.addstr(
+            0,
+            self.static_padding,
+            self.shorten_title(toc_title),
+            self.info_colors
+        )
 
     def print_page_content(self, current_page):
         is_open = False
@@ -451,11 +471,10 @@ class Pager:
                 and self.get_page_by_index(quickmarks.get_index(mark)) \
                 == current_page:
                 mark_tag = '[' + str(mark) + ']'
-
         current_page += 1
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
         pos_y = self.page_max_y - 1
-        pos_x = self.page_max_x - len(mark_tag) - 2
+        pos_x = self.page_max_x - len(mark_tag) - self.static_padding
         self.page.addstr(pos_y, pos_x, mark_tag, self.info_colors)
         self.page.addstr(pos_y, pos_x - len(page_number), page_number, self.info_colors)
 
@@ -463,9 +482,12 @@ class Pager:
         chapter_title = self.book.get_chapter_title(self.chapter)
         chapter_id = self.book.get_id(self.chapter)
         page_title = '[' +  str(chapter_id) + '][' + chapter_title + ']'
-        if len(page_title) >= self.page_columns - 4:
-            page_title = page_title[:self.page_columns - 4] + '...]'
-        self.page.addstr(0, 2, page_title, self.info_colors)
+        self.page.addstr(
+            0,
+            self.static_padding,
+            self.shorten_title(page_title),
+            self.info_colors
+        )
 
     # :::: SPAWNERS :::::::::::::::: #
 
@@ -530,11 +552,11 @@ class Quickmarks:
         return self.quickmarks.keys()
 
     def get_chapter(self, mark):
-        if self.quickmarks[str(mark)]['chapter']:
+        if self.quickmarks[str(mark)]['chapter'] is not None:
             return self.quickmarks[str(mark)]['chapter']
 
     def get_index(self, mark):
-        if self.quickmarks[str(mark)]['index']:
+        if self.quickmarks[str(mark)]['index'] is not None:
             return self.quickmarks[str(mark)]['index']
 
     def is_set(self, mark):

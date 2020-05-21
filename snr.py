@@ -71,7 +71,8 @@ def main(argv):
     config = ConfigReader()
     dark_mode = config.get_dark_mode()
     highlight = config.get_highlight()
-    padding = config.get_horizontal_padding()
+    h_padding = config.get_horizontal_padding()
+    v_padding = config.get_vertical_padding()
     number_of_chapters = book.get_number_of_chapters()
 
     # :::: VARS :::::::::::::::::::: #
@@ -94,7 +95,7 @@ def main(argv):
         quickmarks = Quickmarks()
 
     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-        padding, padding)
+        v_padding, h_padding)
     current_page = page.get_page_by_index(page_index)
 
     while escape == False:
@@ -108,7 +109,7 @@ def main(argv):
 
         if init_chapter_update:
             page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                padding, padding)
+                v_padding, h_padding)
             init_chapter_update = False
 
         page.print_page(current_page, quickmarks)
@@ -127,7 +128,7 @@ def main(argv):
             if current_page == 0 and current_chapter != 0:
                 current_chapter -= 1
                 page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                    padding, padding)
+                    v_padding, h_padding)
                 current_page = page.get_number_of_pages() - 1
             elif current_page == 0 and current_chapter == 0:
                 current_page = 0
@@ -163,14 +164,16 @@ def main(argv):
             init_chapter_update = True
 
         if x in PADDING_UP:
-            if padding < 6:
-                padding += 1
+            if v_padding < 6 and h_padding < 12:
+                v_padding += 1
+                h_padding += 1
                 init_screen_update = True
                 init_chapter_update = True
 
         if x in PADDING_DOWN:
-            if padding > 1:
-                padding -= 1
+            if v_padding > 1 and h_padding > 1:
+                v_padding -= 1
+                h_padding -= 1
                 init_screen_update = True
                 init_chapter_update = True
 
@@ -178,7 +181,7 @@ def main(argv):
             if quickmarks.is_set(chr(x)):
                 current_chapter = quickmarks.get_chapter(chr(x))
                 page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                    padding, padding)
+                    v_padding, h_padding)
                 current_page = page.get_page_by_index(quickmarks.get_index(chr(x)))
 
         if x in QUICKMARK:
