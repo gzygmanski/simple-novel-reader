@@ -176,10 +176,10 @@ def main(argv):
 
         if x in QUICKMARK_SLOT:
             if quickmarks.is_set(chr(x)):
-                current_chapter = quickmarks.get_quickmark_chapter(chr(x))
-                current_page = page.get_page_by_index(quickmarks.get_quickmark_index(chr(x)))
-                init_screen_update = True
-                init_chapter_update = True
+                current_chapter = quickmarks.get_chapter(chr(x))
+                page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                    padding, padding)
+                current_page = page.get_page_by_index(quickmarks.get_index(chr(x)))
 
         if x in QUICKMARK:
             page.print_page(current_page, quickmarks, True)

@@ -447,8 +447,8 @@ class Pager:
         for mark in quickmarks.get_slots():
             if quickmark_change:
                 mark_tag = '[+]'
-            elif quickmarks.get_quickmark_chapter(mark) == self.chapter \
-                and self.get_page_by_index(quickmarks.get_quickmark_index(mark)) \
+            elif quickmarks.get_chapter(mark) == self.chapter \
+                and self.get_page_by_index(quickmarks.get_index(mark)) \
                 == current_page:
                 mark_tag = '[' + str(mark) + ']'
 
@@ -516,8 +516,8 @@ class Quickmarks:
 
     def set_quickmark(self, mark, chapter, index):
         for slot in self.get_slots():
-            if self.get_quickmark_chapter(slot) == chapter \
-                and self.get_quickmark_index(slot) == index:
+            if self.get_chapter(slot) == chapter \
+                and self.get_index(slot) == index:
                     self.quickmarks[str(slot)]['chapter'] = None
                     self.quickmarks[str(slot)]['index'] = None
         self.quickmarks[str(mark)]['chapter'] = chapter
@@ -529,11 +529,11 @@ class Quickmarks:
     def get_slots(self):
         return self.quickmarks.keys()
 
-    def get_quickmark_chapter(self, mark):
+    def get_chapter(self, mark):
         if self.quickmarks[str(mark)]['chapter']:
             return self.quickmarks[str(mark)]['chapter']
 
-    def get_quickmark_index(self, mark):
+    def get_index(self, mark):
         if self.quickmarks[str(mark)]['index']:
             return self.quickmarks[str(mark)]['index']
 

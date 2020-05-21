@@ -78,7 +78,7 @@ class StateReader(Config):
         self.state['default']['title'] = title
         self.state['default']['chapter'] = chapter
         self.state['default']['index'] = index
-        self.state['default']['quicmarks'] = quickmarks
+        self.state['default']['quickmarks'] = quickmarks
         self.state[new_key] = {
             'path': path,
             'title': title,
