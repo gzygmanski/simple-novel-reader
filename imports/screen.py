@@ -163,8 +163,6 @@ class Pager:
                 'INCREASE PAGE PADDING': '>',
                 'DECREASE PAGE PADDING': '<',
                 'TABLE OF CONTENTS': 't, Tab',
-                'SAVE QUICKMARK': 'm, then [1-9]',
-                'OPEN QUICKMARK': '[1-9]',
                 'ESCAPE': 'Esc, BackSpace',
                 'QUIT': 'q'
             },
@@ -173,6 +171,11 @@ class Pager:
                 'MOVE DOWN': 'k, p',
                 'SELECT': 'o, Enter',
                 'ESCAPE': 't, Tab, Esc'
+            },
+            'QUICKMARKS NAVIGATION': {
+                'SAVE QUICKMARK': 'm, then [1-9]',
+                'OPEN QUICKMARK': '[1-9]',
+                'CLEAR QUICKMARK': 'c, then [1-9] or a'
             }
         }
         self.help_pages = []

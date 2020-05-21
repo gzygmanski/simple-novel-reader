@@ -34,6 +34,8 @@ SELECT = [curses.KEY_ENTER, ord('o'), 13]
 HELP = [ord('?')]
 QUICKMARK = [ord('m')]
 QUICKMARK_SLOT = [ord(str(x)) for x in range(1, 10)]
+QUICKMARK_CLEAR = [ord('c')]
+QUICKMARK_ALL = [ord('a')]
 ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
 QUIT = [ord('q')]
 
@@ -183,6 +185,19 @@ def main(argv):
                 page = Pager(screen, book, current_chapter, dark_mode, highlight, \
                     v_padding, h_padding)
                 current_page = page.get_page_by_index(quickmarks.get_index(chr(x)))
+
+        if x in QUICKMARK_CLEAR:
+            y = screen.getch()
+
+            if y in QUICKMARK_SLOT:
+                quickmarks.set_quickmark(
+                    chr(y),
+                    None,
+                    None
+                )
+
+            if y in QUICKMARK_ALL:
+                quickmarks = Quickmarks()
 
         if x in QUICKMARK:
             page.print_page(current_page, quickmarks, True)
