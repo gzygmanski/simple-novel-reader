@@ -124,7 +124,7 @@ class Pager:
         )
 
     def _set_selector(self):
-        self.pointer = '>'
+        self.pointer = '->'
         self.pointer_margin = len(self.pointer)
         self.page_id_margin = 7 + self.pointer_margin
 
@@ -366,7 +366,7 @@ class Pager:
                 )
                 for line in chapter['name']:
                     self.toc_page.addstr(pos_y,
-                        self.v_padding + self.page_id_margin,
+                        self.v_padding + len(chapter_index) + self.pointer_margin + 1,
                         line,
                         self.select_colors
                     )
@@ -382,7 +382,7 @@ class Pager:
                 )
                 for line in chapter['name']:
                     self.toc_page.addstr(pos_y,
-                        self.v_padding + self.page_id_margin,
+                        self.v_padding + len(chapter_index) + self.pointer_margin + 1,
                         line,
                         self.normal_colors
                     )
