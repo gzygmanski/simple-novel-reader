@@ -8,9 +8,9 @@
 # gzygmanski@hotmail.com:::::::: #
 
 import os, sys, curses
-from imports.reader import ConfigReader, StateReader, FileReader
-from imports.parser import BookContent
-from imports.screen import Screen, Pager, Quickmarks
+from reader import ConfigReader, StateReader, FileReader
+from parser import BookContent
+from screen import Screen, Pager, Quickmarks
 
 # :::: APP INFO :::::::::::::::: #
 
