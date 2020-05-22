@@ -8,9 +8,9 @@
 # gzygmanski@hotmail.com:::::::: #
 
 import os, sys, curses
-from reader import ConfigReader, StateReader, FileReader
-from parser import BookContent
-from screen import Screen, Pager, Quickmarks
+from snr.reader import ConfigReader, StateReader, FileReader
+from snr.parser import BookContent
+from snr.screen import Screen, Pager, Quickmarks
 
 # :::: APP INFO :::::::::::::::: #
 
@@ -39,13 +39,13 @@ QUICKMARK_ALL = [ord('a')]
 ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
 QUIT = [ord('q')]
 
-def main(argv):
+def main():
 
     # :::: BOOK INIT ::::::::::::::: #
 
     state = StateReader()
     try:
-        fileinput = argv[1]
+        fileinput = sys.argv[1]
     except IndexError:
         fileinput = state.get_path()
         default = True
@@ -324,4 +324,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
