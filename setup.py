@@ -27,7 +27,7 @@ setup(
     install_requires=['beautifulsoup4', 'lxml'],
     entry_points={
             'console_scripts': [
-            'snr=snr:main',
+            'snr=snr.__main__:main',
         ],
     },
 )
