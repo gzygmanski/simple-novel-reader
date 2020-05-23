@@ -23,6 +23,7 @@ class ConfigReader(Config):
     def __init__(self, config_file=None):
         Config.__init__(self)
         self.general_section = 'DEFAULT'
+        self.colors_section = 'COLORS'
         self._set_config_file(config_file)
         self._set_config()
 
@@ -41,6 +42,18 @@ class ConfigReader(Config):
                 'horizontal_padding': '2',
                 'vertical_padding': '2'
             }
+            self.config[self.colors_section] = {
+                'background_light': '15',
+                'foreground_light': '0',
+                'primary_light': '9',
+                'secondary_light': '2',
+                'tertiary_light': '11',
+                'background_dark': '0',
+                'foreground_dark': '15',
+                'primary_dark': '12',
+                'secondary_dark': '11',
+                'tertiary_dark': '2'
+            }
             with open(self.config_file, 'w') as f:
                 self.config.write(f)
 
@@ -55,6 +68,9 @@ class ConfigReader(Config):
 
     def get_vertical_padding(self):
         return int(self.config[self.general_section]['vertical_padding'])
+
+    def get_colors(self):
+        return self.config[self.colors_section]
 
 class StateReader(Config):
     def __init__(self):
