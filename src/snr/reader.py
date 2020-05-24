@@ -1,8 +1,7 @@
 #!/bin/python3
 
-import os, tempfile, shutil, zipfile, configparser, json, tempfile
+import os, tempfile, shutil, zipfile, configparser, json, appdirs
 from distutils.util import strtobool
-from gi.repository import GLib
 from pathlib import Path
 
 class Config:
@@ -11,7 +10,7 @@ class Config:
         self._set_config_dir()
 
     def _set_config_dir(self):
-        self.config_dir = os.path.join(GLib.get_user_config_dir(), 'snr/')
+        self.config_dir = appdirs.user_config_dir('snr')
         if not os.path.exists(self.config_dir):
             try:
                 os.mkdir(self.config_dir, self.access_rights)
@@ -29,7 +28,7 @@ class ConfigReader(Config):
 
     def _set_config_file(self, config_file):
         if not config_file:
-            self.config_file = os.path.join(self.config_dir + 'config.ini')
+            self.config_file = os.path.join(self.config_dir, 'config.ini')
 
     def _set_config(self):
         self.config = configparser.ConfigParser()
@@ -79,7 +78,7 @@ class StateReader(Config):
         self._set_state()
 
     def _set_state_file(self):
-        self.state_file = os.path.join(self.config_dir + 'state.json')
+        self.state_file = os.path.join(self.config_dir, 'state.json')
 
     def _set_state(self):
         if os.path.isfile(self.state_file):
