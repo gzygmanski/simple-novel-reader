@@ -317,6 +317,7 @@ class Pager:
             for line in page:
                 if index == line[0]:
                     return current_page
+        return 0
 
     def get_current_page_index(self, current_page):
         if len(self.pages) != 1:

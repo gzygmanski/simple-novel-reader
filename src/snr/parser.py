@@ -9,7 +9,8 @@ class BookContent:
         self.toc_file = toc_file
         self.content_file = content_file
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-        self.paragraph_tags = ['p']
+        self.paragraph_tags = ['p', 'div', 'span']
+        self.style_tags = ['span', 'i', 'b', 'em', 'strong']
         self._set_toc_soup()
         self._set_content_soup()
         self._set_toc_list()
@@ -26,7 +27,7 @@ class BookContent:
 
     def _set_toc_list(self):
         self.toc_list = []
-        for index, nav_item in enumerate(self.toc_soup.find_all(True)):
+        for index, nav_item in enumerate(self.toc_soup.navMap.find_all(True)):
             if nav_item.name == 'navPoint':
                 if nav_item.has_attr('playOrder'):
                     toc_id = int(nav_item['playOrder'])
@@ -93,7 +94,7 @@ class BookContent:
                 if new_file != current_file:
                     soup = self.make_soup(document, 'html.parser')
                     current_file = new_file
-                for tag in soup.find_all():
+                for tag in soup.body.find_all():
                     if tag.name in self.heading_tags:
                         if tag.text == current_heading:
                             has_content = True
@@ -105,13 +106,17 @@ class BookContent:
                         else:
                             has_content = False
                     elif not self.has_inner_id():
-                        if tag.name in self.paragraph_tags:
-                            if tag.text != '' and tag.text != '\xa0':
-                                item['text'].append(tag.text)
+                        if tag.name in self.paragraph_tags \
+                            or tag.name in self.style_tags:
+                            if tag.parent.name in self.paragraph_tags \
+                                and tag.name not in self.style_tags:
+                                if tag.text != '' and tag.text != '\xa0':
+                                    item['text'].append(tag.text)
                     else:
-                        if tag.name in self.paragraph_tags and has_content:
-                            if tag.text != '' and tag.text != '\xa0':
-                                item['text'].append(tag.text)
+                        if tag.name in self.paragraph_tags \
+                            and tag.parent.name not in self.paragraph_tags \
+                            and has_content:
+                            item['text'].append(tag.text)
 
     def get_toc_list(self):
         return self.toc_list
