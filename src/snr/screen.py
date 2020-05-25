@@ -249,6 +249,7 @@ class Pager:
                 'END OF CHAPTER': 'G, $',
                 'DARK MODE': 'r',
                 'HIGHLIGHT': 'v',
+                'DOUBLE PAGE': 'd',
                 'INCREASE PAGE PADDING': '>',
                 'DECREASE PAGE PADDING': '<',
                 'TABLE OF CONTENTS': 't, Tab',

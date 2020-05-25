@@ -297,7 +297,7 @@ def main():
 
                 if y in PAGE_DOWN:
                     current_help_page -= 1
-                    if current_help_page <= 0:
+                    if current_help_page < 0:
                         current_help_page = page.get_number_of_help_pages() - 1
 
                 if y in HELP or y in ESCAPE:
