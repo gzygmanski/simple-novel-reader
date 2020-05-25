@@ -109,7 +109,13 @@ class BookContent:
                     if item['inner_id'] is None or has_content:
                         if tag.name in self.paragraph_tags:
                             if tag.text != '' and tag.text != '\xa0':
-                                item['text'].append(tag.text)
+                                item['text'].append(tag.text.lstrip())
+                        if tag.name in self.style_tags and \
+                            tag.parent.name not in self.paragraph_tags:
+                            if tag.text != '' and tag.text != '\xa0':
+                                item['text'].append(
+                                    tag.text.lstrip()
+                                )
 
     def get_toc_list(self):
         return self.toc_list
