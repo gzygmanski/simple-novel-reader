@@ -266,7 +266,7 @@ def main():
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                        padding, padding)
+                        v_padding, h_padding)
 
         if x in HELP:
             escape_help = False
@@ -305,7 +305,7 @@ def main():
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                        padding, padding)
+                        v_padding, h_padding)
         if x in QUIT:
             escape = True
             curses.endwin()
