@@ -205,7 +205,10 @@ class Pager:
         page = []
         lines = 0
         for key in toc.keys():
-            chapter = wrap(toc[key], self.page_max_x - self.toc_id_margin)
+            chapter = wrap(
+                toc[key],
+                self.page_max_x - self.toc_id_margin - self.static_padding
+            )
             if lines + len(chapter) <= self.page_lines:
                 page.append({
                     'id': key,
