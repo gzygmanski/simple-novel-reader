@@ -646,8 +646,8 @@ class Pager:
                 pass
 
     def print_page_footer(self, current_page, quickmarks, quickmark_change):
-        mark_tag = ''
         if not self.double_page:
+            mark_tag = ''
             for mark in quickmarks.get_slots():
                 if quickmark_change:
                     mark_tag = '[+]'
@@ -658,10 +658,11 @@ class Pager:
             current_page += 1
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
-            pos_x = self.page_max_x - len(mark_tag) - self.static_padding
-            self.page.addstr(pos_y, pos_x, mark_tag, self.info_colors)
+            pos_x = self.page_max_x - self.static_padding
+            self.page.addstr(pos_y, self.static_padding, mark_tag, self.info_colors)
             self.page.addstr(pos_y, pos_x - len(page_number), page_number, self.info_colors)
         else:
+            mark_tag = ''
             for mark in quickmarks.get_slots():
                 if quickmark_change:
                     mark_tag = '[+]'
@@ -672,17 +673,32 @@ class Pager:
             current_page += 1
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
-            pos_x = self.page_max_x - self.static_padding - len(page_number)
+            pos_x = self.page_max_x - self.static_padding - len(mark_tag)
             self.page_left.addstr(
                 pos_y,
-                self.static_padding + len(page_number),
+                pos_x,
                 mark_tag,
                 self.info_colors
             )
             self.page_left.addstr(pos_y, self.static_padding, page_number, self.info_colors)
             if current_page + 1 <= self.get_number_of_pages():
+                mark_tag = ''
+                for mark in quickmarks.get_slots():
+                    if quickmark_change:
+                        mark_tag = '[+]'
+                    elif quickmarks.get_chapter(mark) == self.chapter \
+                        and self.get_page_by_index(quickmarks.get_index(mark)) \
+                        == current_page:
+                        mark_tag = '[' + str(mark) + ']'
                 current_page += 1
                 page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
+                pos_x = self.page_max_x - self.static_padding - len(page_number)
+                self.page_right.addstr(
+                    pos_y,
+                    self.static_padding,
+                    mark_tag,
+                    self.info_colors
+                )
                 self.page_right.addstr(pos_y, pos_x, page_number, self.info_colors)
 
     def print_page_header(self):

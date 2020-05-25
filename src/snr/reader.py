@@ -38,6 +38,7 @@ class ConfigReader(Config):
             self.config[self.general_section] = {
                 'dark_mode': 'on',
                 'highlight': 'on',
+                'double_page': 'off',
                 'horizontal_padding': '2',
                 'vertical_padding': '2'
             }
@@ -61,6 +62,9 @@ class ConfigReader(Config):
 
     def get_highlight(self):
         return bool(strtobool(self.config[self.general_section]['highlight']))
+
+    def get_double_page(self):
+        return bool(strtobool(self.config[self.general_section]['double_page']))
 
     def get_horizontal_padding(self):
         return int(self.config[self.general_section]['horizontal_padding'])
