@@ -10,7 +10,7 @@ class BookContent:
         self.content_file = content_file
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         self.paragraph_tags = ['p']
-        self.style_tags = ['span', 'i', 'b', 'em', 'strong']
+        self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a']
         self._set_toc_soup()
         self._set_content_soup()
         self._set_toc_list()
@@ -110,8 +110,9 @@ class BookContent:
                         if tag.name in self.paragraph_tags:
                             if tag.text != '' and tag.text != '\xa0':
                                 item['text'].append(tag.text.lstrip())
-                        if tag.name in self.style_tags and \
-                            tag.parent.name not in self.paragraph_tags:
+                        if tag.name in self.style_tags \
+                            and (tag.parent.name not in self.paragraph_tags \
+                            and tag.parent.name not in self.style_tags):
                             if tag.text != '' and tag.text != '\xa0':
                                 item['text'].append(
                                     tag.text.lstrip()
