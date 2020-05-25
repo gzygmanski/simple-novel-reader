@@ -30,17 +30,17 @@ class Screen:
             )
             curses.init_pair(
                 2,
-                int(colors['primary_light']),
+                int(colors['info_light']),
                 int(colors['background_light'])
             )
             curses.init_pair(
                 3,
-                int(colors['secondary_light']),
+                int(colors['speech_light']),
                 int(colors['background_light'])
             )
             curses.init_pair(
                 4,
-                int(colors['tertiary_light']),
+                int(colors['select_light']),
                 int(colors['background_light'])
             )
             curses.init_pair(
@@ -50,17 +50,17 @@ class Screen:
             )
             curses.init_pair(
                 6,
-                int(colors['primary_dark']),
+                int(colors['info_dark']),
                 int(colors['background_dark'])
             )
             curses.init_pair(
                 7,
-                int(colors['secondary_dark']),
+                int(colors['speech_dark']),
                 int(colors['background_dark'])
             )
             curses.init_pair(
                 8,
-                int(colors['tertiary_dark']),
+                int(colors['select_dark']),
                 int(colors['background_dark'])
             )
         except:

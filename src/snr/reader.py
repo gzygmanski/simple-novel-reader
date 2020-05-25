@@ -44,14 +44,14 @@ class ConfigReader(Config):
             self.config[self.colors_section] = {
                 'background_light': '15',
                 'foreground_light': '0',
-                'primary_light': '9',
-                'secondary_light': '2',
-                'tertiary_light': '11',
+                'info_light': '9',
+                'speech_light': '2',
+                'select_light': '11',
                 'background_dark': '0',
                 'foreground_dark': '15',
-                'primary_dark': '12',
-                'secondary_dark': '11',
-                'tertiary_dark': '2'
+                'info_dark': '12',
+                'speech_dark': '11',
+                'select_dark': '2'
             }
             with open(self.config_file, 'w') as f:
                 self.config.write(f)
