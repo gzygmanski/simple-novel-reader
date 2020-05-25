@@ -72,6 +72,7 @@ def main():
 
     config = ConfigReader()
     dark_mode = config.get_dark_mode()
+    double_page = True
     highlight = config.get_highlight()
     h_padding = config.get_horizontal_padding()
     v_padding = config.get_vertical_padding()
@@ -97,7 +98,7 @@ def main():
         quickmarks = Quickmarks()
 
     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-        v_padding, h_padding)
+        double_page, v_padding, h_padding)
     current_page = page.get_page_by_index(page_index)
 
     while escape == False:
@@ -111,7 +112,7 @@ def main():
 
         if init_chapter_update:
             page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                v_padding, h_padding)
+                double_page, v_padding, h_padding)
             init_chapter_update = False
 
         page.print_page(current_page, quickmarks)
@@ -130,7 +131,7 @@ def main():
             if current_page == 0 and current_chapter != 0:
                 current_chapter -= 1
                 page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                    v_padding, h_padding)
+                    double_page, v_padding, h_padding)
                 current_page = page.get_number_of_pages() - 1
             elif current_page == 0 and current_chapter == 0:
                 current_page = 0
@@ -183,7 +184,7 @@ def main():
             if quickmarks.is_set(chr(x)):
                 current_chapter = quickmarks.get_chapter(chr(x))
                 page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                    v_padding, h_padding)
+                    double_page, v_padding, h_padding)
                 current_page = page.get_page_by_index(quickmarks.get_index(chr(x)))
 
         if x in QUICKMARK_CLEAR:
@@ -266,7 +267,7 @@ def main():
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                        v_padding, h_padding)
+                        double_page, v_padding, h_padding)
 
         if x in HELP:
             escape_help = False
@@ -305,7 +306,7 @@ def main():
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     page = Pager(screen, book, current_chapter, dark_mode, highlight, \
-                        v_padding, h_padding)
+                        double_page, v_padding, h_padding)
         if x in QUIT:
             escape = True
             curses.endwin()
