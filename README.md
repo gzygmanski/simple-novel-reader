@@ -19,7 +19,7 @@ To run program: `snr \path\to\epub\file`. On the first run you need to specify a
 
 ## Todo:
 * Features:
-  + configurable colors from config.ini,
+  + [done] configurable colors from config.ini,
   + bookmarks,
   + dual page view,
   + speed reading view (the same as in koreader perception expander).

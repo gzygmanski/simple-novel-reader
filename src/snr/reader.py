@@ -1,8 +1,7 @@
 #!/bin/python3
 
-import os, tempfile, shutil, zipfile, configparser, json, tempfile
+import os, tempfile, shutil, zipfile, configparser, json, appdirs
 from distutils.util import strtobool
-from gi.repository import GLib
 from pathlib import Path
 
 class Config:
@@ -11,7 +10,7 @@ class Config:
         self._set_config_dir()
 
     def _set_config_dir(self):
-        self.config_dir = os.path.join(GLib.get_user_config_dir(), 'snr/')
+        self.config_dir = appdirs.user_config_dir('snr')
         if not os.path.exists(self.config_dir):
             try:
                 os.mkdir(self.config_dir, self.access_rights)
@@ -23,12 +22,13 @@ class ConfigReader(Config):
     def __init__(self, config_file=None):
         Config.__init__(self)
         self.general_section = 'DEFAULT'
+        self.colors_section = 'COLORS'
         self._set_config_file(config_file)
         self._set_config()
 
     def _set_config_file(self, config_file):
         if not config_file:
-            self.config_file = os.path.join(self.config_dir + 'config.ini')
+            self.config_file = os.path.join(self.config_dir, 'config.ini')
 
     def _set_config(self):
         self.config = configparser.ConfigParser()
@@ -40,6 +40,18 @@ class ConfigReader(Config):
                 'highlight': 'on',
                 'horizontal_padding': '2',
                 'vertical_padding': '2'
+            }
+            self.config[self.colors_section] = {
+                'background_light': '15',
+                'foreground_light': '0',
+                'info_light': '9',
+                'speech_light': '2',
+                'select_light': '11',
+                'background_dark': '0',
+                'foreground_dark': '15',
+                'info_dark': '12',
+                'speech_dark': '11',
+                'select_dark': '2'
             }
             with open(self.config_file, 'w') as f:
                 self.config.write(f)
@@ -56,6 +68,9 @@ class ConfigReader(Config):
     def get_vertical_padding(self):
         return int(self.config[self.general_section]['vertical_padding'])
 
+    def get_colors(self):
+        return self.config[self.colors_section]
+
 class StateReader(Config):
     def __init__(self):
         Config.__init__(self)
@@ -63,7 +78,7 @@ class StateReader(Config):
         self._set_state()
 
     def _set_state_file(self):
-        self.state_file = os.path.join(self.config_dir + 'state.json')
+        self.state_file = os.path.join(self.config_dir, 'state.json')
 
     def _set_state(self):
         if os.path.isfile(self.state_file):
