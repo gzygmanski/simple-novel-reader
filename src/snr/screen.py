@@ -173,11 +173,11 @@ class Pager:
 
     def _set_page_pos_x_left(self):
         if self.double_page:
-            self.page_pos_x_left = self.page_pos_x - self.page_columns - 1
+            self.page_pos_x_left = self.page_pos_x - self.page_max_x
 
     def _set_page_pos_x_right(self):
         if self.double_page:
-            self.page_pos_x_right = self.page_pos_x + 1
+            self.page_pos_x_right = self.page_pos_x
 
     def _set_page(self):
         if not self.double_page:
@@ -431,7 +431,7 @@ class Pager:
 
     def print_help_content(self, current_page):
         for y, line_of_text in enumerate(self.help_pages[current_page]):
-            self.page.addstr(
+            self.help_page.addstr(
                 y + self.static_padding,
                 self.static_padding,
                 line_of_text,
@@ -440,7 +440,7 @@ class Pager:
 
     def print_help_header(self, current_page):
         help_title = '[HELP][' + self.help_sections[current_page - 1] + ']'
-        self.toc_page.addstr(
+        self.help_page.addstr(
             0,
             self.static_padding,
             self.shorten_title(help_title),
@@ -452,7 +452,7 @@ class Pager:
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_help_pages()) + ']'
         pos_y = self.page_max_y - 1
         pos_x = self.page_max_x - len(page_number) - self.static_padding
-        self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
+        self.help_page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
 
     def print_toc_content(self, current_page, pointer_pos):
@@ -504,7 +504,7 @@ class Pager:
         page_number = '[' + str(current_page) + '/' + str(self.get_number_of_toc_pages()) + ']'
         pos_y = self.page_max_y - 1
         pos_x = self.page_max_x - len(page_number) - self.static_padding
-        self.page.addstr(pos_y, pos_x, page_number, self.info_colors)
+        self.toc_page.addstr(pos_y, pos_x, page_number, self.info_colors)
 
     def print_toc_header(self):
         toc_title = '[Table of Contents]'
@@ -598,43 +598,44 @@ class Pager:
                                 is_speech = False
                                 is_info = False
             try:
-                for y, line in enumerate(self.pages[current_page + 1]):
+                current_page += 1
+                for y, line in enumerate(self.pages[current_page]):
                         for x, character in enumerate(line[1]):
                             if not is_open:
                                 if [y, x] \
                                     in self.speech_map[current_page]['opening_coordinates'] \
                                     and self.highlight:
-                                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
                                         character, self.speech_colors)
                                     is_open = True
                                     is_speech = True
                                 if [y, x] \
                                     in self.info_map[current_page]['opening_coordinates'] \
                                     and self.highlight:
-                                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
                                         character, self.info_colors)
                                     is_open = True
                                     is_info = True
                                 if not is_info and not is_speech:
-                                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
                                         character, curses.A_NORMAL)
                             else:
                                 if is_info and not is_speech:
-                                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
                                         character, self.info_colors)
                                     if [y, x] \
                                         in self.info_map[current_page]['closing_coordinates']:
                                         is_open = False
                                         is_info = False
                                 elif is_speech and not is_info:
-                                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
                                         character, self.speech_colors)
                                     if [y, x] \
                                         in self.speech_map[current_page]['closing_coordinates']:
                                         is_open = False
                                         is_speech = False
                                 else:
-                                    self.page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
                                         character, self.info_colors)
                                     if [y, x] \
                                         in self.info_map[current_page]['closing_coordinates']:
@@ -643,38 +644,74 @@ class Pager:
                                         is_info = False
             except IndexError:
                 pass
+
     def print_page_footer(self, current_page, quickmarks, quickmark_change):
         mark_tag = ''
-        for mark in quickmarks.get_slots():
-            if quickmark_change:
-                mark_tag = '[+]'
-            elif quickmarks.get_chapter(mark) == self.chapter \
-                and self.get_page_by_index(quickmarks.get_index(mark)) \
-                == current_page:
-                mark_tag = '[' + str(mark) + ']'
-        current_page += 1
-        page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
-        pos_y = self.page_max_y - 1
-        pos_x = self.page_max_x - len(mark_tag) - self.static_padding
-        self.page.addstr(pos_y, pos_x, mark_tag, self.info_colors)
-        self.page.addstr(pos_y, pos_x - len(page_number), page_number, self.info_colors)
+        if not self.double_page:
+            for mark in quickmarks.get_slots():
+                if quickmark_change:
+                    mark_tag = '[+]'
+                elif quickmarks.get_chapter(mark) == self.chapter \
+                    and self.get_page_by_index(quickmarks.get_index(mark)) \
+                    == current_page:
+                    mark_tag = '[' + str(mark) + ']'
+            current_page += 1
+            page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
+            pos_y = self.page_max_y - 1
+            pos_x = self.page_max_x - len(mark_tag) - self.static_padding
+            self.page.addstr(pos_y, pos_x, mark_tag, self.info_colors)
+            self.page.addstr(pos_y, pos_x - len(page_number), page_number, self.info_colors)
+        else:
+            for mark in quickmarks.get_slots():
+                if quickmark_change:
+                    mark_tag = '[+]'
+                elif quickmarks.get_chapter(mark) == self.chapter \
+                    and self.get_page_by_index(quickmarks.get_index(mark)) \
+                    == current_page:
+                    mark_tag = '[' + str(mark) + ']'
+            current_page += 1
+            page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
+            pos_y = self.page_max_y - 1
+            pos_x = self.page_max_x - self.static_padding - len(page_number)
+            self.page_left.addstr(
+                pos_y,
+                self.static_padding + len(page_number),
+                mark_tag,
+                self.info_colors
+            )
+            self.page_left.addstr(pos_y, self.static_padding, page_number, self.info_colors)
+            if current_page + 1 <= self.get_number_of_pages():
+                current_page += 1
+                page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
+                self.page_right.addstr(pos_y, pos_x, page_number, self.info_colors)
 
     def print_page_header(self):
         chapter_title = self.book.get_chapter_title(self.chapter)
         chapter_id = self.book.get_id(self.chapter)
         page_title = '[' +  str(chapter_id) + '][' + chapter_title + ']'
-        self.page.addstr(
-            0,
-            self.static_padding,
-            self.shorten_title(page_title),
-            self.info_colors
-        )
+        if not self.double_page:
+            self.page.addstr(
+                0,
+                self.static_padding,
+                self.shorten_title(page_title),
+                self.info_colors
+            )
+        else:
+            self.page_left.addstr(
+                0,
+                self.static_padding,
+                self.shorten_title(page_title),
+                self.info_colors
+            )
 
     # :::: SPAWNERS :::::::::::::::: #
 
     def print_help_page(self, current_page):
         self.help_page.erase()
-        self.page.clear()
+        if not self.double_page:
+            self.page.clear()
+        else:
+            self.page_right.clear()
         self.help_page.bkgd(' ', self.info_colors)
         self.help_page.box()
         self.print_help_header(current_page)
@@ -683,17 +720,34 @@ class Pager:
         self.help_page.refresh()
 
     def print_page(self, current_page, quickmarks, quickmark_change=False):
-        self.page.erase()
-        self.page.bkgd(' ', self.normal_colors)
-        self.page.box()
-        self.print_page_header()
-        self.print_page_content(current_page)
-        self.print_page_footer(current_page, quickmarks, quickmark_change)
-        self.page.refresh()
+        if not self.double_page:
+            self.page.erase()
+            self.page.bkgd(' ', self.normal_colors)
+            self.page.box()
+            self.print_page_header()
+            self.print_page_content(current_page)
+            self.print_page_footer(current_page, quickmarks, quickmark_change)
+            self.page.refresh()
+        else:
+            self.page_left.erase()
+            self.page_right.erase()
+            self.page_left.bkgd(' ', self.normal_colors)
+            self.page_right.bkgd(' ', self.normal_colors)
+            self.page_left.box()
+            self.page_right.box()
+            self.print_page_header()
+            self.print_page_content(current_page)
+            self.print_page_footer(current_page, quickmarks, quickmark_change)
+            self.page_left.refresh()
+            self.page_right.refresh()
+
 
     def print_toc_page(self, current_page, pointer_pos):
         self.toc_page.erase()
-        self.page.clear()
+        if not self.double_page:
+            self.page.clear()
+        else:
+            self.page_right.clear()
         self.toc_page.bkgd(' ', self.info_colors)
         self.toc_page.box()
         self.print_toc_header()
