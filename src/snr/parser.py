@@ -108,12 +108,12 @@ class BookContent:
                         has_content = False
                     if item['inner_id'] is None or has_content:
                         if tag.name in self.paragraph_tags:
-                            if tag.text != '' and tag.text != '\xa0':
+                            if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
                                 item['text'].append(tag.text.lstrip())
                         if tag.name in self.style_tags \
                             and (tag.parent.name not in self.paragraph_tags \
                             and tag.parent.name not in self.style_tags):
-                            if tag.text != '' and tag.text != '\xa0':
+                            if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
                                 item['text'].append(
                                     tag.text.lstrip()
                                 )
