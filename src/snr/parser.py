@@ -9,12 +9,12 @@ class BookContent:
         self.toc_file = toc_file
         self.content_file = content_file
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-        self.paragraph_tags = ['p', 'div', 'span']
+        self.paragraph_tags = ['p']
         self.style_tags = ['span', 'i', 'b', 'em', 'strong']
         self._set_toc_soup()
         self._set_content_soup()
         self._set_toc_list()
-        self._set_content_list()
+        self._set_content_dict()
         self._set_order_list()
         self._set_content()
         self._set_paragraphs()
@@ -27,12 +27,9 @@ class BookContent:
 
     def _set_toc_list(self):
         self.toc_list = []
-        for index, nav_item in enumerate(self.toc_soup.navMap.find_all(True)):
+        for index, nav_item in enumerate(self.toc_soup.navMap.find_all(recursive=False)):
             if nav_item.name == 'navPoint':
-                if nav_item.has_attr('playOrder'):
-                    toc_id = int(nav_item['playOrder'])
-                else:
-                    toc_id = index + 1
+                toc_id = index + 1
                 toc_name = nav_item.select('navLabel > text')[0].string
                 toc_content = nav_item.content['src'].split('#')
                 toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
@@ -49,13 +46,13 @@ class BookContent:
                 }
                 self.toc_list.append(toc_dict)
 
-    def _set_content_list(self):
-        self.content_list = {}
+    def _set_content_dict(self):
+        self.content_dict = {}
         for item in self.content_soup.find_all('item'):
             if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
                 content_id = item['id']
                 content_src = self.path + '/' + urllib.parse.unquote(item['href'])
-                self.content_list[content_id] = content_src
+                self.content_dict[content_id] = content_src
 
     def _set_order_list(self):
         self.order_list = []
@@ -67,12 +64,12 @@ class BookContent:
         paths_continue = False
         for index in range(len(self.toc_list)):
             for idref in self.order_list:
-                if self.toc_list[index]['src'][0] == self.content_list[idref]:
+                if self.toc_list[index]['src'][0] == self.content_dict[idref]:
                     paths_continue = True
                 if paths_continue:
                     if index != len(self.toc_list) - 1 and \
-                        self.toc_list[index + 1]['src'][0] != self.content_list[idref]:
-                        self.toc_list[index]['src'].append(self.content_list[idref])
+                        self.toc_list[index + 1]['src'][0] != self.content_dict[idref]:
+                        self.toc_list[index]['src'].append(self.content_dict[idref])
                     else:
                         paths_continue = False
                         break
@@ -94,29 +91,25 @@ class BookContent:
                 if new_file != current_file:
                     soup = self.make_soup(document, 'html.parser')
                     current_file = new_file
+                if soup.body.find_all('p') == []:
+                    if 'div' not in self.paragraph_tags:
+                        self.paragraph_tags.append('div')
+                else:
+                    if 'div' in self.paragraph_tags:
+                        self.paragraph_tags.remove('div')
                 for tag in soup.body.find_all():
-                    if tag.name in self.heading_tags:
-                        if tag.text == current_heading:
-                            has_content = True
-                        else:
-                            has_content = False
-                    elif tag.has_attr('id'):
-                        if tag['id'] == current_id:
-                            has_content = True
-                        else:
-                            has_content = False
-                    elif not self.has_inner_id():
-                        if tag.name in self.paragraph_tags \
-                            or tag.name in self.style_tags:
-                            if tag.parent.name in self.paragraph_tags \
-                                and tag.name not in self.style_tags:
-                                if tag.text != '' and tag.text != '\xa0':
-                                    item['text'].append(tag.text)
-                    else:
-                        if tag.name in self.paragraph_tags \
-                            and tag.parent.name not in self.paragraph_tags \
-                            and has_content:
-                            item['text'].append(tag.text)
+                    try:
+                        if tag.name in self.heading_tags or tag.has_attr('id'):
+                            if tag.text == current_heading or tag['id'] == current_id:
+                                has_content = True
+                            else:
+                                has_content = False
+                    except KeyError:
+                        has_content = False
+                    if item['inner_id'] is None or has_content:
+                        if tag.name in self.paragraph_tags:
+                            if tag.text != '' and tag.text != '\xa0':
+                                item['text'].append(tag.text)
 
     def get_toc_list(self):
         return self.toc_list
@@ -144,12 +137,6 @@ class BookContent:
 
     def has_text(self, chapter):
         return False if len(self.toc_list[chapter]['text']) == 0 else True
-
-    def has_inner_id(self):
-        for item in self.toc_list:
-            if item['inner_id'] is not None:
-                return True
-        return False
 
     def make_soup(self, path, parser):
         with open(path) as f:
