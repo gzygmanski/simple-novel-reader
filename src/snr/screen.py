@@ -114,12 +114,16 @@ class Pager:
         self.dark_mode = dark_mode
         self.highlight = highlight
         self.double_page = double_page
-        self.v_padding = v_padding
-        self.h_padding = h_padding * 2
-        self.static_padding = 2
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
         self._set_page_max_y()
         self._set_page_max_x()
+        self.static_padding = 2
+        self._set_v_padding_max()
+        self._set_v_padding_min()
+        self._set_h_padding_max()
+        self._set_h_padding_min()
+        self.v_padding = self._set_padding(v_padding, self.v_padding_max, self.v_padding_min)
+        self.h_padding = self._set_padding(h_padding, self.h_padding_max, self.h_padding_min)
         self._set_double_page()
         self._set_page_pos_y()
         self._set_page_pos_x()
@@ -151,6 +155,26 @@ class Pager:
             self.page_max_x = self.screen_max_x - 2
         else:
             self.page_max_x = max_x
+
+    def _set_v_padding_max(self):
+        self.v_padding_max = int(self.page_max_x * 10 / 100)
+
+    def _set_v_padding_min(self):
+        self.v_padding_min = self.static_padding
+
+    def _set_h_padding_max(self):
+        self.h_padding_max = int(self.page_max_x * 10 / 100) * 2
+
+    def _set_h_padding_min(self):
+        self.h_padding_min = self.static_padding
+
+    def _set_padding(self, padding, padding_max, padding_min):
+        if padding > padding_max:
+            return padding_max
+        elif padding < padding_min:
+            return padding_min
+        else:
+            return padding
 
     def _set_double_page(self):
         if self.double_page and self.page_max_x * 2 + 1 > self.screen_max_x - 2:
@@ -250,8 +274,10 @@ class Pager:
                 'DARK MODE': 'r',
                 'HIGHLIGHT': 'v',
                 'DOUBLE PAGE': 'd',
-                'INCREASE PAGE PADDING': '>',
-                'DECREASE PAGE PADDING': '<',
+                'INCREASE VERTICAL PADDING': '>',
+                'DECREASE VERTICAL PADDING': '<',
+                'INCREASE HORIZONTAL PADDING': '.',
+                'DECREASE HORIZONTAL PADDING': ',',
                 'TABLE OF CONTENTS': 't, Tab',
                 'ESCAPE': 'Esc, BackSpace',
                 'QUIT': 'q'
@@ -425,6 +451,30 @@ class Pager:
             return title[:self.page_max_x - self.static_padding * 2 - 4] + '...]'
         else:
             return title
+
+    def increase_v_padding(self, padding):
+        if padding < self.v_padding_max:
+            padding += 1
+        return padding
+
+    def increase_h_padding(self, padding):
+        if padding + 1 < self.h_padding_max:
+            padding += 2
+        # elif padding > self.h_padding_max:
+        #     padding += 1
+        return padding
+
+    def decrease_v_padding(self, padding):
+        if padding > self.v_padding_min:
+            padding -= 1
+        return padding
+
+    def decrease_h_padding(self, padding):
+        if padding - 1 > self.h_padding_min:
+            padding -= 2
+        # elif padding > self.h_padding_min:
+        #     padding -= 1
+        return padding
 
     # :::: PRINTERS :::::::::::::::: #
 
