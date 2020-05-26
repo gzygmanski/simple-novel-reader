@@ -127,7 +127,7 @@ def main():
                     current_page += 1
                 else:
                     current_page += 2
-                if current_page >= page.get_number_of_pages() - 1:
+                if current_page >= page.get_number_of_pages():
                     current_chapter += 1
                     current_page = 0
                     init_chapter_update = True
