@@ -97,11 +97,11 @@ def main():
     elif state.exists(book_title):
         current_chapter = state.get_chapter(book_title)
         page_index = state.get_index(book_title)
-        quickmarks = Srceen.Quickmarks(state.get_quickmarks(book_title))
+        quickmarks = Screen.Quickmarks(state.get_quickmarks(book_title))
     else:
         current_chapter = 0
         page_index = 0
-        quickmarks = Quickmarks()
+        quickmarks = Screen.Quickmarks()
 
     page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
         double_page, v_padding, h_padding)
