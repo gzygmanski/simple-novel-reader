@@ -7,10 +7,12 @@
 # https://github.com/gzygmanski: #
 # gzygmanski@hotmail.com:::::::: #
 
-import os, sys, curses
-from snr.reader import ConfigReader, StateReader, FileReader
-from snr.parser import BookContent
-from snr.screen import Screen, Pager, Quickmarks
+import os
+import sys
+import curses
+import snr.reader as Reader
+import snr.parser as Parser
+import snr.screen as Screen
 
 def main():
 
@@ -47,7 +49,7 @@ def main():
 
     # :::: BOOK INIT ::::::::::::::: #
 
-    state = StateReader()
+    state = Reader.StateReader()
     try:
         fileinput = os.path.abspath(sys.argv[1])
     except IndexError:
@@ -56,16 +58,16 @@ def main():
     else:
         default = False
 
-    reader = FileReader(fileinput)
+    reader = Reader.FileReader(fileinput)
     toc_file = reader.get_toc_file()
     content_file = reader.get_content_file()
     path = reader.get_directory_path(toc_file)
-    book = BookContent(path, toc_file, content_file)
+    book = Parser.BookContent(path, toc_file, content_file)
     book_title = book.get_document_title()
 
     # :::: CURSES CONFIG ::::::::::: #
 
-    init_screen = Screen(book_title, VERSION, APP)
+    init_screen = Screen.Screen(book_title, VERSION, APP)
     screen = init_screen.get_screen()
     curses.noecho()
     curses.cbreak()
@@ -74,7 +76,7 @@ def main():
 
     # :::: READER CONFIG ::::::::::: #
 
-    config = ConfigReader()
+    config = Reader.ConfigReader()
     dark_mode = config.get_dark_mode()
     highlight = config.get_highlight()
     double_page = config.get_double_page()
@@ -91,17 +93,17 @@ def main():
     if default:
         current_chapter = state.get_chapter()
         page_index = state.get_index()
-        quickmarks = Quickmarks(state.get_quickmarks())
+        quickmarks = Screen.Quickmarks(state.get_quickmarks())
     elif state.exists(book_title):
         current_chapter = state.get_chapter(book_title)
         page_index = state.get_index(book_title)
-        quickmarks = Quickmarks(state.get_quickmarks(book_title))
+        quickmarks = Srceen.Quickmarks(state.get_quickmarks(book_title))
     else:
         current_chapter = 0
         page_index = 0
         quickmarks = Quickmarks()
 
-    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+    page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
         double_page, v_padding, h_padding)
     current_page = page.get_page_by_index(page_index)
 
@@ -115,7 +117,7 @@ def main():
             init_screen_update = False
 
         if init_chapter_update:
-            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+            page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                 double_page, v_padding, h_padding)
             init_chapter_update = False
 
@@ -140,7 +142,7 @@ def main():
                 current_page -= 2
             if current_page < 0 and current_chapter != 0:
                 current_chapter -= 1
-                page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                     double_page, v_padding, h_padding)
                 if not double_page or page.get_number_of_pages() < 2:
                     current_page = page.get_number_of_pages() - 1
@@ -185,7 +187,7 @@ def main():
         if x in V_PADDING_UP:
             v_padding = page.increase_v_padding(v_padding)
             index = page.get_current_page_index(current_page)
-            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+            page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                 double_page, v_padding, h_padding)
             current_page = page.get_page_by_index(index)
             del index
@@ -194,7 +196,7 @@ def main():
         if x in H_PADDING_UP:
             h_padding = page.increase_h_padding(h_padding)
             index = page.get_current_page_index(current_page)
-            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+            page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                 double_page, v_padding, h_padding)
             current_page = page.get_page_by_index(index)
             del index
@@ -203,7 +205,7 @@ def main():
         if x in V_PADDING_DOWN:
             v_padding = page.decrease_v_padding(v_padding)
             index = page.get_current_page_index(current_page)
-            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+            page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                 double_page, v_padding, h_padding)
             current_page = page.get_page_by_index(index)
             del index
@@ -212,7 +214,7 @@ def main():
         if x in H_PADDING_DOWN:
             h_padding = page.decrease_h_padding(h_padding)
             index = page.get_current_page_index(current_page)
-            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+            page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                 double_page, v_padding, h_padding)
             current_page = page.get_page_by_index(index)
             del index
@@ -221,7 +223,7 @@ def main():
         if x in QUICKMARK_SLOT:
             if quickmarks.is_set(chr(x)):
                 current_chapter = quickmarks.get_chapter(chr(x))
-                page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                     double_page, v_padding, h_padding)
                 current_page = page.get_page_by_index(quickmarks.get_index(chr(x)))
 
@@ -236,7 +238,7 @@ def main():
                 )
 
             if y in QUICKMARK_ALL:
-                quickmarks = Quickmarks()
+                quickmarks = Screen.Quickmarks()
 
         if x in QUICKMARK:
             page.print_page(current_page, quickmarks, True)
@@ -311,7 +313,7 @@ def main():
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     index = page.get_current_page_index(current_page)
-                    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                    page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                         double_page, v_padding, h_padding)
                     current_page = page.get_page_by_index(index)
                     current_toc_page = 0
@@ -360,7 +362,7 @@ def main():
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     index = page.get_current_page_index(current_page)
-                    page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+                    page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                         double_page, v_padding, h_padding)
                     current_page = page.get_page_by_index(index)
                     current_help_page = 0
@@ -386,7 +388,7 @@ def main():
             screen = init_screen.get_screen()
             init_screen_update = True
             index = page.get_current_page_index(current_page)
-            page = Pager(screen, book, current_chapter, dark_mode, highlight, \
+            page = Screen.Pager(screen, book, current_chapter, dark_mode, highlight, \
                 double_page, v_padding, h_padding)
             current_page = page.get_page_by_index(index)
             del index
