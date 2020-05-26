@@ -49,7 +49,7 @@ def main():
 
     state = StateReader()
     try:
-        fileinput = sys.argv[1]
+        fileinput = os.path.abspath(sys.argv[1])
     except IndexError:
         fileinput = state.get_path()
         default = True
