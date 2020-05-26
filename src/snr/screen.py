@@ -319,21 +319,19 @@ class Pager:
             content = self.book.get_chapter_text(self.chapter)
             for index, paragraph in enumerate(content):
                 lines_of_text = wrap(paragraph, self.page_columns)
-                if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
-                    for text in lines_of_text:
-                        on_page.append([index, text])
-                    if len(on_page) != 0:
-                        on_page.append([index, ''])
-                else:
-                    for _ in range(len(on_page), self.page_lines):
-                        on_page.append([index, lines_of_text[0]])
-                        lines_of_text.pop(0)
-                    self.pages.append(on_page)
-                    on_page = []
-                    for text in lines_of_text:
-                        on_page.append([index, text])
-                    if len(on_page) != 0:
-                        on_page.append([index, ''])
+                while len(lines_of_text) > 0:
+                    if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
+                        for text in lines_of_text:
+                            on_page.append([index, text])
+                        if len(on_page) != 0:
+                            on_page.append([index, ''])
+                        lines_of_text = []
+                    else:
+                        for _ in range(len(on_page), self.page_lines):
+                            on_page.append([index, lines_of_text[0]])
+                            lines_of_text.pop(0)
+                        self.pages.append(on_page)
+                        on_page = []
             if len(on_page) != 0:
                 self.pages.append(on_page)
         else:
@@ -538,7 +536,7 @@ class Pager:
                             is_info = True
                         if not is_info and not is_speech:
                             self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, curses.A_NORMAL)
+                                character, self.normal_colors)
                     else:
                         if is_info and not is_speech:
                             self.page.addstr(y + self.v_padding, x + self.h_padding, \
@@ -577,7 +575,7 @@ class Pager:
                             is_info = True
                         if not is_info and not is_speech:
                             self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, curses.A_NORMAL)
+                                character, self.normal_colors)
                     else:
                         if is_info and not is_speech:
                             self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
@@ -619,7 +617,7 @@ class Pager:
                                     is_info = True
                                 if not is_info and not is_speech:
                                     self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, curses.A_NORMAL)
+                                        character, self.normal_colors)
                             else:
                                 if is_info and not is_speech:
                                     self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
