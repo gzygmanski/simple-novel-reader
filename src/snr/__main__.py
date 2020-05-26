@@ -36,12 +36,13 @@ def main():
     H_PADDING_DOWN = [ord(',')]
     TOC = [ord('t'), 9]
     SELECT = [curses.KEY_ENTER, ord('o'), 13]
-    HELP = [ord('?')]
+    HELP = [ord('?'), curses.KEY_F1]
     QUICKMARK = [ord('m')]
     QUICKMARK_SLOT = [ord(str(x)) for x in range(1, 10)]
     QUICKMARK_CLEAR = [ord('c')]
     QUICKMARK_ALL = [ord('a')]
     ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
+    REFRESH = [ord('R'), curses.KEY_F5]
     QUIT = [ord('q')]
 
     # :::: BOOK INIT ::::::::::::::: #
@@ -288,6 +289,11 @@ def main():
                 if y in TOC or y in ESCAPE:
                     escape_toc = True
 
+                if y in REFRESH:
+                    init_screen_update = True
+                    init_chapter_update = True
+                    escape_toc = True
+
                 if y in QUIT:
                     escape = True
                     escape_toc = True
@@ -332,6 +338,11 @@ def main():
                 if y in HELP or y in ESCAPE:
                     escape_help = True
 
+                if y in REFRESH:
+                    init_screen_update = True
+                    init_chapter_update = True
+                    escape_help = True
+
                 if y in QUIT:
                     escape = True
                     escape_help = True
@@ -354,6 +365,10 @@ def main():
                     current_page = page.get_page_by_index(index)
                     current_help_page = 0
                     del index
+
+        if x in REFRESH:
+            init_screen_update = True
+            init_chapter_update = True
 
         if x in QUIT:
             escape = True

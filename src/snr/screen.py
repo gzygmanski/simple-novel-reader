@@ -279,7 +279,9 @@ class Pager:
                 'INCREASE HORIZONTAL PADDING': '.',
                 'DECREASE HORIZONTAL PADDING': ',',
                 'TABLE OF CONTENTS': 't, Tab',
+                'HELP PAGE': '?, F1',
                 'ESCAPE': 'Esc, BackSpace',
+                'REFRESH': 'R, F5',
                 'QUIT': 'q'
             },
             'TABLE OF CONTENTS NAVIGATION': {
@@ -779,9 +781,12 @@ class Pager:
             self.page_right.clear()
         self.help_page.bkgd(' ', self.info_colors)
         self.help_page.box()
-        self.print_help_header(current_page)
-        self.print_help_content(current_page)
-        self.print_help_footer(current_page)
+        try:
+            self.print_help_header(current_page)
+            self.print_help_content(current_page)
+            self.print_help_footer(current_page)
+        except:
+            pass
         self.help_page.refresh()
 
     def print_page(self, current_page, quickmarks, quickmark_change=False):
@@ -789,9 +794,12 @@ class Pager:
             self.page.erase()
             self.page.bkgd(' ', self.normal_colors)
             self.page.box()
-            self.print_page_header()
-            self.print_page_content(current_page)
-            self.print_page_footer(current_page, quickmarks, quickmark_change)
+            try:
+                self.print_page_header()
+                self.print_page_content(current_page)
+                self.print_page_footer(current_page, quickmarks, quickmark_change)
+            except:
+                pass
             self.page.refresh()
         else:
             self.page_left.erase()
@@ -800,9 +808,12 @@ class Pager:
             self.page_right.bkgd(' ', self.normal_colors)
             self.page_left.box()
             self.page_right.box()
-            self.print_page_header()
-            self.print_page_content(current_page)
-            self.print_page_footer(current_page, quickmarks, quickmark_change)
+            try:
+                self.print_page_header()
+                self.print_page_content(current_page)
+                self.print_page_footer(current_page, quickmarks, quickmark_change)
+            except:
+                pass
             self.page_left.refresh()
             self.page_right.refresh()
 
@@ -815,9 +826,12 @@ class Pager:
             self.page_right.clear()
         self.toc_page.bkgd(' ', self.info_colors)
         self.toc_page.box()
-        self.print_toc_header()
-        self.print_toc_content(current_page, pointer_pos)
-        self.print_toc_footer(current_page)
+        try:
+            self.print_toc_header()
+            self.print_toc_content(current_page, pointer_pos)
+            self.print_toc_footer(current_page)
+        except:
+            pass
         self.toc_page.refresh()
 
 class Quickmarks:
