@@ -608,8 +608,8 @@ class Pager:
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
             pos_x = self.page_max_x - self.static_padding
-            self.page.addstr(pos_y, self.static_padding, mark_tag, self.info_colors)
-            self.page.addstr(pos_y, pos_x - len(page_number), page_number, self.info_colors)
+            self.page.addstr(pos_y, pos_x - len(mark_tag), mark_tag, self.info_colors)
+            self.page.addstr(pos_y, pos_x - len(page_number) - len(mark_tag), page_number, self.info_colors)
         else:
             mark_tag = ''
             for mark in quickmarks.get_slots():
