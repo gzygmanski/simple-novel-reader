@@ -18,7 +18,7 @@ def main():
 
     # :::: APP INFO :::::::::::::::: #
 
-    VERSION = 'v0.5.73-alpha'
+    VERSION = 'v0.6.91-alpha'
     APP = 'Simple Novel Reader'
 
     # :::: KEYBINDINGS ::::::::::::: #
