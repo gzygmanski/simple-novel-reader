@@ -48,6 +48,7 @@ class BookContent:
                 self.toc_list.append(toc_dict)
 
     def _set_reference_toc(self):
+        self.reference_toc_src = None
         for item in self.content_soup.guide.find_all('reference'):
             if item['type'] == 'toc':
                 reference = item['href'].split('#')
@@ -55,6 +56,7 @@ class BookContent:
 
     def _set_content_dict(self):
         self.content_dict = {}
+        self.content_toc_id = None
         for item in self.content_soup.find_all('item'):
             if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
                 content_id = item['id']
