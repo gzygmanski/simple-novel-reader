@@ -36,4 +36,3 @@ On the first run you need to specify a file, next time the file will be opened a
 
 ## Screenshots:
 ![screen](https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/master/screen.png "screen")
-![screen2](https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/master/screen2.png "screen2")
