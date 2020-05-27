@@ -14,6 +14,7 @@ class BookContent:
         self._set_toc_soup()
         self._set_content_soup()
         self._set_toc_list()
+        self._set_reference_toc()
         self._set_content_dict()
         self._set_order_list()
         self._set_content()
@@ -46,19 +47,29 @@ class BookContent:
                 }
                 self.toc_list.append(toc_dict)
 
+    def _set_reference_toc(self):
+        for item in self.content_soup.guide.find_all('reference'):
+            if item['type'] == 'toc':
+                reference = item['href'].split('#')
+                self.reference_toc_src = self.path + '/' + urllib.parse.unquote(reference[0])
+
     def _set_content_dict(self):
         self.content_dict = {}
         for item in self.content_soup.find_all('item'):
             if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
                 content_id = item['id']
                 content_src = self.path + '/' + urllib.parse.unquote(item['href'])
-                self.content_dict[content_id] = content_src
+                if content_src != self.reference_toc_src:
+                    self.content_dict[content_id] = content_src
+                else:
+                    self.content_toc_id = content_id
 
     def _set_order_list(self):
         self.order_list = []
         for item in self.content_soup.find_all('itemref'):
             if item.has_attr('idref'):
-                self.order_list.append(item['idref'])
+                if item['idref'] != self.content_toc_id:
+                    self.order_list.append(item['idref'])
 
     def _set_content(self):
         paths_continue = False
