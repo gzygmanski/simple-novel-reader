@@ -150,15 +150,17 @@ class Pager:
     def _set_colors(self):
         curses.start_color()
         if self.dark_mode:
-            self.normal_colors = curses.color_pair(5)
-            self.info_colors = curses.color_pair(6)
-            self.speech_colors = curses.color_pair(7)
-            self.select_colors = curses.color_pair(8)
+            self.normal_colors = curses.color_pair(6)
+            self.info_colors = curses.color_pair(7)
+            self.speech_colors = curses.color_pair(8)
+            self.select_colors = curses.color_pair(9)
+            self.perception_colors = curses.color_pair(10)
         else:
             self.normal_colors = curses.color_pair(1)
             self.info_colors = curses.color_pair(2)
             self.speech_colors = curses.color_pair(3)
             self.select_colors = curses.color_pair(4)
+            self.perception_colors = curses.color_pair(5)
 
     def _set_help(self):
         navigation = {
@@ -718,6 +720,7 @@ class Pager:
                 self.print_page_footer(current_page, quickmarks, quickmark_change)
             except:
                 pass
+            self.print_perception_expander()
             self.page.refresh()
         else:
             self.page_left.erase()
@@ -751,3 +754,20 @@ class Pager:
         except:
             pass
         self.toc_page.refresh()
+
+    def print_perception_expander(self):
+        line_pos = int(self.page_columns * .15)
+        for y in range(self.page_lines):
+            if not self.double_page:
+                self.page.chgat(
+                    y + self.v_padding,
+                    self.h_padding + line_pos - 1,
+                    1,
+                    self.perception_colors
+                )
+                self.page.chgat(
+                    y + self.v_padding,
+                    self.page_columns + self.h_padding - line_pos,
+                    1,
+                    self.perception_colors
+                )
