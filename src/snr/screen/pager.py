@@ -248,13 +248,13 @@ class Pager:
                 while len(lines_of_text) > 0:
                     if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                         for text in lines_of_text:
-                            on_page.append([index, text])
+                            on_page.append([index, self._justify_line(text)])
                         if len(on_page) != 0:
                             on_page.append([index, ''])
                         lines_of_text = []
                     else:
                         for _ in range(len(on_page), self.page_lines):
-                            on_page.append([index, lines_of_text[0]])
+                            on_page.append([index, self._justify_line(lines_of_text[0])])
                             lines_of_text.pop(0)
                         self.pages.append(on_page)
                         on_page = []
@@ -263,7 +263,7 @@ class Pager:
         else:
             content = self.book.get_chapter_title(self.chapter)
             for line_of_text in wrap(content, self.page_columns):
-                on_page.append([0, line_of_text])
+                on_page.append([0, self._justify_line(line_of_text)])
             on_page.append([1, '* * *'])
             self.pages.append(on_page)
 
@@ -346,7 +346,7 @@ class Pager:
     # :::: OTHER ::::::::::::::::::: #
     # :::::::::::::::::::::::::::::: #
 
-    def shorten_title(self, title):
+    def _shorten_title(self, title):
         if len(title) >= self.page_max_x - self.static_padding * 2:
             return title[:self.page_max_x - self.static_padding * 2 - 4] + '...]'
         else:
@@ -376,6 +376,26 @@ class Pager:
         #     padding -= 1
         return padding
 
+    def _justify_line(self, line):
+        just_line = []
+        words = line.split(" ")
+        words_len = sum(len(word) for word in words)
+        if words_len < int(self.page_columns / 1.8):
+            return line
+        spaces_number = len(words) - 1
+        spaces = [1 for _ in range(spaces_number)]
+        index = 0
+        if spaces:
+            while words_len + spaces_number < self.page_columns:
+                spaces[len(spaces) - index - 1] += 1
+                spaces_number += 1
+                index = (index + 1) % len(spaces)
+        for index, word in enumerate(words):
+            just_line.append(word)
+            if index < len(spaces):
+                just_line.append(' ' * spaces[index])
+        return ''.join(just_line)
+
     # :::: PRINTERS :::::::::::::::: #
 
     def print_help_content(self, current_page):
@@ -392,7 +412,7 @@ class Pager:
         self.help_page.addstr(
             0,
             self.static_padding,
-            self.shorten_title(help_title),
+            self._shorten_title(help_title),
             self.info_colors
         )
 
@@ -460,7 +480,7 @@ class Pager:
         self.toc_page.addstr(
             0,
             self.static_padding,
-            self.shorten_title(toc_title),
+            self._shorten_title(toc_title),
             self.info_colors
         )
 
@@ -658,14 +678,14 @@ class Pager:
             self.page.addstr(
                 0,
                 self.static_padding,
-                self.shorten_title(page_title),
+                self._shorten_title(page_title),
                 self.info_colors
             )
         else:
             self.page_left.addstr(
                 0,
                 self.static_padding,
-                self.shorten_title(page_title),
+                self._shorten_title(page_title),
                 self.info_colors
             )
 
