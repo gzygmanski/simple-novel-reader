@@ -6,26 +6,32 @@ This is an CLI light novel reader written in Python for Linux.
 * lxml
 
 ## Setup/Usage:
+To install:
 ```bash
 pip3 install simple-novel-reader
 ```
-To run program: `snr \path\to\epub\file`. On the first run you need to specify a file, next time the file will be opened as default.
+To run program:
+```bash
+snr \path\to\epub\file
+```
+On the first run you need to specify a file, next time the file will be opened as default.
 
 ## Features:
 * save reading progress and quickmarks of a book upon exit,
 * starting program without argument will open last read book,
 * quickmarks,
-* colored dialogs.
+* colored dialogs,
+* dual page view.
 
 ## Todo:
 * Features:
   + [done] configurable colors from config.ini,
   + bookmarks,
-  + dual page view,
+  + [done] dual page view,
   + speed reading view (the same as in koreader perception expander).
 * Chores:
   + refactor and clean up code,
-  + split main function to multiple files for better readability,
+  + add comments
   + error handling.
 
 ## Screenshots:
