@@ -316,7 +316,7 @@ def main():
                     curses.endwin()
 
                 if y == curses.KEY_RESIZE:
-                    init_screen = Screen(book_title, VERSION, APP)
+                    init_screen = Screen.Screen(book_title, VERSION, APP)
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     index = page.get_current_page_index(current_page)
@@ -365,7 +365,7 @@ def main():
                     )
 
                 if y == curses.KEY_RESIZE:
-                    init_screen = Screen(book_title, VERSION, APP)
+                    init_screen = Screen.Screen(book_title, VERSION, APP)
                     screen = init_screen.get_screen()
                     init_screen.redraw(dark_mode)
                     index = page.get_current_page_index(current_page)
@@ -391,7 +391,7 @@ def main():
             )
 
         if x == curses.KEY_RESIZE:
-            init_screen = Screen(book_title, VERSION, APP)
+            init_screen = Screen.Screen(book_title, VERSION, APP)
             screen = init_screen.get_screen()
             init_screen_update = True
             index = page.get_current_page_index(current_page)
