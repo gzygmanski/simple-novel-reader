@@ -8,6 +8,7 @@ class Screen:
         self.title = title
         self.version = version
         self.app_name = app_name
+        self.padding = 2
         self._set_screen()
         self._set_colors()
 
@@ -81,25 +82,36 @@ class Screen:
     def get_screen(self):
         return self.screen
 
+    def _shorten(self, text, bracer=''):
+        text_end = '...' + bracer
+        if len(text) >= self.max_x - self.padding * 2:
+            return text[:self.max_x - self.padding * 2 - len(text_end)] + text_end
+        else:
+            return text
+
+    def _print_info(self, dark_mode):
+        app_text = self.app_name + ' ' + self.version
+        title_text = '[' + self.title + ']'
+        keys = 'quit:[q] help:[?]'
+        self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary(dark_mode))
+        if self.max_x > len(keys) + len(app_text) + 4:
+            self.screen.addstr(
+                0,
+                self.max_x - len(keys) - self.padding,
+                keys,
+                self._get_primary(dark_mode)
+            )
+        self.screen.addstr(self.max_y - 1,
+            self.padding,
+            self._shorten(title_text, ']'),
+            self._get_primary(dark_mode)
+        )
+
     def redraw(self, dark_mode):
         self.screen.erase()
         self.screen.bkgd(' ', self._get_primary(dark_mode))
         try:
-            self.print_info(dark_mode)
+            self._print_info(dark_mode)
         except:
             pass
         self.screen.refresh()
-
-    def print_info(self, dark_mode):
-        app_text = self.app_name + ' ' + self.version
-        title_text = '[' + self.title + ']'
-        keys = 'quit:[q] help:[?]'
-        self.screen.addstr(0, 2, app_text, self._get_primary(dark_mode))
-        if self.max_x > len(keys) + len(app_text) + 4:
-            self.screen.addstr(
-                0,
-                self.max_x - len(keys) - 2,
-                keys,
-                self._get_primary(dark_mode)
-            )
-        self.screen.addstr(self.max_y - 1, 2, title_text, self._get_primary(dark_mode))

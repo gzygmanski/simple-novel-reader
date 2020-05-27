@@ -202,7 +202,7 @@ class Pager:
             self.help_sections[len(self.help_pages) - 1] = section
             for command in navigation[section].keys():
                 command_text = wrap(command + ': ' + navigation[section][command],
-                    self.page_columns - self.static_padding)
+                    self.page_max_x - self.static_padding)
                 lines += len(command_text)
                 if lines <= self.page_lines:
                     for line_of_text in command_text:
