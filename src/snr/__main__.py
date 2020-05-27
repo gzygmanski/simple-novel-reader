@@ -110,6 +110,13 @@ def main():
     while escape == False:
         if current_chapter == number_of_chapters:
             curses.endwin()
+            state.save(
+                fileinput,
+                book_title,
+                current_chapter - 1,
+                page.get_current_page_index(current_page - 1),
+                quickmarks.get_quickmarks()
+            )
             break
 
         if init_screen_update:
