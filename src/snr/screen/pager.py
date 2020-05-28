@@ -4,18 +4,33 @@ import curses
 from textwrap import wrap
 
 class Pager:
-    def __init__(self, screen, book, chapter, dark_mode=False, highlight=False, \
-        double_page=False, v_padding=2, h_padding=2):
+    def __init__(
+        self,
+        screen,
+        book,
+        chapter,
+        dark_mode=False,
+        speed_mode=False,
+        highlight=False,
+        double_page=False,
+        justify_full=False,
+        v_padding=2,
+        h_padding=2,
+        pe_multiplier=.2
+    ):
         self.screen = screen
         self.book = book
         self.chapter = chapter
         self.dark_mode = dark_mode
+        self.speed_mode = speed_mode
         self.highlight = highlight
         self.double_page = double_page
+        self.justify_full = justify_full
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
         self._set_page_max_y()
         self._set_page_max_x()
         self.static_padding = 2
+        self.pe_multiplier = pe_multiplier
         self._set_v_padding_max()
         self._set_v_padding_min()
         self._set_h_padding_max()
@@ -55,13 +70,13 @@ class Pager:
             self.page_max_x = max_x
 
     def _set_v_padding_max(self):
-        self.v_padding_max = int(self.page_max_x * 10 / 100)
+        self.v_padding_max = int(self.page_max_x * .1)
 
     def _set_v_padding_min(self):
         self.v_padding_min = self.static_padding
 
     def _set_h_padding_max(self):
-        self.h_padding_max = int(self.page_max_x * 10 / 100) * 2
+        self.h_padding_max = int(self.page_max_x * .1) * 2
 
     def _set_h_padding_min(self):
         self.h_padding_min = self.static_padding
@@ -150,15 +165,17 @@ class Pager:
     def _set_colors(self):
         curses.start_color()
         if self.dark_mode:
-            self.normal_colors = curses.color_pair(5)
-            self.info_colors = curses.color_pair(6)
-            self.speech_colors = curses.color_pair(7)
-            self.select_colors = curses.color_pair(8)
+            self.normal_colors = curses.color_pair(6)
+            self.info_colors = curses.color_pair(7)
+            self.speech_colors = curses.color_pair(8)
+            self.select_colors = curses.color_pair(9)
+            self.perception_colors = curses.color_pair(10)
         else:
             self.normal_colors = curses.color_pair(1)
             self.info_colors = curses.color_pair(2)
             self.speech_colors = curses.color_pair(3)
             self.select_colors = curses.color_pair(4)
+            self.perception_colors = curses.color_pair(5)
 
     def _set_help(self):
         navigation = {
@@ -170,12 +187,16 @@ class Pager:
                 'BEGGINING OF CHAPTER': 'g, 0',
                 'END OF CHAPTER': 'G, $',
                 'DARK MODE': 'r',
+                'SPEED READING MODE': 's',
                 'HIGHLIGHT': 'v',
                 'DOUBLE PAGE': 'd',
+                'JUSTIFY TEXT': 'f',
                 'INCREASE VERTICAL PADDING': '>',
                 'DECREASE VERTICAL PADDING': '<',
                 'INCREASE HORIZONTAL PADDING': '.',
                 'DECREASE HORIZONTAL PADDING': ',',
+                'INCREASE PE LINE POSITON': ']',
+                'DECREASE PE LINE POSITON': '[',
                 'TABLE OF CONTENTS': 't, Tab',
                 'HELP PAGE': '?, F1',
                 'ESCAPE': 'Esc, BackSpace',
@@ -195,25 +216,27 @@ class Pager:
             }
         }
         self.help_pages = []
-        self.help_sections = {}
+        self.help_sections = []
         page = []
         lines = 0
         for section in navigation.keys():
-            self.help_sections[len(self.help_pages) - 1] = section
+            self.help_sections.append(section)
             for command in navigation[section].keys():
                 command_text = wrap(command + ': ' + navigation[section][command],
-                    self.page_columns - self.static_padding)
+                    self.page_max_x - self.static_padding * 2)
                 lines += len(command_text)
                 if lines <= self.page_lines:
                     for line_of_text in command_text:
                         page.append(line_of_text)
                 else:
+                    self.help_sections.append(section)
                     self.help_pages.append(page)
                     page = []
                     lines = 0
             if len(page) != 0:
                 self.help_pages.append(page)
                 page = []
+                lines = 0
 
     def _set_toc(self):
         toc = self.book.get_toc()
@@ -248,13 +271,19 @@ class Pager:
                 while len(lines_of_text) > 0:
                     if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                         for text in lines_of_text:
-                            on_page.append([index, text])
+                            if self.justify_full:
+                                on_page.append([index, self._justify_line(text)])
+                            else:
+                                on_page.append([index, text])
                         if len(on_page) != 0:
                             on_page.append([index, ''])
                         lines_of_text = []
                     else:
                         for _ in range(len(on_page), self.page_lines):
-                            on_page.append([index, lines_of_text[0]])
+                            if self.justify_full:
+                                on_page.append([index, self._justify_line(lines_of_text[0])])
+                            else:
+                                on_page.append([index, lines_of_text[0]])
                             lines_of_text.pop(0)
                         self.pages.append(on_page)
                         on_page = []
@@ -263,7 +292,10 @@ class Pager:
         else:
             content = self.book.get_chapter_title(self.chapter)
             for line_of_text in wrap(content, self.page_columns):
-                on_page.append([0, line_of_text])
+                if self.justify_full:
+                    on_page.append([0, self._justify_line(line_of_text)])
+                else:
+                    on_page.append([0, line_of_text])
             on_page.append([1, '* * *'])
             self.pages.append(on_page)
 
@@ -346,7 +378,7 @@ class Pager:
     # :::: OTHER ::::::::::::::::::: #
     # :::::::::::::::::::::::::::::: #
 
-    def shorten_title(self, title):
+    def _shorten_title(self, title):
         if len(title) >= self.page_max_x - self.static_padding * 2:
             return title[:self.page_max_x - self.static_padding * 2 - 4] + '...]'
         else:
@@ -360,8 +392,6 @@ class Pager:
     def increase_h_padding(self, padding):
         if padding + 1 < self.h_padding_max:
             padding += 2
-        # elif padding > self.h_padding_max:
-        #     padding += 1
         return padding
 
     def decrease_v_padding(self, padding):
@@ -372,9 +402,37 @@ class Pager:
     def decrease_h_padding(self, padding):
         if padding - 1 > self.h_padding_min:
             padding -= 2
-        # elif padding > self.h_padding_min:
-        #     padding -= 1
         return padding
+
+    def increase_pe_multiplier(self):
+        if self.pe_multiplier < .4:
+            self.pe_multiplier += .1
+        return self.pe_multiplier
+
+    def decrease_pe_multiplier(self):
+        if self.pe_multiplier >= .2:
+            self.pe_multiplier -= .1
+        return self.pe_multiplier
+
+    def _justify_line(self, line):
+        just_line = []
+        words = line.split(" ")
+        words_len = sum(len(word) for word in words)
+        if words_len < int(self.page_columns / 1.8):
+            return line
+        spaces_number = len(words) - 1
+        spaces = [1 for _ in range(spaces_number)]
+        index = 0
+        if spaces:
+            while words_len + spaces_number < self.page_columns:
+                spaces[len(spaces) - index - 1] += 1
+                spaces_number += 1
+                index = (index + 1) % len(spaces)
+        for index, word in enumerate(words):
+            just_line.append(word)
+            if index < len(spaces):
+                just_line.append(' ' * spaces[index])
+        return ''.join(just_line)
 
     # :::: PRINTERS :::::::::::::::: #
 
@@ -388,11 +446,11 @@ class Pager:
             )
 
     def print_help_header(self, current_page):
-        help_title = '[HELP][' + self.help_sections[current_page - 1] + ']'
+        help_title = '[HELP][' + self.help_sections[current_page] + ']'
         self.help_page.addstr(
             0,
             self.static_padding,
-            self.shorten_title(help_title),
+            self._shorten_title(help_title),
             self.info_colors
         )
 
@@ -460,7 +518,7 @@ class Pager:
         self.toc_page.addstr(
             0,
             self.static_padding,
-            self.shorten_title(toc_title),
+            self._shorten_title(toc_title),
             self.info_colors
         )
 
@@ -634,7 +692,7 @@ class Pager:
                 mark_tag = ''
                 for mark in quickmarks.get_slots():
                     if quickmark_change:
-                        mark_tag = '[+]'
+                        mark_tag = ''
                     elif quickmarks.get_chapter(mark) == self.chapter \
                         and self.get_page_by_index(quickmarks.get_index(mark)) \
                         == current_page:
@@ -658,15 +716,31 @@ class Pager:
             self.page.addstr(
                 0,
                 self.static_padding,
-                self.shorten_title(page_title),
+                self._shorten_title(page_title),
                 self.info_colors
             )
         else:
             self.page_left.addstr(
                 0,
                 self.static_padding,
-                self.shorten_title(page_title),
+                self._shorten_title(page_title),
                 self.info_colors
+            )
+
+    def print_perception_expander(self, page):
+        line_pos = int(self.page_columns * self.pe_multiplier)
+        for y in range(self.page_lines):
+            page.chgat(
+                y + self.v_padding,
+                self.h_padding + line_pos - 1,
+                1,
+                self.perception_colors
+            )
+            page.chgat(
+                y + self.v_padding,
+                self.page_columns + self.h_padding - line_pos,
+                1,
+                self.perception_colors
             )
 
     # :::: SPAWNERS :::::::::::::::: #
@@ -696,6 +770,8 @@ class Pager:
                 self.print_page_header()
                 self.print_page_content(current_page)
                 self.print_page_footer(current_page, quickmarks, quickmark_change)
+                if self.speed_mode:
+                    self.print_perception_expander(self.page)
             except:
                 pass
             self.page.refresh()
@@ -710,6 +786,9 @@ class Pager:
                 self.print_page_header()
                 self.print_page_content(current_page)
                 self.print_page_footer(current_page, quickmarks, quickmark_change)
+                if self.speed_mode:
+                    self.print_perception_expander(self.page_left)
+                    self.print_perception_expander(self.page_right)
             except:
                 pass
             self.page_left.refresh()
@@ -731,3 +810,4 @@ class Pager:
         except:
             pass
         self.toc_page.refresh()
+

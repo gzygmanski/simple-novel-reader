@@ -24,11 +24,14 @@ class ConfigReader(Config):
             self.config.read(self.config_file)
         else:
             self.config[self.general_section] = {
-                'dark_mode': 'on',
-                'highlight': 'on',
+                'dark_mode': 'off',
+                'speed_mode': 'off',
+                'highlight': 'off',
                 'double_page': 'off',
+                'justify_full': 'off',
                 'horizontal_padding': '2',
-                'vertical_padding': '2'
+                'vertical_padding': '2',
+                'pe_multiplier': '0.2'
             }
             self.config[self.colors_section] = {
                 'background_light': '15',
@@ -36,11 +39,13 @@ class ConfigReader(Config):
                 'info_light': '9',
                 'speech_light': '2',
                 'select_light': '11',
+                'speed_mode_line_light': '9',
                 'background_dark': '0',
                 'foreground_dark': '15',
                 'info_dark': '12',
                 'speech_dark': '11',
-                'select_dark': '2'
+                'select_dark': '2',
+                'speed_mode_line_dark': '12'
             }
             with open(self.config_file, 'w') as f:
                 self.config.write(f)
@@ -48,17 +53,26 @@ class ConfigReader(Config):
     def get_dark_mode(self):
         return bool(strtobool(self.config[self.general_section]['dark_mode']))
 
+    def get_speed_mode(self):
+        return bool(strtobool(self.config[self.general_section]['speed_mode']))
+
     def get_highlight(self):
         return bool(strtobool(self.config[self.general_section]['highlight']))
 
     def get_double_page(self):
         return bool(strtobool(self.config[self.general_section]['double_page']))
 
+    def get_justify_full(self):
+        return bool(strtobool(self.config[self.general_section]['justify_full']))
+
     def get_horizontal_padding(self):
         return int(self.config[self.general_section]['horizontal_padding'])
 
     def get_vertical_padding(self):
         return int(self.config[self.general_section]['vertical_padding'])
+
+    def get_pe_multiplier(self):
+        return float(self.config[self.general_section]['pe_multiplier'])
 
     def get_colors(self):
         return self.config[self.colors_section]
