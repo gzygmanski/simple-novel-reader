@@ -24,8 +24,9 @@ class ConfigReader(Config):
             self.config.read(self.config_file)
         else:
             self.config[self.general_section] = {
-                'dark_mode': 'on',
-                'highlight': 'on',
+                'dark_mode': 'off',
+                'speed_mode': 'off',
+                'highlight': 'off',
                 'double_page': 'off',
                 'horizontal_padding': '2',
                 'vertical_padding': '2'
@@ -47,6 +48,9 @@ class ConfigReader(Config):
 
     def get_dark_mode(self):
         return bool(strtobool(self.config[self.general_section]['dark_mode']))
+
+    def get_speed_mode(self):
+        return bool(strtobool(self.config[self.general_section]['speed_mode']))
 
     def get_highlight(self):
         return bool(strtobool(self.config[self.general_section]['highlight']))

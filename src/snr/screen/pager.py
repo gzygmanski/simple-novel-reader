@@ -4,12 +4,23 @@ import curses
 from textwrap import wrap
 
 class Pager:
-    def __init__(self, screen, book, chapter, dark_mode=False, highlight=False, \
-        double_page=False, v_padding=2, h_padding=2):
+    def __init__(
+        self,
+        screen,
+        book,
+        chapter,
+        dark_mode=False,
+        speed_mode=False,
+        highlight=False,
+        double_page=False,
+        v_padding=2,
+        h_padding=2
+    ):
         self.screen = screen
         self.book = book
         self.chapter = chapter
         self.dark_mode = dark_mode
+        self.speed_mode = speed_mode
         self.highlight = highlight
         self.double_page = double_page
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
@@ -691,6 +702,22 @@ class Pager:
                 self.info_colors
             )
 
+    def print_perception_expander(self, page):
+        line_pos = int(self.page_columns * .15)
+        for y in range(self.page_lines):
+            page.chgat(
+                y + self.v_padding,
+                self.h_padding + line_pos - 1,
+                1,
+                self.perception_colors
+            )
+            page.chgat(
+                y + self.v_padding,
+                self.page_columns + self.h_padding - line_pos,
+                1,
+                self.perception_colors
+            )
+
     # :::: SPAWNERS :::::::::::::::: #
 
     def print_help_page(self, current_page):
@@ -718,9 +745,10 @@ class Pager:
                 self.print_page_header()
                 self.print_page_content(current_page)
                 self.print_page_footer(current_page, quickmarks, quickmark_change)
+                if self.speed_mode:
+                    self.print_perception_expander(self.page)
             except:
                 pass
-            self.print_perception_expander()
             self.page.refresh()
         else:
             self.page_left.erase()
@@ -733,6 +761,9 @@ class Pager:
                 self.print_page_header()
                 self.print_page_content(current_page)
                 self.print_page_footer(current_page, quickmarks, quickmark_change)
+                if self.speed_mode:
+                    self.print_perception_expander(self.page_left)
+                    self.print_perception_expander(self.page_right)
             except:
                 pass
             self.page_left.refresh()
@@ -755,19 +786,3 @@ class Pager:
             pass
         self.toc_page.refresh()
 
-    def print_perception_expander(self):
-        line_pos = int(self.page_columns * .15)
-        for y in range(self.page_lines):
-            if not self.double_page:
-                self.page.chgat(
-                    y + self.v_padding,
-                    self.h_padding + line_pos - 1,
-                    1,
-                    self.perception_colors
-                )
-                self.page.chgat(
-                    y + self.v_padding,
-                    self.page_columns + self.h_padding - line_pos,
-                    1,
-                    self.perception_colors
-                )
