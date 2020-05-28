@@ -28,7 +28,7 @@ On the first run you need to specify a file, next time the file will be opened a
   + [done] configurable colors from config.ini,
   + bookmarks,
   + [done] dual page view,
-  + speed reading view (the same as in koreader perception expander).
+  + [done] speed reading view (the same as in koreader perception expander).
 * Chores:
   + refactor and clean up code,
   + add comments
