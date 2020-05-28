@@ -236,6 +236,7 @@ class Pager:
             if len(page) != 0:
                 self.help_pages.append(page)
                 page = []
+                lines = 0
 
     def _set_toc(self):
         toc = self.book.get_toc()
