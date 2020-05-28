@@ -678,7 +678,7 @@ class Pager:
                 mark_tag = ''
                 for mark in quickmarks.get_slots():
                     if quickmark_change:
-                        mark_tag = '[+]'
+                        mark_tag = ''
                     elif quickmarks.get_chapter(mark) == self.chapter \
                         and self.get_page_by_index(quickmarks.get_index(mark)) \
                         == current_page:
