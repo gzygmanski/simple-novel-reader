@@ -11,6 +11,7 @@ class Screen:
         speed_mode,
         highlight,
         double_page,
+        justify_full,
         version='2020',
         app_name='Simple Novel Reader'
     ):
@@ -21,6 +22,7 @@ class Screen:
         self.speed_mode = speed_mode
         self.highlight = highlight
         self.double_page = double_page
+        self.justify_full = justify_full
         self.padding = 2
         self._set_screen()
         self._set_colors()
@@ -104,7 +106,8 @@ class Screen:
             'r': self.dark_mode,
             's': self.speed_mode,
             'v': self.highlight,
-            'd': self.double_page
+            'd': self.double_page,
+            'f': self.justify_full
         }
 
     def _get_primary(self):

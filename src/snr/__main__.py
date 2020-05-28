@@ -33,6 +33,7 @@ def main():
     SPEED_MODE = [ord('s')]
     HIGHLIGHT = [ord('v')]
     DOUBLE_PAGE = [ord('d')]
+    JUSTIFY_FULL = [ord('f')]
     V_PADDING_UP = [ord('>')]
     H_PADDING_UP = [ord('.')]
     V_PADDING_DOWN = [ord('<')]
@@ -75,6 +76,7 @@ def main():
     speed_mode = config.get_speed_mode()
     highlight = config.get_highlight()
     double_page = config.get_double_page()
+    justify_full = config.get_justify_full()
     h_padding = config.get_horizontal_padding()
     v_padding = config.get_vertical_padding()
     pe_line = config.get_pe_multiplier()
@@ -88,6 +90,7 @@ def main():
         speed_mode,
         highlight,
         double_page,
+        justify_full,
         VERSION,
         APP
     )
@@ -117,7 +120,7 @@ def main():
         quickmarks = Screen.Quickmarks()
 
     page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-        double_page, v_padding, h_padding, pe_line)
+        double_page, justify_full, v_padding, h_padding, pe_line)
     current_page = page.get_page_by_index(page_index)
 
     while escape == False:
@@ -139,6 +142,7 @@ def main():
                 speed_mode,
                 highlight,
                 double_page,
+                justify_full,
                 VERSION,
                 APP
             )
@@ -147,7 +151,7 @@ def main():
 
         if init_chapter_update:
             page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, v_padding, h_padding, pe_line)
+                double_page, justify_full, v_padding, h_padding, pe_line)
             init_chapter_update = False
 
         page.print_page(current_page, quickmarks)
@@ -172,7 +176,7 @@ def main():
             if current_page < 0 and current_chapter != 0:
                 current_chapter -= 1
                 page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                    double_page, v_padding, h_padding, pe_line)
+                    double_page, justify_full, v_padding, h_padding, pe_line)
                 if not double_page or page.get_number_of_pages() < 2:
                     current_page = page.get_number_of_pages() - 1
                 else:
@@ -218,11 +222,16 @@ def main():
             init_screen_update = True
             init_chapter_update = True
 
+        if x in JUSTIFY_FULL:
+            justify_full = not justify_full
+            init_screen_update = True
+            init_chapter_update = True
+
         if x in V_PADDING_UP:
             v_padding = page.increase_v_padding(v_padding)
             index = page.get_current_page_index(current_page)
             page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, v_padding, h_padding, pe_line)
+                double_page, justify_full, v_padding, h_padding, pe_line)
             current_page = page.get_page_by_index(index)
             del index
             init_screen_update = True
@@ -231,7 +240,7 @@ def main():
             h_padding = page.increase_h_padding(h_padding)
             index = page.get_current_page_index(current_page)
             page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, v_padding, h_padding, pe_line)
+                double_page, justify_full, v_padding, h_padding, pe_line)
             current_page = page.get_page_by_index(index)
             del index
             init_screen_update = True
@@ -240,7 +249,7 @@ def main():
             v_padding = page.decrease_v_padding(v_padding)
             index = page.get_current_page_index(current_page)
             page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, v_padding, h_padding, pe_line)
+                double_page, justify_full, v_padding, h_padding, pe_line)
             current_page = page.get_page_by_index(index)
             del index
             init_screen_update = True
@@ -249,7 +258,7 @@ def main():
             h_padding = page.decrease_h_padding(h_padding)
             index = page.get_current_page_index(current_page)
             page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, v_padding, h_padding, pe_line)
+                double_page, justify_full, v_padding, h_padding, pe_line)
             current_page = page.get_page_by_index(index)
             del index
             init_screen_update = True
@@ -264,7 +273,7 @@ def main():
             if quickmarks.is_set(chr(x)):
                 current_chapter = quickmarks.get_chapter(chr(x))
                 page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                    double_page, v_padding, h_padding, pe_line)
+                    double_page, justify_full, v_padding, h_padding, pe_line)
                 current_page = page.get_page_by_index(quickmarks.get_index(chr(x)))
 
         if x in QUICKMARK_CLEAR:
@@ -355,6 +364,7 @@ def main():
                         speed_mode,
                         highlight,
                         double_page,
+                        justify_full,
                         VERSION,
                         APP
                     )
@@ -362,7 +372,7 @@ def main():
                     init_screen.redraw()
                     index = page.get_current_page_index(current_page)
                     page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                        double_page, v_padding, h_padding, pe_line)
+                        double_page, justify_full, v_padding, h_padding, pe_line)
                     current_page = page.get_page_by_index(index)
                     current_toc_page = 0
                     del index
@@ -412,6 +422,7 @@ def main():
                         speed_mode,
                         highlight,
                         double_page,
+                        justify_full,
                         VERSION,
                         APP
                     )
@@ -419,7 +430,7 @@ def main():
                     init_screen.redraw()
                     index = page.get_current_page_index(current_page)
                     page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                        double_page, v_padding, h_padding, pe_line)
+                        double_page, justify_full, v_padding, h_padding, pe_line)
                     current_page = page.get_page_by_index(index)
                     current_help_page = 0
                     del index
@@ -446,6 +457,7 @@ def main():
                 speed_mode,
                 highlight,
                 double_page,
+                justify_full,
                 VERSION,
                 APP
             )
@@ -453,7 +465,7 @@ def main():
             init_screen_update = True
             index = page.get_current_page_index(current_page)
             page = Screen.Pager(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, v_padding, h_padding, pe_line)
+                double_page, justify_full, v_padding, h_padding, pe_line)
             current_page = page.get_page_by_index(index)
             del index
 

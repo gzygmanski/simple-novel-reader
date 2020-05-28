@@ -13,6 +13,7 @@ class Pager:
         speed_mode=False,
         highlight=False,
         double_page=False,
+        justify_full=False,
         v_padding=2,
         h_padding=2,
         pe_multiplier=.2
@@ -24,6 +25,7 @@ class Pager:
         self.speed_mode = speed_mode
         self.highlight = highlight
         self.double_page = double_page
+        self.justify_full = justify_full
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
         self._set_page_max_y()
         self._set_page_max_x()
@@ -188,6 +190,7 @@ class Pager:
                 'SPEED READING MODE': 's',
                 'HIGHLIGHT': 'v',
                 'DOUBLE PAGE': 'd',
+                'JUSTIFY TEXT': 'f',
                 'INCREASE VERTICAL PADDING': '>',
                 'DECREASE VERTICAL PADDING': '<',
                 'INCREASE HORIZONTAL PADDING': '.',
@@ -266,13 +269,19 @@ class Pager:
                 while len(lines_of_text) > 0:
                     if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                         for text in lines_of_text:
-                            on_page.append([index, self._justify_line(text)])
+                            if self.justify_full:
+                                on_page.append([index, self._justify_line(text)])
+                            else:
+                                on_page.append([index, text])
                         if len(on_page) != 0:
                             on_page.append([index, ''])
                         lines_of_text = []
                     else:
                         for _ in range(len(on_page), self.page_lines):
-                            on_page.append([index, self._justify_line(lines_of_text[0])])
+                            if self.justify_full:
+                                on_page.append([index, self._justify_line(lines_of_text[0])])
+                            else:
+                                on_page.append([index, lines_of_text[0]])
                             lines_of_text.pop(0)
                         self.pages.append(on_page)
                         on_page = []
@@ -281,7 +290,10 @@ class Pager:
         else:
             content = self.book.get_chapter_title(self.chapter)
             for line_of_text in wrap(content, self.page_columns):
-                on_page.append([0, self._justify_line(line_of_text)])
+                if self.justify_full:
+                    on_page.append([0, self._justify_line(line_of_text)])
+                else:
+                    on_page.append([0, line_of_text])
             on_page.append([1, '* * *'])
             self.pages.append(on_page)
 
