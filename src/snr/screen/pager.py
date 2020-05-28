@@ -216,19 +216,20 @@ class Pager:
             }
         }
         self.help_pages = []
-        self.help_sections = {}
+        self.help_sections = []
         page = []
         lines = 0
         for section in navigation.keys():
-            self.help_sections[len(self.help_pages) - 1] = section
+            self.help_sections.append(section)
             for command in navigation[section].keys():
                 command_text = wrap(command + ': ' + navigation[section][command],
-                    self.page_max_x - self.static_padding)
+                    self.page_max_x - self.static_padding * 2)
                 lines += len(command_text)
                 if lines <= self.page_lines:
                     for line_of_text in command_text:
                         page.append(line_of_text)
                 else:
+                    self.help_sections.append(section)
                     self.help_pages.append(page)
                     page = []
                     lines = 0
@@ -444,7 +445,7 @@ class Pager:
             )
 
     def print_help_header(self, current_page):
-        help_title = '[HELP][' + self.help_sections[current_page - 1] + ']'
+        help_title = '[HELP][' + self.help_sections[current_page] + ']'
         self.help_page.addstr(
             0,
             self.static_padding,
