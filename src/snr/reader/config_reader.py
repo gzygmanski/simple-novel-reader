@@ -37,11 +37,13 @@ class ConfigReader(Config):
                 'info_light': '9',
                 'speech_light': '2',
                 'select_light': '11',
+                'speed_mode_line_light': '9',
                 'background_dark': '0',
                 'foreground_dark': '15',
                 'info_dark': '12',
                 'speech_dark': '11',
-                'select_dark': '2'
+                'select_dark': '2',
+                'speed_mode_line_dark': '12'
             }
             with open(self.config_file, 'w') as f:
                 self.config.write(f)

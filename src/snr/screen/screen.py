@@ -45,8 +45,8 @@ class Screen:
             )
             curses.init_pair(
                 5,
-                int(colors['background_light']),
-                int(colors['foreground_light'])
+                int(colors['foreground_light']),
+                int(colors['speed_mode_line_light'])
             )
             curses.init_pair(
                 6,
@@ -70,8 +70,8 @@ class Screen:
             )
             curses.init_pair(
                 10,
-                int(colors['background_dark']),
-                int(colors['foreground_dark'])
+                int(colors['foreground_dark']),
+                int(colors['speed_mode_line_dark'])
             )
         except:
             curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
