@@ -185,12 +185,15 @@ class Pager:
                 'BEGGINING OF CHAPTER': 'g, 0',
                 'END OF CHAPTER': 'G, $',
                 'DARK MODE': 'r',
+                'SPEED READING MODE': 's',
                 'HIGHLIGHT': 'v',
                 'DOUBLE PAGE': 'd',
                 'INCREASE VERTICAL PADDING': '>',
                 'DECREASE VERTICAL PADDING': '<',
                 'INCREASE HORIZONTAL PADDING': '.',
                 'DECREASE HORIZONTAL PADDING': ',',
+                'INCREASE PE LINE POSITON': ']'
+                'DECREASE PE LINE POSITON': '['
                 'TABLE OF CONTENTS': 't, Tab',
                 'HELP PAGE': '?, F1',
                 'ESCAPE': 'Esc, BackSpace',
