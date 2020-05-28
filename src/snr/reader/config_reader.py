@@ -29,7 +29,8 @@ class ConfigReader(Config):
                 'highlight': 'off',
                 'double_page': 'off',
                 'horizontal_padding': '2',
-                'vertical_padding': '2'
+                'vertical_padding': '2',
+                'pe_multiplier': '0.2'
             }
             self.config[self.colors_section] = {
                 'background_light': '15',
@@ -65,6 +66,9 @@ class ConfigReader(Config):
 
     def get_vertical_padding(self):
         return int(self.config[self.general_section]['vertical_padding'])
+
+    def get_pe_multiplier(self):
+        return float(self.config[self.general_section]['pe_multiplier'])
 
     def get_colors(self):
         return self.config[self.colors_section]

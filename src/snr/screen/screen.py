@@ -4,13 +4,27 @@ import curses
 from snr.reader import ConfigReader
 
 class Screen:
-    def __init__(self, title, version='2020', app_name='Simple Novel Reader'):
+    def __init__(
+        self,
+        title,
+        dark_mode,
+        speed_mode,
+        highlight,
+        double_page,
+        version='2020',
+        app_name='Simple Novel Reader'
+    ):
         self.title = title
         self.version = version
         self.app_name = app_name
+        self.dark_mode = dark_mode
+        self.speed_mode = speed_mode
+        self.highlight = highlight
+        self.double_page = double_page
         self.padding = 2
         self._set_screen()
         self._set_colors()
+        self._set_modes()
 
     def _set_screen(self):
         self.screen = curses.initscr()
@@ -85,11 +99,29 @@ class Screen:
             curses.init_pair(9, curses.COLOR_RED, curses.COLOR_BLACK)
             curses.init_pair(10, curses.COLOR_WHITE, curses.COLOR_RED)
 
-    def _get_primary(self, dark_mode):
-        if dark_mode:
+    def _set_modes(self):
+        self.modes = {
+            'r': self.dark_mode,
+            's': self.speed_mode,
+            'v': self.highlight,
+            'd': self.double_page
+        }
+
+    def _get_primary(self):
+        if self.dark_mode:
             return curses.color_pair(6)
         else:
-            return curses.color_pair(2)
+            return curses.color_pair(1)
+
+    def _get_modes_info(self):
+        modes_info = 'modes:['
+        for mode in self.modes.keys():
+            if self.modes[mode]:
+                modes_info += mode
+            else:
+                modes_info += '-'
+        modes_info += ']'
+        return modes_info
 
     def get_screen(self):
         return self.screen
@@ -101,29 +133,36 @@ class Screen:
         else:
             return text
 
-    def _print_info(self, dark_mode):
+    def _print_info(self):
         app_text = self.app_name + ' ' + self.version
         title_text = '[' + self.title + ']'
-        keys = 'quit:[q] help:[?]'
-        self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary(dark_mode))
+        keys =  self._get_modes_info() + ' quit:[q] help:[?]'
+        self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary())
         if self.max_x > len(keys) + len(app_text) + 4:
             self.screen.addstr(
                 0,
                 self.max_x - len(keys) - self.padding,
                 keys,
-                self._get_primary(dark_mode)
+                self._get_primary()
+            )
+        else:
+            self.screen.addstr(
+                1,
+                self.padding,
+                keys,
+                self._get_primary()
             )
         self.screen.addstr(self.max_y - 1,
             self.padding,
             self._shorten(title_text, ']'),
-            self._get_primary(dark_mode)
+            self._get_primary()
         )
 
-    def redraw(self, dark_mode):
+    def redraw(self):
         self.screen.erase()
-        self.screen.bkgd(' ', self._get_primary(dark_mode))
+        self.screen.bkgd(' ', self._get_primary())
         try:
-            self._print_info(dark_mode)
+            self._print_info()
         except:
             pass
         self.screen.refresh()

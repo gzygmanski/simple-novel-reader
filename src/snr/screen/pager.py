@@ -14,7 +14,8 @@ class Pager:
         highlight=False,
         double_page=False,
         v_padding=2,
-        h_padding=2
+        h_padding=2,
+        pe_multiplier=.2
     ):
         self.screen = screen
         self.book = book
@@ -27,6 +28,7 @@ class Pager:
         self._set_page_max_y()
         self._set_page_max_x()
         self.static_padding = 2
+        self.pe_multiplier = pe_multiplier
         self._set_v_padding_max()
         self._set_v_padding_min()
         self._set_h_padding_max()
@@ -66,13 +68,13 @@ class Pager:
             self.page_max_x = max_x
 
     def _set_v_padding_max(self):
-        self.v_padding_max = int(self.page_max_x * 10 / 100)
+        self.v_padding_max = int(self.page_max_x * .1)
 
     def _set_v_padding_min(self):
         self.v_padding_min = self.static_padding
 
     def _set_h_padding_max(self):
-        self.h_padding_max = int(self.page_max_x * 10 / 100) * 2
+        self.h_padding_max = int(self.page_max_x * .1) * 2
 
     def _set_h_padding_min(self):
         self.h_padding_min = self.static_padding
@@ -373,8 +375,6 @@ class Pager:
     def increase_h_padding(self, padding):
         if padding + 1 < self.h_padding_max:
             padding += 2
-        # elif padding > self.h_padding_max:
-        #     padding += 1
         return padding
 
     def decrease_v_padding(self, padding):
@@ -385,9 +385,17 @@ class Pager:
     def decrease_h_padding(self, padding):
         if padding - 1 > self.h_padding_min:
             padding -= 2
-        # elif padding > self.h_padding_min:
-        #     padding -= 1
         return padding
+
+    def increase_pe_multiplier(self):
+        if self.pe_multiplier < .4:
+            self.pe_multiplier += .1
+        return self.pe_multiplier
+
+    def decrease_pe_multiplier(self):
+        if self.pe_multiplier >= .2:
+            self.pe_multiplier -= .1
+        return self.pe_multiplier
 
     def _justify_line(self, line):
         just_line = []
@@ -703,7 +711,7 @@ class Pager:
             )
 
     def print_perception_expander(self, page):
-        line_pos = int(self.page_columns * .15)
+        line_pos = int(self.page_columns * self.pe_multiplier)
         for y in range(self.page_lines):
             page.chgat(
                 y + self.v_padding,
