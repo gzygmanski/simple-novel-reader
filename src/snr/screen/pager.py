@@ -192,8 +192,8 @@ class Pager:
                 'DECREASE VERTICAL PADDING': '<',
                 'INCREASE HORIZONTAL PADDING': '.',
                 'DECREASE HORIZONTAL PADDING': ',',
-                'INCREASE PE LINE POSITON': ']'
-                'DECREASE PE LINE POSITON': '['
+                'INCREASE PE LINE POSITON': ']',
+                'DECREASE PE LINE POSITON': '[',
                 'TABLE OF CONTENTS': 't, Tab',
                 'HELP PAGE': '?, F1',
                 'ESCAPE': 'Esc, BackSpace',
