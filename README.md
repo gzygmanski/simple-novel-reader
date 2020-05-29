@@ -1,5 +1,6 @@
 # Simple Novel Reader
-This is an CLI light novel reader written in Python for Linux.
+<img src="snr.svg">
+CLI light novel reader written in Python for Linux.
 
 ## Dependencies:
 * BeautifulSoup4
