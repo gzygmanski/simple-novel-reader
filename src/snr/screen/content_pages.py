@@ -120,6 +120,7 @@ class ContentPages(Pages):
 
     def _get_coordinates_map(self, opening_marks, closing_marks, closing_after):
         coordinates_map = {}
+        previous_index = 0
         is_opened = False
         for index, page in enumerate(self.pages):
             coordinates_map[index] = {
@@ -127,6 +128,9 @@ class ContentPages(Pages):
                 'closing_coordinates': []
             }
             for y, line in enumerate(page):
+                if is_opened and line[0] > previous_index:
+                    is_opened = False
+                    coordinates_map[index]['closing_coordinates'].append([y - 2, len(page[y - 2][1]) - 1])
                 if is_opened and y == 0:
                     coordinates_map[index]['opening_coordinates'].append([y, 0])
                 for x, character in enumerate(line[1]):
@@ -148,6 +152,7 @@ class ContentPages(Pages):
                         coordinates_map[index]['closing_coordinates'].append([y, len(line[1]) - 1])
                     else:
                         coordinates_map[index]['closing_coordinates'].append([y, len(line[1])])
+                previous_index = line[0]
         return coordinates_map
 
     def _get_page_content(self, current_page, page):
