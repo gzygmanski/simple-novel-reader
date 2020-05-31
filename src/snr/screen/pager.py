@@ -300,18 +300,21 @@ class Pager:
             self.pages.append(on_page)
 
     def _set_speech_map(self):
-        speech_open = ['\'', '"', '‘', '“']
-        speech_close = ['\'', '"', '’', '”']
-        speech_after = [' ', '.', ',',  ';', ':', '!', '?', '-', '—', speech_close]
-        self.speech_map = self._get_coordinates_map(speech_open, speech_close, \
-            speech_after)
+        self._speech_open = ['\'', '"', '‘', '“']
+        self._speech_close = ['\'', '"', '’', '”']
+        self._speech_after = ['\n', ' ', '.', ',',  ';', ':', '!', '?', '-', '—']
+        self._speech_after.extend(self._speech_close)
+        self.speech_map = self._get_coordinates_map(self._speech_open, self._speech_close, \
+            self._speech_after)
 
     def _set_info_map(self):
-        info_open = ['<', '(', '[', '{']
-        info_close = ['>', ')', ']', '}']
-        info_after = [' ', '.', ',',  ';', ':', '!', '?', '-', '—', info_close]
-        self.info_map = self._get_coordinates_map(info_open, info_close, \
-            info_after)
+        self._info_open = ['<', '(', '[', '{']
+        self._info_close = ['>', ')', ']', '}']
+        self._info_after = ['\n', ' ', '.', ',',  ';', ':', '!', '?', '-', '—']
+        self._info_after.extend(self._info_close)
+        self._info_after.extend(self._speech_close)
+        self.info_map = self._get_coordinates_map(self._info_open, self._info_close, \
+            self._info_after)
 
     # :::::::::::::::::::::::::::::: #
     # :::: GETTERS ::::::::::::::::: #
@@ -336,15 +339,63 @@ class Pager:
                             is_opened = True
                             current_mark = opening_marks.index(character)
                             coordinates_map[index]['opening_coordinates'].append([y, x])
+                        if is_opened and character == closing_marks[current_mark]:
+                            if x == len(line[1]) - 1 or line[1][x + 1] in closing_after:
+                                is_opened = False
+                                coordinates_map[index]['closing_coordinates'].append([y, x])
                     except IndexError:
                         pass
-                    if is_opened and character == closing_marks[current_mark]:
-                        if x == len(line[1]) - 1 or line[1][x + 1] in closing_after:
-                            is_opened = False
-                            coordinates_map[index]['closing_coordinates'].append([y, x])
                 if is_opened and y == len(page) - 1:
-                    coordinates_map[index]['closing_coordinates'].append([y, len(line[1]) - 1])
+                    if line[1] != '':
+                        coordinates_map[index]['closing_coordinates'].append([y, len(line[1]) - 1])
+                    else:
+                        coordinates_map[index]['closing_coordinates'].append([y, len(line[1])])
         return coordinates_map
+
+    def _get_page_content(self, current_page, page):
+        is_open = False
+        is_speech = False
+        is_info = False
+        if self.highlight:
+            try:
+                for y, line in enumerate(self.pages[current_page]):
+                    for x, character in enumerate(line[1]):
+                        if not is_open:
+                            if [y, x] in self.speech_map[current_page]['opening_coordinates']:
+                                page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    character, self.speech_colors)
+                                is_open = True
+                                is_speech = True
+                            elif [y, x] in self.info_map[current_page]['opening_coordinates']:
+                                page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    character, self.info_colors)
+                                is_open = True
+                                is_info = True
+                            else:
+                                page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    character, self.normal_colors)
+                        else:
+                            if is_speech:
+                                page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    character, self.speech_colors)
+                                if [y, x] in self.speech_map[current_page]['closing_coordinates']:
+                                    is_open = False
+                                    is_speech = False
+                            elif is_info:
+                                page.addstr(y + self.v_padding, x + self.h_padding, \
+                                    character, self.info_colors)
+                                if [y, x] in self.info_map[current_page]['closing_coordinates']:
+                                    is_open = False
+                                    is_info = False
+            except IndexError:
+                pass
+        else:
+            try:
+                for y, line in enumerate(self.pages[current_page]):
+                     page.addstr(y + self.v_padding, self.h_padding, \
+                        line[1], self.normal_colors)
+            except IndexError:
+                pass
 
     def get_number_of_help_pages(self):
         return len(self.help_pages)
@@ -523,134 +574,11 @@ class Pager:
         )
 
     def print_page_content(self, current_page):
-        is_open = False
-        is_speech = False
-        is_info = False
         if not self.double_page:
-            for y, line in enumerate(self.pages[current_page]):
-                for x, character in enumerate(line[1]):
-                    if not is_open:
-                        if [y, x] in self.speech_map[current_page]['opening_coordinates'] \
-                            and self.highlight:
-                            self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.speech_colors)
-                            is_open = True
-                            is_speech = True
-                        if [y, x] in self.info_map[current_page]['opening_coordinates'] \
-                            and self.highlight:
-                            self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.info_colors)
-                            is_open = True
-                            is_info = True
-                        if not is_info and not is_speech:
-                            self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.normal_colors)
-                    else:
-                        if is_info and not is_speech:
-                            self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.info_colors)
-                            if [y, x] in self.info_map[current_page]['closing_coordinates']:
-                                is_open = False
-                                is_info = False
-                        elif is_speech and not is_info:
-                            self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.speech_colors)
-                            if [y, x] in self.speech_map[current_page]['closing_coordinates']:
-                                is_open = False
-                                is_speech = False
-                        else:
-                            self.page.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.info_colors)
-                            if [y, x] in self.info_map[current_page]['closing_coordinates']:
-                                is_open = False
-                                is_speech = False
-                                is_info = False
+            self._get_page_content(current_page, self.page)
         else:
-            for y, line in enumerate(self.pages[current_page]):
-                for x, character in enumerate(line[1]):
-                    if not is_open:
-                        if [y, x] in self.speech_map[current_page]['opening_coordinates'] \
-                            and self.highlight:
-                            self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.speech_colors)
-                            is_open = True
-                            is_speech = True
-                        if [y, x] in self.info_map[current_page]['opening_coordinates'] \
-                            and self.highlight:
-                            self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.info_colors)
-                            is_open = True
-                            is_info = True
-                        if not is_info and not is_speech:
-                            self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.normal_colors)
-                    else:
-                        if is_info and not is_speech:
-                            self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.info_colors)
-                            if [y, x] in self.info_map[current_page]['closing_coordinates']:
-                                is_open = False
-                                is_info = False
-                        elif is_speech and not is_info:
-                            self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.speech_colors)
-                            if [y, x] in self.speech_map[current_page]['closing_coordinates']:
-                                is_open = False
-                                is_speech = False
-                        else:
-                            self.page_left.addstr(y + self.v_padding, x + self.h_padding, \
-                                character, self.info_colors)
-                            if [y, x] in self.info_map[current_page]['closing_coordinates']:
-                                is_open = False
-                                is_speech = False
-                                is_info = False
-            try:
-                current_page += 1
-                for y, line in enumerate(self.pages[current_page]):
-                        for x, character in enumerate(line[1]):
-                            if not is_open:
-                                if [y, x] \
-                                    in self.speech_map[current_page]['opening_coordinates'] \
-                                    and self.highlight:
-                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, self.speech_colors)
-                                    is_open = True
-                                    is_speech = True
-                                if [y, x] \
-                                    in self.info_map[current_page]['opening_coordinates'] \
-                                    and self.highlight:
-                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, self.info_colors)
-                                    is_open = True
-                                    is_info = True
-                                if not is_info and not is_speech:
-                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, self.normal_colors)
-                            else:
-                                if is_info and not is_speech:
-                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, self.info_colors)
-                                    if [y, x] \
-                                        in self.info_map[current_page]['closing_coordinates']:
-                                        is_open = False
-                                        is_info = False
-                                elif is_speech and not is_info:
-                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, self.speech_colors)
-                                    if [y, x] \
-                                        in self.speech_map[current_page]['closing_coordinates']:
-                                        is_open = False
-                                        is_speech = False
-                                else:
-                                    self.page_right.addstr(y + self.v_padding, x + self.h_padding, \
-                                        character, self.info_colors)
-                                    if [y, x] \
-                                        in self.info_map[current_page]['closing_coordinates']:
-                                        is_open = False
-                                        is_speech = False
-                                        is_info = False
-            except IndexError:
-                pass
+            self._get_page_content(current_page, self.page_left)
+            self._get_page_content(current_page + 1, self.page_right)
 
     def print_page_footer(self, current_page, quickmarks, quickmark_change):
         if not self.double_page:
