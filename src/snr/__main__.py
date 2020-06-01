@@ -114,14 +114,17 @@ def main():
         current_chapter = state.get_chapter()
         page_index = state.get_index()
         quickmarks = Utilities.Quickmarks(state.get_quickmarks())
+        bookmarks = Utilities.Bookmarks(state.get_bookmarks())
     elif state.exists(book_title):
         current_chapter = state.get_chapter(book_title)
         page_index = state.get_index(book_title)
         quickmarks = Utilities.Quickmarks(state.get_quickmarks(book_title))
+        bookmarks = Utilities.Bookmarks(state.get_bookmarks(book_title))
     else:
         current_chapter = 0
         page_index = 0
         quickmarks = Utilities.Quickmarks()
+        bookmarks = Utilities.Bookmarks()
 
     content_pages = Screen.ContentPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
         double_page, justify_full, v_padding, h_padding, pe_line)
@@ -140,7 +143,8 @@ def main():
                 book_title,
                 current_chapter - 1,
                 content_pages.get_current_page_index(current_page - 1),
-                quickmarks.get_quickmarks()
+                quickmarks.get_quickmarks(),
+                bookmarks.get_bookmarks()
             )
             break
 
@@ -370,6 +374,13 @@ def main():
                     content_pages.get_current_page_index(current_page)
                 )
 
+        if x in BOOKMARK_NEW:
+            index = content_pages.get_current_page_index(current_page)
+            bookmarks.create(current_chapter, index)
+            screen_update = True
+            content_update = True
+            del index
+
         if x in TOC:
             escape_toc = False
             current_toc_page = 0
@@ -422,7 +433,8 @@ def main():
                         book_title,
                         current_chapter,
                         content_pages.get_current_page_index(current_page),
-                        quickmarks.get_quickmarks()
+                        quickmarks.get_quickmarks(),
+                        bookmarks.get_bookmarks()
                     )
                     curses.endwin()
 
@@ -493,7 +505,8 @@ def main():
                         book_title,
                         current_chapter,
                         content_pages.get_current_page_index(current_page),
-                        quickmarks.get_quickmarks()
+                        quickmarks.get_quickmarks(),
+                        bookmarks.get_bookmarks()
                     )
 
                 if y == curses.KEY_RESIZE:
@@ -528,13 +541,6 @@ def main():
                     current_help_page = 0
                     del index
 
-        if x in BOOKMARK_NEW:
-            bookmarks = Utilities.Bookmarks()
-            bookmarks.create(current_chapter, current_page)
-            curses.endwin()
-            screen_update = True
-            content_update = True
-
         if x in REFRESH:
             curses.endwin()
             std_screen = Screen.Screen(
@@ -559,7 +565,8 @@ def main():
                 book_title,
                 current_chapter,
                 content_pages.get_current_page_index(current_page),
-                quickmarks.get_quickmarks()
+                quickmarks.get_quickmarks(),
+                bookmarks.get_bookmarks()
             )
 
         if x == curses.KEY_RESIZE:

@@ -25,7 +25,7 @@ class Bookmarks:
         self.template = self.name_tag + '\n' + self.description_tag
 
     def _set_bookmark(self, name, description, chapter, index):
-        self.bookmarks[len(self.bookmarks)] = {
+        self.bookmarks[str(len(self.bookmarks))] = {
             'name': name,
             'description': description,
             'chapter': chapter,
@@ -43,11 +43,14 @@ class Bookmarks:
             lines = f.readlines()
             name = lines[0][len(self.name_tag):].decode('utf-8').strip()
             description = []
-            for index, paragraph in enumerate(lines[1:]):
-                if index == 0:
+            for i, paragraph in enumerate(lines[1:]):
+                if i == 0:
                     description.append(
                         paragraph[len(self.description_tag):].decode('utf-8').strip()
                     )
                 else:
                     description.append(paragraph.decode('utf-8').strip())
             self._set_bookmark(name, description, chapter, index)
+
+    def get_bookmarks(self):
+        return self.bookmarks
