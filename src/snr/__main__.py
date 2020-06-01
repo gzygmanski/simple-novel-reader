@@ -698,6 +698,19 @@ def main():
                                     v_padding,
                                     h_padding
                                 )
+                                bookmark_pages = Screen.BookmarkPages(
+                                    screen,
+                                    book,
+                                    current_chapter,
+                                    bookmarks,
+                                    dark_mode,
+                                    speed_mode,
+                                    highlight,
+                                    double_page,
+                                    justify_full,
+                                    v_padding,
+                                    h_padding
+                                )
                                 content_pages.print_page(current_page, quickmarks)
                                 current_page = content_pages.get_page_by_index(index)
                                 current_description_page = 0
