@@ -61,8 +61,10 @@ class Bookmarks:
                         paragraph[len(self.description_tag):].decode('utf-8').strip()
                     )
                 else:
-                    description.append(paragraph.decode('utf-8').strip())
-            self._set_bookmark(name, description, chapter, index)
+                    if paragraph.decode('utf-8').strip() != '':
+                        description.append(paragraph.decode('utf-8').strip())
+            if name != '':
+                self._set_bookmark(name, description, chapter, index)
 
     def remove(self, key_to_remove):
         if key_to_remove in self.bookmarks:
@@ -74,3 +76,6 @@ class Bookmarks:
 
     def has_bookmarks(self):
         return True if len(self.bookmarks) > 0 else False
+
+    def has_description(self, key):
+        return True if len(self.bookmarks[key]['description']) > 4 else False

@@ -33,7 +33,7 @@ class BookmarkPages(Pages):
         )
         self.bookmarks = bookmarks
         self._set_page()
-        self._set_bookmarks()
+        self._set_pages()
 
     # :::: SETTERS ::::::::::::::::: #
 
@@ -53,7 +53,7 @@ class BookmarkPages(Pages):
                 self.page_pos_x_right
             )
 
-    def _set_bookmarks(self):
+    def _set_pages(self):
         bookmarks = self.bookmarks.get_bookmarks()
         self.pages = []
         page = []

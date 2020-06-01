@@ -4,12 +4,14 @@ import curses
 from textwrap import wrap
 from .pages import Pages
 
-class HelpPages(Pages):
+class BookmarkDescribePages(Pages):
     def __init__(
         self,
         screen,
         book,
         chapter,
+        bookmarks,
+        bookmark,
         dark_mode=False,
         speed_mode=False,
         highlight=False,
@@ -30,6 +32,8 @@ class HelpPages(Pages):
             v_padding,
             h_padding,
         )
+        self.bookmarks = bookmarks
+        self.bookmark = bookmark
         self._set_page()
         self._set_pages()
 
@@ -52,65 +56,34 @@ class HelpPages(Pages):
             )
 
     def _set_pages(self):
-        navigation = {
-            'READER NAVIGATION': {
-                'PAGE UP': 'j, n, Space',
-                'PAGE DOWN': 'k, p',
-                'NEXT CHAPTER': 'l, N',
-                'PREVIOUS CHAPTER': 'h, P',
-                'BEGGINING OF CHAPTER': 'g, 0',
-                'END OF CHAPTER': 'G, $',
-                'DARK MODE': 'r',
-                'SPEED READING MODE': 's',
-                'HIGHLIGHT': 'v',
-                'DOUBLE PAGE': 'd',
-                'JUSTIFY TEXT': 'f',
-                'INCREASE VERTICAL PADDING': '>',
-                'DECREASE VERTICAL PADDING': '<',
-                'INCREASE HORIZONTAL PADDING': '.',
-                'DECREASE HORIZONTAL PADDING': ',',
-                'INCREASE PE LINE POSITON': ']',
-                'DECREASE PE LINE POSITON': '[',
-                'TABLE OF CONTENTS': 't, Tab',
-                'HELP PAGE': '?, F1',
-                'ESCAPE': 'Esc, BackSpace',
-                'REFRESH': 'R, F5',
-                'QUIT': 'q'
-            },
-            'TABLE OF CONTENTS NAVIGATION': {
-                'MOVE UP': 'j, n, Space',
-                'MOVE DOWN': 'k, p',
-                'SELECT': 'o, Enter',
-                'ESCAPE': 't, Tab, Esc'
-            },
-            'QUICKMARKS NAVIGATION': {
-                'SAVE QUICKMARK': 'm, then [1-9]',
-                'OPEN QUICKMARK': '[1-9]',
-                'CLEAR QUICKMARK': 'c, then [1-9] or a'
-            }
-        }
+        bookmarks = self.bookmarks.get_bookmarks()
         self.pages = []
-        self.help_sections = []
-        page = []
-        lines = 0
-        for section in navigation.keys():
-            self.help_sections.append(section)
-            for command in navigation[section].keys():
-                command_text = wrap(command + ': ' + navigation[section][command],
-                    self.page_max_x - self.static_padding * 2)
-                lines += len(command_text)
-                if lines <= self.page_lines:
-                    for line_of_text in command_text:
-                        page.append(line_of_text)
-                else:
-                    self.help_sections.append(section)
-                    self.pages.append(page)
-                    page = []
-                    lines = 0
-            if len(page) != 0:
-                self.pages.append(page)
-                page = []
-                lines = 0
+        on_page = []
+        if self.bookmarks.has_description(self.bookmark):
+            content = bookmarks[self.bookmark]['description']
+            for paragraph in content:
+                lines_of_text = wrap(paragraph, self.page_max_x - self.static_padding * 2)
+                while len(lines_of_text) > 0:
+                    if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
+                        for text in lines_of_text:
+                            on_page.append(text)
+                        if len(on_page) != 0:
+                            on_page.append('')
+                        lines_of_text = []
+                    else:
+                        for _ in range(len(on_page), self.page_lines):
+                            on_page.append(lines_of_text[0])
+                            lines_of_text.pop(0)
+                        self.pages.append(on_page)
+                        on_page = []
+            if len(on_page) != 0:
+                self.pages.append(on_page)
+        else:
+            content = bookmarks[self.bookmark]['name']
+            for line_of_text in wrap(content, self.page_max_x - self.static_padding * 2):
+                on_page.append(line_of_text)
+            on_page.append('* * *')
+            self.pages.append(on_page)
 
     # :::: GETTERS ::::::::::::::::: #
 
@@ -120,7 +93,8 @@ class HelpPages(Pages):
     # :::: PRINTERS :::::::::::::::: #
 
     def _print_header(self, current_page):
-        help_title = '[HELP][' + self.help_sections[current_page] + ']'
+        help_title = '[Bookmark][' + \
+            self.bookmarks.get_bookmarks()[self.bookmark]['name'] + ']'
         self.page.addstr(
             0,
             self.static_padding,
@@ -148,8 +122,8 @@ class HelpPages(Pages):
         self.page.erase()
         self.page.bkgd(' ', self.info_colors)
         self.page.box()
+        self._print_header(current_page)
         try:
-            self._print_header(current_page)
             self._print_content(current_page)
             self._print_footer(current_page)
         except:

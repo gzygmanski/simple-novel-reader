@@ -52,6 +52,7 @@ def main():
     BOOKMARK = [ord('b')]
     BOOKMARK_NEW = [ord('B')]
     BOOKMARK_REMOVE = [ord('x')]
+    BOOKMARK_DESCRIBE = [ord('l'), ord('d')]
     ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
     REFRESH = [ord('R'), curses.KEY_F5]
     QUIT = [ord('q')]
@@ -545,6 +546,95 @@ def main():
                                 current_bookmark_page = bookmark_pages.get_number_of_pages() - 1
                             if current_bookmark_pos > bookmark_pages.get_number_of_positions(current_bookmark_page) - 1:
                                 current_bookmark_pos = bookmark_pages.get_number_of_positions(current_bookmark_page) - 1
+
+                if y in BOOKMARK_DESCRIBE:
+                    if bookmarks.has_bookmarks():
+                        escape_description = False
+                        current_description_page = 0
+                        bookmark_key = \
+                            bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
+                        bookmark_description_pages = Screen.BookmarkDescribePages(
+                            screen,
+                            book,
+                            current_chapter,
+                            bookmarks,
+                            bookmark_key,
+                            dark_mode,
+                            speed_mode,
+                            highlight,
+                            double_page,
+                            justify_full,
+                            v_padding,
+                            h_padding
+                        )
+
+                        while escape_description == False:
+                            bookmark_description_pages.print_page(current_description_page)
+
+                            z = screen.getch()
+
+                            if z in PAGE_UP:
+                                current_description_page += 1
+                                if current_description_page == bookmark_description_pages.get_number_of_pages():
+                                    current_description_page = 0
+
+                            if z in PAGE_DOWN:
+                                current_description_page -= 1
+                                if current_description_page < 0:
+                                    current_description_page = bookmark_description_pages.get_number_of_pages() - 1
+
+                            if z in BOOKMARK_DESCRIBE or y in ESCAPE:
+                                escape_description = True
+
+                            if z in REFRESH:
+                                screen_update = True
+                                content_update = True
+                                escape_description = True
+
+                            if z in QUIT:
+                                escape = True
+                                escape_description = True
+                                curses.endwin()
+                                state.save(
+                                    fileinput,
+                                    book_title,
+                                    current_chapter,
+                                    content_pages.get_current_page_index(current_page),
+                                    quickmarks.get_quickmarks(),
+                                    bookmarks.get_bookmarks()
+                                )
+
+                            if z == curses.KEY_RESIZE:
+                                curses.endwin()
+                                std_screen = Screen.Screen(
+                                    book_title,
+                                    dark_mode,
+                                    speed_mode,
+                                    highlight,
+                                    double_page,
+                                    justify_full,
+                                    VERSION,
+                                    APP
+                                )
+                                screen = std_screen.get_screen()
+                                std_screen.redraw()
+                                index = content_pages.get_current_page_index(current_page)
+                                content_pages = Screen.ContentPages(
+                                    screen,
+                                    book,
+                                    current_chapter,
+                                    dark_mode,
+                                    speed_mode,
+                                    highlight,
+                                    double_page,
+                                    justify_full,
+                                    v_padding,
+                                    h_padding,
+                                    pe_line
+                                )
+                                current_page = content_pages.get_page_by_index(index)
+                                current_description_page = 0
+                                del index
 
                 if y in BOOKMARK or y in ESCAPE:
                     escape_bookmark = True
