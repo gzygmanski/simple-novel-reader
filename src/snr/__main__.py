@@ -501,47 +501,50 @@ def main():
                                 bookmark_pages.get_number_of_positions(current_bookmark_page) - 1
 
                 if y in SELECT:
-                    bookmark_key = \
-                        bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
-                    current_chapter = bookmarks.get_chapter(bookmark_key)
-                    content_pages = Screen.ContentPages(
-                        screen,
-                        book,
-                        current_chapter,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        v_padding,
-                        h_padding,
-                        pe_line
-                    )
-                    current_page = content_pages.get_page_by_index(bookmarks.get_index(bookmark_key))
+                    if bookmarks.has_bookmarks():
+                        bookmark_key = \
+                            bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
+                        current_chapter = bookmarks.get_chapter(bookmark_key)
+                        content_pages = Screen.ContentPages(
+                            screen,
+                            book,
+                            current_chapter,
+                            dark_mode,
+                            speed_mode,
+                            highlight,
+                            double_page,
+                            justify_full,
+                            v_padding,
+                            h_padding,
+                            pe_line
+                        )
+                        current_page = content_pages.get_page_by_index(bookmarks.get_index(bookmark_key))
                     escape_bookmark = True
                     content_update = True
 
                 if y in BOOKMARK_REMOVE:
-                    bookmark_key = \
-                        bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
-                    bookmarks.remove(bookmark_key)
-                    bookmark_pages = Screen.BookmarkPages(
-                        screen,
-                        book,
-                        current_chapter,
-                        bookmarks,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        v_padding,
-                        h_padding
-                    )
-                    if current_bookmark_page > bookmark_pages.get_number_of_pages() - 1:
-                        current_bookmark_page = bookmark_pages.get_number_of_pages() - 1
-                    if current_bookmark_pos > bookmark_pages.get_number_of_positions(current_bookmark_page) - 1:
-                        current_bookmark_pos = bookmark_pages.get_number_of_positions(current_bookmark_page) - 1
+                    if bookmarks.has_bookmarks():
+                        bookmark_key = \
+                            bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
+                        bookmarks.remove(bookmark_key)
+                        bookmark_pages = Screen.BookmarkPages(
+                            screen,
+                            book,
+                            current_chapter,
+                            bookmarks,
+                            dark_mode,
+                            speed_mode,
+                            highlight,
+                            double_page,
+                            justify_full,
+                            v_padding,
+                            h_padding
+                        )
+                        if bookmarks.has_bookmarks():
+                            if current_bookmark_page > bookmark_pages.get_number_of_pages() - 1:
+                                current_bookmark_page = bookmark_pages.get_number_of_pages() - 1
+                            if current_bookmark_pos > bookmark_pages.get_number_of_positions(current_bookmark_page) - 1:
+                                current_bookmark_pos = bookmark_pages.get_number_of_positions(current_bookmark_page) - 1
 
                 if y in BOOKMARK or y in ESCAPE:
                     escape_bookmark = True

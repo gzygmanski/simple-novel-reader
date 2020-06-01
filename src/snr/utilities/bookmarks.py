@@ -65,9 +65,12 @@ class Bookmarks:
             self._set_bookmark(name, description, chapter, index)
 
     def remove(self, key_to_remove):
-        self.bookmarks.pop(key_to_remove)
+        if key_to_remove in self.bookmarks:
+            del self.bookmarks[key_to_remove]
+        new_bookmarks = {}
         for index, key in enumerate(self.bookmarks.keys()):
-            self.bookmarks[str(index)] = self.bookmarks.pop(key)
+            new_bookmarks[str(index)] = self.bookmarks[key]
+        self.bookmarks = new_bookmarks
 
     def has_bookmarks(self):
         return True if len(self.bookmarks) > 0 else False
