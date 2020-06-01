@@ -634,7 +634,7 @@ def main():
                                 if current_description_page < 0:
                                     current_description_page = bookmark_description_pages.get_number_of_pages() - 1
 
-                            if z in BOOKMARK_DESCRIBE or y in ESCAPE:
+                            if z in BOOKMARK_DESCRIBE or z in ESCAPE:
                                 content_update = True
                                 escape_description = True
 
