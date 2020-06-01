@@ -87,6 +87,15 @@ class HelpPages(Pages):
                 'SAVE QUICKMARK': 'm, then [1-9]',
                 'OPEN QUICKMARK': '[1-9]',
                 'CLEAR QUICKMARK': 'c, then [1-9] or a'
+            },
+            'BOOKMARKS NAVIGATION': {
+                'MOVE UP': 'j, n, Space',
+                'MOVE DOWN': 'k, p',
+                'SELECT': 'o, Enter',
+                'REMOVE': 'x',
+                'EDIT DESCRIPTION': 'e',
+                'OPEN DESCRIPTION': 'd, l',
+                'ESCAPE': 't, Tab, Esc'
             }
         }
         self.pages = []
