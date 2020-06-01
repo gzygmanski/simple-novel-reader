@@ -17,6 +17,7 @@ import snr.utilities as Utilities
 
 def main():
 
+
     # :::: APP INFO :::::::::::::::: #
 
     VERSION = 'v0.7.106-alpha'
@@ -48,6 +49,8 @@ def main():
     QUICKMARK_SLOT = [ord(str(x)) for x in range(1, 10)]
     QUICKMARK_CLEAR = [ord('c')]
     QUICKMARK_ALL = [ord('a')]
+    BOOKMARK = [ord('b')]
+    BOOKMARK_NEW = [ord('B')]
     ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
     REFRESH = [ord('R'), curses.KEY_F5]
     QUIT = [ord('q')]
@@ -142,6 +145,7 @@ def main():
             break
 
         if screen_update:
+            curses.endwin()
             std_screen = Screen.Screen(
                 book_title,
                 dark_mode,
@@ -152,6 +156,7 @@ def main():
                 VERSION,
                 APP
             )
+            screen = std_screen.get_screen()
             std_screen.redraw()
             screen_update = False
 
@@ -422,6 +427,7 @@ def main():
                     curses.endwin()
 
                 if y == curses.KEY_RESIZE:
+                    curses.endwin()
                     std_screen = Screen.Screen(
                         book_title,
                         dark_mode,
@@ -491,6 +497,7 @@ def main():
                     )
 
                 if y == curses.KEY_RESIZE:
+                    curses.endwin()
                     std_screen = Screen.Screen(
                         book_title,
                         dark_mode,
@@ -521,7 +528,26 @@ def main():
                     current_help_page = 0
                     del index
 
+        if x in BOOKMARK_NEW:
+            bookmarks = Utilities.Bookmarks()
+            bookmarks.create(current_chapter, current_page)
+            curses.endwin()
+            screen_update = True
+            content_update = True
+
         if x in REFRESH:
+            curses.endwin()
+            std_screen = Screen.Screen(
+                book_title,
+                dark_mode,
+                speed_mode,
+                highlight,
+                double_page,
+                justify_full,
+                VERSION,
+                APP
+            )
+            screen = std_screen.get_screen()
             screen_update = True
             content_update = True
 
@@ -537,6 +563,7 @@ def main():
             )
 
         if x == curses.KEY_RESIZE:
+            curses.endwin()
             std_screen = Screen.Screen(
                 book_title,
                 dark_mode,
