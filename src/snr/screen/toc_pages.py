@@ -31,7 +31,7 @@ class TocPages(Pages):
             h_padding,
         )
         self._set_page()
-        self._set_toc()
+        self._set_pages()
 
     # :::: SETTERS ::::::::::::::::: #
 
@@ -51,7 +51,7 @@ class TocPages(Pages):
                 self.page_pos_x_right
             )
 
-    def _set_toc(self):
+    def _set_pages(self):
         toc = self.book.get_toc()
         self.pages = []
         page = []
