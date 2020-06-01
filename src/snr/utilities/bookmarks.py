@@ -32,6 +32,18 @@ class Bookmarks:
             'index': index
         }
 
+    def get_bookmarks(self):
+        return self.bookmarks
+
+    def get_chapter(self, key):
+        return self.bookmarks[key]['chapter']
+
+    def get_index(self, key):
+        return self.bookmarks[key]['index']
+
+    def get_keys(self):
+        return self.bookmarks.keys()
+
     def create(self, chapter, index):
         with tempfile.NamedTemporaryFile(suffix='.tmp') as f:
             f.write(bytes(self.template, 'utf-8'))
@@ -52,5 +64,10 @@ class Bookmarks:
                     description.append(paragraph.decode('utf-8').strip())
             self._set_bookmark(name, description, chapter, index)
 
-    def get_bookmarks(self):
-        return self.bookmarks
+    def remove(self, key_to_remove):
+        self.bookmarks.pop(key_to_remove)
+        for index, key in enumerate(self.bookmarks.keys()):
+            self.bookmarks[str(index)] = self.bookmarks.pop(key)
+
+    def has_bookmarks(self):
+        return True if len(self.bookmarks) > 0 else False

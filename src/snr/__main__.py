@@ -51,6 +51,7 @@ def main():
     QUICKMARK_ALL = [ord('a')]
     BOOKMARK = [ord('b')]
     BOOKMARK_NEW = [ord('B')]
+    BOOKMARK_REMOVE = [ord('x')]
     ESCAPE = [curses.KEY_BACKSPACE, 8, 27]
     REFRESH = [ord('R'), curses.KEY_F5]
     QUIT = [ord('q')]
@@ -126,12 +127,56 @@ def main():
         quickmarks = Utilities.Quickmarks()
         bookmarks = Utilities.Bookmarks()
 
-    content_pages = Screen.ContentPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-        double_page, justify_full, v_padding, h_padding, pe_line)
-    toc_pages = Screen.TocPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-        double_page, justify_full, v_padding, h_padding)
-    help_pages = Screen.HelpPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-        double_page, justify_full, v_padding, h_padding)
+    content_pages = Screen.ContentPages(
+        screen,
+        book,
+        current_chapter,
+        dark_mode,
+        speed_mode,
+        highlight,
+        double_page,
+        justify_full,
+        v_padding,
+        h_padding,
+        pe_line
+    )
+    toc_pages = Screen.TocPages(
+        screen,
+        book,
+        current_chapter,
+        dark_mode,
+        speed_mode,
+        highlight,
+        double_page,
+        justify_full,
+        v_padding,
+        h_padding
+    )
+    help_pages = Screen.HelpPages(
+        screen,
+        book,
+        current_chapter,
+        dark_mode,
+        speed_mode,
+        highlight,
+        double_page,
+        justify_full,
+        v_padding,
+        h_padding
+    )
+    bookmark_pages = Screen.BookmarkPages(
+        screen,
+        book,
+        current_chapter,
+        bookmarks,
+        dark_mode,
+        speed_mode,
+        highlight,
+        double_page,
+        justify_full,
+        v_padding,
+        h_padding
+    )
 
     current_page = content_pages.get_page_by_index(page_index)
 
@@ -165,12 +210,55 @@ def main():
             screen_update = False
 
         if content_update:
-            content_pages = Screen.ContentPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, justify_full, v_padding, h_padding, pe_line)
-            toc_pages = Screen.TocPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, justify_full, v_padding, h_padding)
-            help_pages = Screen.HelpPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                double_page, justify_full, v_padding, h_padding)
+            content_pages = Screen.ContentPages(screen,
+                book,
+                current_chapter,
+                dark_mode,
+                speed_mode,
+                highlight,
+                double_page,
+                justify_full,
+                v_padding,
+                h_padding,
+                pe_line
+            )
+            toc_pages = Screen.TocPages(
+                screen,
+                book,
+                current_chapter,
+                dark_mode,
+                speed_mode,
+                highlight,
+                double_page,
+                justify_full,
+                v_padding,
+                h_padding
+            )
+            help_pages = Screen.HelpPages(
+                screen,
+                book,
+                current_chapter,
+                dark_mode,
+                speed_mode,
+                highlight,
+                double_page,
+                justify_full,
+                v_padding,
+                h_padding
+            )
+            bookmark_pages = Screen.BookmarkPages(
+                screen,
+                book,
+                current_chapter,
+                bookmarks,
+                dark_mode,
+                speed_mode,
+                highlight,
+                double_page,
+                justify_full,
+                v_padding,
+                h_padding,
+            )
             content_update = False
 
         content_pages.print_page(current_page, quickmarks)
@@ -380,6 +468,133 @@ def main():
             screen_update = True
             content_update = True
             del index
+
+        if x in BOOKMARK:
+            escape_bookmark = False
+            current_bookmark_page = 0
+            current_bookmark_pos = 0
+            while escape_bookmark == False:
+                bookmark_pages.print_page(current_bookmark_page, current_bookmark_pos)
+
+                y = screen.getch()
+
+                if y in PAGE_UP:
+                    if bookmarks.has_bookmarks():
+                        current_bookmark_pos += 1
+                        if current_bookmark_pos == \
+                            bookmark_pages.get_number_of_positions(current_bookmark_page):
+                            current_bookmark_pos = 0
+                            if current_bookmark_page < bookmark_pages.get_number_of_pages() - 1:
+                                current_bookmark_page += 1
+                            else:
+                                current_bookmark_page = 0
+
+                if y in PAGE_DOWN:
+                    if bookmarks.has_bookmarks():
+                        current_bookmark_pos -= 1
+                        if current_bookmark_pos == -1:
+                            if current_bookmark_page > 0:
+                                current_bookmark_page -= 1
+                            else:
+                                current_bookmark_page = bookmark_pages.get_number_of_pages() - 1
+                            current_bookmark_pos = \
+                                bookmark_pages.get_number_of_positions(current_bookmark_page) - 1
+
+                if y in SELECT:
+                    bookmark_key = \
+                        bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
+                    current_chapter = bookmarks.get_chapter(bookmark_key)
+                    content_pages = Screen.ContentPages(
+                        screen,
+                        book,
+                        current_chapter,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        v_padding,
+                        h_padding,
+                        pe_line
+                    )
+                    current_page = content_pages.get_page_by_index(bookmarks.get_index(bookmark_key))
+                    escape_bookmark = True
+                    content_update = True
+
+                if y in BOOKMARK_REMOVE:
+                    bookmark_key = \
+                        bookmark_pages.get_position_id(current_bookmark_page, current_bookmark_pos)
+                    bookmarks.remove(bookmark_key)
+                    bookmark_pages = Screen.BookmarkPages(
+                        screen,
+                        book,
+                        current_chapter,
+                        bookmarks,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        v_padding,
+                        h_padding
+                    )
+                    if current_bookmark_page > bookmark_pages.get_number_of_pages() - 1:
+                        current_bookmark_page = bookmark_pages.get_number_of_pages() - 1
+                    if current_bookmark_pos > bookmark_pages.get_number_of_positions(current_bookmark_page) - 1:
+                        current_bookmark_pos = bookmark_pages.get_number_of_positions(current_bookmark_page) - 1
+
+                if y in BOOKMARK or y in ESCAPE:
+                    escape_bookmark = True
+
+                if y in REFRESH:
+                    screen_update = True
+                    content_update = True
+                    escape_bookmark = True
+
+                if y in QUIT:
+                    escape = True
+                    escape_bookmark = True
+                    state.save(
+                        fileinput,
+                        book_title,
+                        current_chapter,
+                        content_pages.get_current_page_index(current_page),
+                        quickmarks.get_quickmarks(),
+                        bookmarks.get_bookmarks()
+                    )
+                    curses.endwin()
+
+                if y == curses.KEY_RESIZE:
+                    curses.endwin()
+                    std_screen = Screen.Screen(
+                        book_title,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        VERSION,
+                        APP
+                    )
+                    screen = std_screen.get_screen()
+                    std_screen.redraw()
+                    index = content_pages.get_current_page_index(current_page)
+                    content_pages = Screen.ContentPages(
+                        screen,
+                        book,
+                        current_chapter,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        v_padding,
+                        h_padding,
+                        pe_line
+                    )
+                    current_page = content_pages.get_page_by_index(index)
+                    current_bookmark_page = 0
+                    del index
 
         if x in TOC:
             escape_toc = False

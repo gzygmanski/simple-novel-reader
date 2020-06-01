@@ -109,7 +109,7 @@ class Pages:
         self.index_suffix = ': '
         max_index = 3
         self.pointer_margin = len(self.pointer)
-        self.toc_id_margin = self.pointer_margin + self.static_padding + max_index \
+        self.id_margin = self.pointer_margin + self.static_padding + max_index \
             + len(self.index_suffix)
 
     def _set_colors(self):

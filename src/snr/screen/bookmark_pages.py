@@ -4,12 +4,13 @@ import curses
 from textwrap import wrap
 from .pages import Pages
 
-class TocPages(Pages):
+class BookmarkPages(Pages):
     def __init__(
         self,
         screen,
         book,
         chapter,
+        bookmarks,
         dark_mode=False,
         speed_mode=False,
         highlight=False,
@@ -30,8 +31,9 @@ class TocPages(Pages):
             v_padding,
             h_padding,
         )
+        self.bookmarks = bookmarks
         self._set_page()
-        self._set_toc()
+        self._set_bookmarks()
 
     # :::: SETTERS ::::::::::::::::: #
 
@@ -51,22 +53,22 @@ class TocPages(Pages):
                 self.page_pos_x_right
             )
 
-    def _set_toc(self):
-        toc = self.book.get_toc()
+    def _set_bookmarks(self):
+        bookmarks = self.bookmarks.get_bookmarks()
         self.pages = []
         page = []
         lines = 0
-        for key in toc.keys():
-            chapter = wrap(
-                toc[key],
+        for key in bookmarks.keys():
+            bookmark = wrap(
+                bookmarks[key]['name'],
                 self.page_max_x - self.id_margin - self.static_padding
             )
-            if lines + len(chapter) <= self.page_lines:
+            if lines + len(bookmark) <= self.page_lines:
                 page.append({
                     'id': key,
-                    'name': chapter
+                    'name': bookmark
                 })
-                lines += len(chapter)
+                lines += len(bookmark)
             else:
                 self.pages.append(page)
                 page = []
@@ -88,7 +90,7 @@ class TocPages(Pages):
     # :::: PRINTERS :::::::::::::::: #
 
     def _print_header(self):
-        toc_title = '[Table of Contents]'
+        toc_title = '[Bookmarks]'
         self.page.addstr(
             0,
             self.static_padding,
@@ -98,7 +100,7 @@ class TocPages(Pages):
 
     def _print_content(self, current_page, pointer_pos):
         pos_y = self.static_padding
-        for y, chapter in enumerate(self.pages[current_page]):
+        for y, bookmark in enumerate(self.pages[current_page]):
             if pointer_pos == y:
                 self.page.addstr(
                     pos_y,
@@ -106,15 +108,15 @@ class TocPages(Pages):
                     self.pointer,
                     self.select_colors
                 )
-                chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
-                    + str(chapter['id']) + self.index_suffix
+                bookmark_index = ' ' * abs((len(str(bookmark['id'])) - 3) * -1) \
+                    + str(bookmark['id']) + self.index_suffix
                 self.page.addstr(
                     pos_y,
                     self.static_padding + self.pointer_margin,
-                    chapter_index,
+                    bookmark_index,
                     self.select_colors
                 )
-                for line in chapter['name']:
+                for line in bookmark['name']:
                     self.page.addstr(
                         pos_y,
                         self.id_margin,
@@ -123,15 +125,15 @@ class TocPages(Pages):
                     )
                     pos_y += 1
             else:
-                chapter_index = ' ' * abs((len(str(chapter['id'])) - 3) * -1) \
-                    + str(chapter['id']) + ':'
+                bookmark_index = ' ' * abs((len(str(bookmark['id'])) - 3) * -1) \
+                    + str(bookmark['id']) + ':'
                 self.page.addstr(
                     pos_y,
                     self.static_padding + self.pointer_margin,
-                    chapter_index,
+                    bookmark_index,
                     self.info_colors
                 )
-                for line in chapter['name']:
+                for line in bookmark['name']:
                     self.page.addstr(
                         pos_y,
                         self.id_margin,
