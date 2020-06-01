@@ -47,7 +47,38 @@ class Bookmarks:
     def create(self, chapter, index):
         with tempfile.NamedTemporaryFile(suffix='.tmp') as f:
             f.write(bytes(self.template, 'utf-8'))
-            f.write(b"")
+            f.flush()
+            edit = Popen([self.editor, f.name], start_new_session=True)
+            edit.wait()
+            f.seek(0)
+            lines = f.readlines()
+            name = lines[0][len(self.name_tag):].decode('utf-8').strip()
+            description = []
+            for i, paragraph in enumerate(lines[1:]):
+                if i == 0:
+                    description.append(
+                        paragraph[len(self.description_tag):].decode('utf-8').strip()
+                    )
+                else:
+                    description.append(paragraph.decode('utf-8').strip())
+            if name != '':
+                self._set_bookmark(name, description, chapter, index)
+
+    def remove(self, key_to_remove):
+        if key_to_remove in self.bookmarks:
+            del self.bookmarks[key_to_remove]
+        new_bookmarks = {}
+        for index, key in enumerate(self.bookmarks.keys()):
+            new_bookmarks[str(index)] = self.bookmarks[key]
+        self.bookmarks = new_bookmarks
+
+    def edit(self, key):
+        with tempfile.NamedTemporaryFile(suffix='.tmp') as f:
+            content = self.name_tag + ' ' + self.bookmarks[key]['name'] \
+                + '\n' + self.description_tag + ' '
+            for line_of_text in self.bookmarks[key]['description']:
+                content += line_of_text + '\n'
+            f.write(bytes(content, 'utf-8'))
             f.flush()
             edit = Popen([self.editor, f.name], start_new_session=True)
             edit.wait()
@@ -63,19 +94,15 @@ class Bookmarks:
                 else:
                     if paragraph.decode('utf-8').strip() != '':
                         description.append(paragraph.decode('utf-8').strip())
-            if name != '':
-                self._set_bookmark(name, description, chapter, index)
-
-    def remove(self, key_to_remove):
-        if key_to_remove in self.bookmarks:
-            del self.bookmarks[key_to_remove]
-        new_bookmarks = {}
-        for index, key in enumerate(self.bookmarks.keys()):
-            new_bookmarks[str(index)] = self.bookmarks[key]
-        self.bookmarks = new_bookmarks
+            if len(name) != 0:
+                self.bookmarks[key]['name'] = name
+            self.bookmarks[key]['description'] = description
 
     def has_bookmarks(self):
         return True if len(self.bookmarks) > 0 else False
 
     def has_description(self, key):
-        return True if len(self.bookmarks[key]['description']) > 4 else False
+        if len(self.bookmarks[key]['description']) == 1 and self.bookmarks[key]['description'][0] == '':
+            return False
+        else:
+            return True
