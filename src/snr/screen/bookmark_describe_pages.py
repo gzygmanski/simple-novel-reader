@@ -93,7 +93,7 @@ class BookmarkDescribePages(Pages):
     # :::: PRINTERS :::::::::::::::: #
 
     def _print_header(self, current_page):
-        help_title = '[Bookmark][' + \
+        help_title = '[Bookmarks][' + \
             self.bookmarks.get_bookmarks()[self.bookmark]['name'] + ']'
         self.page.addstr(
             0,

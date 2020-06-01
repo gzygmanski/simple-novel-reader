@@ -635,6 +635,7 @@ def main():
                                     current_description_page = bookmark_description_pages.get_number_of_pages() - 1
 
                             if z in BOOKMARK_DESCRIBE or y in ESCAPE:
+                                content_update = True
                                 escape_description = True
 
                             if z in REFRESH:
@@ -683,11 +684,27 @@ def main():
                                     h_padding,
                                     pe_line
                                 )
+                                bookmark_description_pages = Screen.BookmarkDescribePages(
+                                    screen,
+                                    book,
+                                    current_chapter,
+                                    bookmarks,
+                                    bookmark_key,
+                                    dark_mode,
+                                    speed_mode,
+                                    highlight,
+                                    double_page,
+                                    justify_full,
+                                    v_padding,
+                                    h_padding
+                                )
+                                content_pages.print_page(current_page, quickmarks)
                                 current_page = content_pages.get_page_by_index(index)
                                 current_description_page = 0
                                 del index
 
                 if y in BOOKMARK or y in ESCAPE:
+                    content_update = True
                     escape_bookmark = True
 
                 if y in REFRESH:
@@ -736,6 +753,20 @@ def main():
                         h_padding,
                         pe_line
                     )
+                    bookmark_pages = Screen.BookmarkPages(
+                        screen,
+                        book,
+                        current_chapter,
+                        bookmarks,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        v_padding,
+                        h_padding
+                    )
+                    content_pages.print_page(current_page, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_bookmark_page = 0
                     del index
@@ -777,6 +808,7 @@ def main():
                     content_update = True
 
                 if y in TOC or y in ESCAPE:
+                    content_update = True
                     escape_toc = True
 
                 if y in REFRESH:
@@ -825,6 +857,19 @@ def main():
                         h_padding,
                         pe_line
                     )
+                    toc_pages = Screen.TocPages(
+                        screen,
+                        book,
+                        current_chapter,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        v_padding,
+                        h_padding
+                    )
+                    content_pages.print_page(current_page, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_toc_page = 0
                     del index
@@ -848,6 +893,7 @@ def main():
                         current_help_page = help_pages.get_number_of_pages() - 1
 
                 if y in HELP or y in ESCAPE:
+                    content_update = True
                     escape_help = True
 
                 if y in REFRESH:
@@ -896,6 +942,19 @@ def main():
                         h_padding,
                         pe_line
                     )
+                    help_pages = Screen.HelpPages(
+                        screen,
+                        book,
+                        current_chapter,
+                        dark_mode,
+                        speed_mode,
+                        highlight,
+                        double_page,
+                        justify_full,
+                        v_padding,
+                        h_padding
+                    )
+                    content_pages.print_page(current_page, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_help_page = 0
                     del index
