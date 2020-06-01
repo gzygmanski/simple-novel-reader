@@ -595,8 +595,8 @@ def main():
                         )
                         current_page = content_pages.get_page_by_index(index)
                         current_description_page = 0
+                        content_pages.print_page(current_page, quickmarks)
                         del index
-
 
                 if y in BOOKMARK_DESCRIBE:
                     if bookmarks.has_bookmarks():
