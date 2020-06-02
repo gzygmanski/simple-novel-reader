@@ -181,6 +181,7 @@ def main():
     )
 
     current_page = content_pages.get_page_by_index(page_index)
+    index = None
 
     while escape == False:
         if current_chapter == number_of_chapters:
@@ -261,6 +262,9 @@ def main():
                 v_padding,
                 h_padding,
             )
+            if index is not None:
+                current_page = content_pages.get_page_by_index(index)
+                index = None
             content_update = False
 
         content_pages.print_page(current_page, bookmarks, quickmarks)
@@ -353,7 +357,6 @@ def main():
                 pe_line
             )
             current_page = content_pages.get_page_by_index(index)
-            del index
             screen_update = True
 
         if x in H_PADDING_UP:
@@ -373,7 +376,6 @@ def main():
                 pe_line
             )
             current_page = content_pages.get_page_by_index(index)
-            del index
             screen_update = True
 
         if x in V_PADDING_DOWN:
@@ -392,7 +394,6 @@ def main():
                 pe_line
             )
             current_page = content_pages.get_page_by_index(index)
-            del index
             screen_update = True
 
         if x in H_PADDING_DOWN:
@@ -412,7 +413,6 @@ def main():
                 pe_line
             )
             current_page = content_pages.get_page_by_index(index)
-            del index
             screen_update = True
 
         if x in PE_LINE_UP:
@@ -469,7 +469,6 @@ def main():
             bookmarks.create(current_chapter, index)
             screen_update = True
             content_update = True
-            del index
 
         if x in BOOKMARK:
             escape_bookmark = False
@@ -596,7 +595,6 @@ def main():
                         current_page = content_pages.get_page_by_index(index)
                         current_description_page = 0
                         content_pages.print_page(current_page, bookmarks, quickmarks)
-                        del index
 
                 if y in BOOKMARK_DESCRIBE:
                     if bookmarks.has_bookmarks():
@@ -714,7 +712,6 @@ def main():
                                 content_pages.print_page(current_page, bookmarks, quickmarks)
                                 current_page = content_pages.get_page_by_index(index)
                                 current_description_page = 0
-                                del index
 
                 if y in BOOKMARK or y in ESCAPE:
                     content_update = True
@@ -782,7 +779,6 @@ def main():
                     content_pages.print_page(current_page, bookmarks, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_bookmark_page = 0
-                    del index
 
         if x in TOC:
             escape_toc = False
@@ -885,7 +881,6 @@ def main():
                     content_pages.print_page(current_page, bookmarks, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_toc_page = 0
-                    del index
 
         if x in HELP:
             escape_help = False
@@ -970,7 +965,6 @@ def main():
                     content_pages.print_page(current_page, bookmarks, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_help_page = 0
-                    del index
 
         if x in REFRESH:
             curses.endwin()
@@ -1014,20 +1008,5 @@ def main():
             )
             screen = std_screen.get_screen()
             index = content_pages.get_current_page_index(current_page)
-            content_pages = Screen.ContentPages(
-                screen,
-                book,
-                current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                v_padding,
-                h_padding,
-                pe_line
-            )
-            current_page = content_pages.get_page_by_index(index)
             screen_update = True
             content_update = True
-            del index
