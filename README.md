@@ -37,4 +37,6 @@ On the first run you need to specify a file, next time the file will be opened a
   + error handling.
 
 ## Screenshots:
-<img src="screen.png" width="70%">
+<p align="center">
+  <img src="screen.png" width="70%">
+</p>
