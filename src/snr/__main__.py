@@ -20,7 +20,7 @@ def main():
 
     # :::: APP INFO :::::::::::::::: #
 
-    VERSION = 'v0.7.106-alpha'
+    VERSION = 'v0.8.136-alpha'
     APP = 'Simple Novel Reader'
 
     # :::: KEYBINDINGS ::::::::::::: #
