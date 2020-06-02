@@ -1013,7 +1013,6 @@ def main():
                 APP
             )
             screen = std_screen.get_screen()
-            screen_update = True
             index = content_pages.get_current_page_index(current_page)
             content_pages = Screen.ContentPages(
                 screen,
@@ -1029,7 +1028,6 @@ def main():
                 pe_line
             )
             current_page = content_pages.get_page_by_index(index)
+            screen_update = True
+            content_update = True
             del index
-
-if __name__ == '__main__':
-    main()
