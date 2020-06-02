@@ -59,6 +59,9 @@ class BookmarkDescribePages(Pages):
         bookmarks = self.bookmarks.get_bookmarks()
         self.pages = []
         on_page = []
+        on_page.append('Chapter: ' + str(bookmarks[self.bookmark]['chapter']))
+        on_page.append('Index: ' + str(bookmarks[self.bookmark]['index']))
+        on_page.append('* * *')
         if self.bookmarks.has_description(self.bookmark):
             content = bookmarks[self.bookmark]['description']
             for paragraph in content:
@@ -82,7 +85,6 @@ class BookmarkDescribePages(Pages):
             content = bookmarks[self.bookmark]['name']
             for line_of_text in wrap(content, self.page_max_x - self.static_padding * 2):
                 on_page.append(line_of_text)
-            on_page.append('* * *')
             self.pages.append(on_page)
 
     # :::: GETTERS ::::::::::::::::: #
