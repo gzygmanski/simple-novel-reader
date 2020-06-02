@@ -26,11 +26,11 @@ On the first run you need to specify a file, next time the file will be opened a
 * dual page view.
 
 ## Todo:
-* Features:
-  + [done] configurable colors from config.ini,
-  + [done] bookmarks,
-  + [done] dual page view,
-  + [done] speed reading view (the same as in koreader perception expander).
+* Fixes:
+  + correct typos,
+  + update help page (forgot to add bookmark key binds),
+  + change edit template for new bookmark,
+  + change default editor (if $EDITOR is not set) if needed.
 * Chores:
   + refactor and clean up code,
   + add comments
