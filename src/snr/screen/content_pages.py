@@ -200,7 +200,7 @@ class ContentPages(Pages):
             except IndexError:
                 pass
 
-    def _get_mark_tag(self, current_page, quickmarks, quickmark_change, tag=''):
+    def _get_quickmark_tag(self, current_page, quickmarks, quickmark_change, tag=''):
         mark_tag = ''
         for mark in quickmarks.get_slots():
             if quickmark_change:
@@ -208,8 +208,27 @@ class ContentPages(Pages):
             elif quickmarks.get_chapter(mark) == self.chapter \
                 and self.get_page_by_index(quickmarks.get_index(mark)) \
                 == current_page:
-                mark_tag = '[' + str(mark) + ']'
+                mark_tag = '[Q:' + str(mark) + ']'
         return mark_tag
+
+    def _get_bookmark_tag(self, current_page, bookmarks):
+        mark_tag = ''
+        keys = []
+        bookmarks = bookmarks.get_bookmarks()
+        for bookmark in bookmarks.keys():
+            if self.chapter == bookmarks[bookmark]['chapter'] \
+                and current_page == self.get_page_by_index(bookmarks[bookmark]['index']):
+                keys.append(bookmark)
+        if len(keys) == 0:
+            return mark_tag
+        else:
+            mark_tag = '[B:'
+            for index, key in enumerate(keys):
+                if index == len(keys) - 1:
+                    mark_tag += key + ']'
+                else:
+                    mark_tag += key + ','
+            return mark_tag
 
     def get_number_of_pages(self):
         return len(self.pages)
@@ -287,9 +306,10 @@ class ContentPages(Pages):
             self._get_page_content(current_page, self.page_left)
             self._get_page_content(current_page + 1, self.page_right)
 
-    def _print_footer(self, current_page, quickmarks, quickmark_change):
+    def _print_footer(self, current_page, bookmarks, quickmarks, quickmark_change):
         if not self.double_page:
-            mark_tag = self._get_mark_tag(current_page, quickmarks, quickmark_change, '[+]')
+            mark_tag = self._get_quickmark_tag(current_page, quickmarks, quickmark_change, '[Q:+]') \
+                + self._get_bookmark_tag(current_page, bookmarks)
             current_page += 1
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
@@ -297,7 +317,8 @@ class ContentPages(Pages):
             self.page.addstr(pos_y, pos_x - len(mark_tag), mark_tag, self.info_colors)
             self.page.addstr(pos_y, pos_x - len(page_number) - len(mark_tag), page_number, self.info_colors)
         else:
-            mark_tag = self._get_mark_tag(current_page, quickmarks, quickmark_change, '[+]')
+            mark_tag = self._get_quickmark_tag(current_page, quickmarks, quickmark_change, '[Q:+]') \
+                + self._get_bookmark_tag(current_page, bookmarks)
             current_page += 1
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
@@ -310,7 +331,8 @@ class ContentPages(Pages):
             )
             self.page_left.addstr(pos_y, self.static_padding, page_number, self.info_colors)
             if current_page + 1 <= self.get_number_of_pages():
-                mark_tag = self._get_mark_tag(current_page, quickmarks, quickmark_change)
+                mark_tag = self._get_quickmark_tag(current_page, quickmarks, quickmark_change) \
+                    + self._get_bookmark_tag(current_page, bookmarks)
                 current_page += 1
                 page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
                 pos_x = self.page_max_x - self.static_padding - len(page_number)
@@ -338,7 +360,7 @@ class ContentPages(Pages):
                 self.perception_colors
             )
 
-    def print_page(self, current_page, quickmarks, quickmark_change=False):
+    def print_page(self, current_page, bookmarks, quickmarks, quickmark_change=False):
         if not self.double_page:
             self.page.erase()
             self.page.bkgd(' ', self.normal_colors)
@@ -346,7 +368,7 @@ class ContentPages(Pages):
             try:
                 self._print_header()
                 self._print_content(current_page)
-                self._print_footer(current_page, quickmarks, quickmark_change)
+                self._print_footer(current_page, bookmarks, quickmarks, quickmark_change)
                 if self.speed_mode:
                     self.print_perception_expander(self.page)
             except:
@@ -362,7 +384,7 @@ class ContentPages(Pages):
             try:
                 self._print_header()
                 self._print_content(current_page)
-                self._print_footer(current_page, quickmarks, quickmark_change)
+                self._print_footer(current_page, bookmarks, quickmarks, quickmark_change)
                 if self.speed_mode:
                     self.print_perception_expander(self.page_left)
                     self.print_perception_expander(self.page_right)

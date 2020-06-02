@@ -263,7 +263,7 @@ def main():
             )
             content_update = False
 
-        content_pages.print_page(current_page, quickmarks)
+        content_pages.print_page(current_page, bookmarks, quickmarks)
 
         x = screen.getch()
 
@@ -453,7 +453,7 @@ def main():
                 quickmarks = Utilities.Quickmarks()
 
         if x in QUICKMARK:
-            content_pages.print_page(current_page, quickmarks, True)
+            content_pages.print_page(current_page, bookmarks, quickmarks, True)
 
             y = screen.getch()
 
@@ -595,7 +595,7 @@ def main():
                         )
                         current_page = content_pages.get_page_by_index(index)
                         current_description_page = 0
-                        content_pages.print_page(current_page, quickmarks)
+                        content_pages.print_page(current_page, bookmarks, quickmarks)
                         del index
 
                 if y in BOOKMARK_DESCRIBE:
@@ -711,7 +711,7 @@ def main():
                                     v_padding,
                                     h_padding
                                 )
-                                content_pages.print_page(current_page, quickmarks)
+                                content_pages.print_page(current_page, bookmarks, quickmarks)
                                 current_page = content_pages.get_page_by_index(index)
                                 current_description_page = 0
                                 del index
@@ -779,7 +779,7 @@ def main():
                         v_padding,
                         h_padding
                     )
-                    content_pages.print_page(current_page, quickmarks)
+                    content_pages.print_page(current_page, bookmarks, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_bookmark_page = 0
                     del index
@@ -882,7 +882,7 @@ def main():
                         v_padding,
                         h_padding
                     )
-                    content_pages.print_page(current_page, quickmarks)
+                    content_pages.print_page(current_page, bookmarks, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_toc_page = 0
                     del index
@@ -967,7 +967,7 @@ def main():
                         v_padding,
                         h_padding
                     )
-                    content_pages.print_page(current_page, quickmarks)
+                    content_pages.print_page(current_page, bookmarks, quickmarks)
                     current_page = content_pages.get_page_by_index(index)
                     current_help_page = 0
                     del index
