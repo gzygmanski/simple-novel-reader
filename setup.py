@@ -19,7 +19,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
         'Operating System :: Unix',
-        'Environment ::Console :: Curses',
+        'Environment :: Console :: Curses',
     ],
     keywords='cli curses ebook epub epub-reader, light-novel-reader light-novels',
     package_dir={'': 'src'},
