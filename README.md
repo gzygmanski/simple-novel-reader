@@ -21,13 +21,14 @@ On the first run you need to specify a file, next time the file will be opened a
 * save reading progress and quickmarks of a book upon exit,
 * starting program without argument will open last read book,
 * quickmarks,
+* bookmarks,
 * colored dialogs,
 * dual page view.
 
 ## Todo:
 * Features:
   + [done] configurable colors from config.ini,
-  + bookmarks,
+  + [done] bookmarks,
   + [done] dual page view,
   + [done] speed reading view (the same as in koreader perception expander).
 * Chores:
@@ -36,4 +37,6 @@ On the first run you need to specify a file, next time the file will be opened a
   + error handling.
 
 ## Screenshots:
-<img src="screen.png" width="70%">
+<p align="center">
+  <img src="screen.png" width="70%">
+</p>

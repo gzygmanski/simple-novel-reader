@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='simple-novel-reader',
-    version='0.7.106',
+    version='0.8.136',
     description='An CLI light novel reader',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,6 +19,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
         'Operating System :: Unix',
+        'Environment :: Console :: Curses',
     ],
     keywords='cli curses ebook epub epub-reader, light-novel-reader light-novels',
     package_dir={'': 'src'},
