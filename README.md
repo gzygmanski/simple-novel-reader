@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="snr_h.svg">
-</p>
+<img src="snr_h.svg">
 
 [![GitHub license](https://img.shields.io/github/license/gzygmanski/simple-novel-reader)](https://github.com/gzygmanski/simple-novel-reader/blob/master/LICENSE)
 [![PyPI version](https://badge.fury.io/py/simple-novel-reader.svg)](https://badge.fury.io/py/simple-novel-reader)
