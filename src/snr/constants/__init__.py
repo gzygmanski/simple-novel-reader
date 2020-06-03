@@ -1,4 +1,4 @@
 #!/bin/python3
 
-import .info
-import .keybinds
+from snr.constants import info
+from snr.constants import keybinds
