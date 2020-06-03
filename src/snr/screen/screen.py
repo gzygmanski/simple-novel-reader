@@ -15,8 +15,6 @@ class Screen:
         justify_full
     ):
         self.title = title
-        self.version = Constant.VERSION
-        self.app_name = Constant.APP
         self.dark_mode = dark_mode
         self.speed_mode = speed_mode
         self.highlight = highlight
@@ -116,7 +114,7 @@ class Screen:
             return curses.color_pair(1)
 
     def _get_modes_info(self):
-        modes_info = 'modes:['
+        modes_info = '['
         for mode in self.modes.keys():
             if self.modes[mode]:
                 modes_info += mode
@@ -136,9 +134,13 @@ class Screen:
             return text
 
     def _print_info(self):
-        app_text = self.app_name + ' ' + self.version
+        app_text = Constant.APP + ' ' + Constant.VERSION
         title_text = '[' + self.title + ']'
-        keys =  self._get_modes_info() + ' quit:[q] help:[?]'
+        keys =  'modes:' + self._get_modes_info() + ' quit:[q] help:[?]'
+        if self.max_x < len(keys) + len(app_text) + 4:
+            app_text = Constant.SHORT_APP + ' ' + Constant.VERSION
+        if self.max_x < len(keys) + len(app_text) + 4:
+            keys = self._get_modes_info() + '[?]'
         self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary())
         if self.max_x > len(keys) + len(app_text) + 4:
             self.screen.addstr(

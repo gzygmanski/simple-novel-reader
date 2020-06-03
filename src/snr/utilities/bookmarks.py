@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+import snr.constants.info as info
 from subprocess import Popen
 
 class Bookmarks:
@@ -20,9 +21,14 @@ class Bookmarks:
         self.editor = os.environ.get('EDITOR', 'vim')
 
     def _set_template(self):
-        self.name_tag = 'Name:'
-        self.description_tag = 'Description:'
-        self.template = self.name_tag + '\n' + self.description_tag
+        self.title = 'BOOKMARK TEMPLATE'
+        self.app_info = '[' + info.SHORT_APP + ' ' + info.VERSION + ']'
+        self.name_tag = '-- Name'
+        self.description_tag = '-- Description'
+        self.template = self.title + ' ' \
+            + self.app_info + '\n' \
+            + self.name_tag + '\n\n' \
+            + self.description_tag + '\n\n'
 
     def _set_bookmark(self, name, description, chapter, index):
         self.bookmarks[str(len(self.bookmarks))] = {
@@ -52,15 +58,10 @@ class Bookmarks:
             edit.wait()
             f.seek(0)
             lines = f.readlines()
-            name = lines[0][len(self.name_tag):].decode('utf-8').strip()
+            name = lines[2].decode('utf-8').strip()
             description = []
-            for i, paragraph in enumerate(lines[1:]):
-                if i == 0:
-                    description.append(
-                        paragraph[len(self.description_tag):].decode('utf-8').strip()
-                    )
-                else:
-                    description.append(paragraph.decode('utf-8').strip())
+            for i, paragraph in enumerate(lines[4:]):
+                description.append(paragraph.decode('utf-8').strip())
             if name != '':
                 self._set_bookmark(name, description, chapter, index)
 
@@ -74,8 +75,11 @@ class Bookmarks:
 
     def edit(self, key):
         with tempfile.NamedTemporaryFile(suffix='.tmp') as f:
-            content = self.name_tag + ' ' + self.bookmarks[key]['name'] \
-                + '\n' + self.description_tag + ' '
+            content = self.title + ' ' \
+                + self.app_info +  '\n' \
+                + self.name_tag + '\n' \
+                + self.bookmarks[key]['name'] + '\n' \
+                + self.description_tag + '\n'
             for line_of_text in self.bookmarks[key]['description']:
                 content += line_of_text + '\n'
             f.write(bytes(content, 'utf-8'))
@@ -84,16 +88,11 @@ class Bookmarks:
             edit.wait()
             f.seek(0)
             lines = f.readlines()
-            name = lines[0][len(self.name_tag):].decode('utf-8').strip()
+            name = lines[2].decode('utf-8').strip()
             description = []
-            for i, paragraph in enumerate(lines[1:]):
-                if i == 0:
-                    description.append(
-                        paragraph[len(self.description_tag):].decode('utf-8').strip()
-                    )
-                else:
-                    if paragraph.decode('utf-8').strip() != '':
-                        description.append(paragraph.decode('utf-8').strip())
+            for i, paragraph in enumerate(lines[4:]):
+                if paragraph.decode('utf-8').strip() != '':
+                    description.append(paragraph.decode('utf-8').strip())
             if len(name) != 0:
                 self.bookmarks[key]['name'] = name
             self.bookmarks[key]['description'] = description
