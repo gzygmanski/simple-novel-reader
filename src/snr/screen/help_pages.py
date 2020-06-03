@@ -99,7 +99,6 @@ class HelpPages(Pages):
         self.pages = []
         self.help_sections = []
         page = []
-        lines = 0
         for section in navigation.keys():
             self.help_sections.append(section)
             for command in navigation[section].keys():
@@ -113,22 +112,21 @@ class HelpPages(Pages):
                     key_binds = ' ' * space + key_binds
                 command_text = wrap(command + ': ' + key_binds,
                     self.page_max_x - self.static_padding * 2)
-                lines += len(command_text)
-                if lines <= self.page_lines:
-                    for line_of_text in command_text:
-                        page.append(line_of_text)
-                        command_text.pop(0)
-                else:
-                    self.help_sections.append(section)
-                    self.pages.append(page)
-                    page = []
-                    if len(command_text) > 0:
-                        page.extend(command_text)
-                    lines = len(page)
+                while len(command_text) > 0:
+                    if len(command_text) + len(page) + 1 <= self.page_max_y - self.static_padding * 2:
+                        for text in command_text:
+                            page.append(text)
+                        command_text = []
+                    else:
+                        for _ in range(len(page), self.page_max_y - self.static_padding * 2):
+                            page.append(command_text[0])
+                            command_text.pop(0)
+                        self.help_sections.append(section)
+                        self.pages.append(page)
+                        page = []
             if len(page) != 0:
                 self.pages.append(page)
                 page = []
-                lines = 0
 
     # :::: GETTERS ::::::::::::::::: #
 

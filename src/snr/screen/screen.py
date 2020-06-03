@@ -137,12 +137,12 @@ class Screen:
         app_text = Constant.APP + ' ' + Constant.VERSION
         title_text = '[' + self.title + ']'
         keys =  'modes:' + self._get_modes_info() + ' quit:[q] help:[?]'
-        if self.max_x < len(keys) + len(app_text) + 4:
+        if self.max_x <= len(keys) + len(app_text) + 4:
             app_text = Constant.SHORT_APP + ' ' + Constant.VERSION
-        if self.max_x < len(keys) + len(app_text) + 4:
+        if self.max_x <= len(keys) + len(app_text) + 4:
             keys = self._get_modes_info() + '[?]'
-        self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary())
         if self.max_x > len(keys) + len(app_text) + 4:
+            self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary())
             self.screen.addstr(
                 0,
                 self.max_x - len(keys) - self.padding,
@@ -151,8 +151,8 @@ class Screen:
             )
         else:
             self.screen.addstr(
-                1,
-                self.padding,
+                0,
+                self.max_x - len(keys) - self.padding,
                 keys,
                 self._get_primary()
             )
