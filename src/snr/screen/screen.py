@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import curses
+import snr.constants.info as Constant
 from snr.reader import ConfigReader
 
 class Screen:
@@ -11,13 +12,11 @@ class Screen:
         speed_mode,
         highlight,
         double_page,
-        justify_full,
-        version='2020',
-        app_name='Simple Novel Reader'
+        justify_full
     ):
         self.title = title
-        self.version = version
-        self.app_name = app_name
+        self.version = Constant.VERSION
+        self.app_name = Constant.APP
         self.dark_mode = dark_mode
         self.speed_mode = speed_mode
         self.highlight = highlight
