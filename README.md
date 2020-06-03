@@ -1,4 +1,4 @@
-<img src="snr_h.svg">
+<img src="images/snr_h.svg">
 
 [![GitHub license](https://img.shields.io/github/license/gzygmanski/simple-novel-reader)](https://github.com/gzygmanski/simple-novel-reader/blob/master/LICENSE)
 [![PyPI version](https://badge.fury.io/py/simple-novel-reader.svg)](https://badge.fury.io/py/simple-novel-reader)
@@ -41,6 +41,4 @@ On the first run you need to specify a file, next time the file will be opened a
   + error handling.
 
 ## Screenshots:
-<p align="center">
-  <img src="screen.png" width="70%">
-</p>
+<img src="images/screen.png" width="70%">
