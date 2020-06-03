@@ -54,48 +54,46 @@ class HelpPages(Pages):
     def _set_pages(self):
         navigation = {
             'READER NAVIGATION': {
-                'PAGE UP': 'j, n, Space',
-                'PAGE DOWN': 'k, p',
-                'NEXT CHAPTER': 'l, N',
-                'PREVIOUS CHAPTER': 'h, P',
-                'BEGGINING OF CHAPTER': 'g, 0',
-                'END OF CHAPTER': 'G, $',
-                'DARK MODE': 'r',
-                'SPEED READING MODE': 's',
-                'HIGHLIGHT': 'v',
-                'DOUBLE PAGE': 'd',
-                'JUSTIFY TEXT': 'f',
-                'INCREASE VERTICAL PADDING': '>',
-                'DECREASE VERTICAL PADDING': '<',
-                'INCREASE HORIZONTAL PADDING': '.',
-                'DECREASE HORIZONTAL PADDING': ',',
-                'INCREASE PE LINE POSITON': ']',
-                'DECREASE PE LINE POSITON': '[',
-                'TABLE OF CONTENTS': 't, Tab',
-                'HELP PAGE': '?, F1',
-                'ESCAPE': 'Esc, BackSpace',
-                'REFRESH': 'R, F5',
-                'QUIT': 'q'
+                'BASIC MOVEMENT': '',
+                'Page up': 'j, n, Space',
+                'Page down': 'k, p',
+                'Next chapter': 'l, N',
+                'Previous chapter': 'h, P',
+                'Beginning of chapter': 'g, 0',
+                'End of chapter': 'G, $',
+                'Select': 'o, Enter',
+                'Escape': 'Esc, BackSpace',
+                'Refresh': 'R, F5',
+                'Quit': 'q',
+                'MODES': '',
+                'Dark mode': 'r',
+                'Speed reading mode': 's',
+                'Highlight speech': 'v',
+                'Double page': 'd',
+                'Justify text': 'f',
+                'PAGE SPACING': '',
+                'Increase vertical padding': '>',
+                'Decrease vertical padding': '<',
+                'Increase horizontal padding': '.',
+                'Decrease horizontal padding': ',',
+                'PE - Perception Expander': '',
+                'Increase PE line positon': ']',
+                'Decrease PE line positon': '[',
+                'OPEN MODULES': '',
+                'Table of contents': 't, Tab',
+                'Bookmark page': 'b',
+                'Help page': '?, F1'
             },
-            'TABLE OF CONTENTS NAVIGATION': {
-                'MOVE UP': 'j, n, Space',
-                'MOVE DOWN': 'k, p',
-                'SELECT': 'o, Enter',
-                'ESCAPE': 't, Tab, Esc'
-            },
-            'QUICKMARKS NAVIGATION': {
-                'SAVE QUICKMARK': 'm, then [1-9]',
-                'OPEN QUICKMARK': '[1-9]',
-                'CLEAR QUICKMARK': 'c, then [1-9] or a'
-            },
-            'BOOKMARKS NAVIGATION': {
-                'MOVE UP': 'j, n, Space',
-                'MOVE DOWN': 'k, p',
-                'SELECT': 'o, Enter',
-                'REMOVE': 'x',
-                'EDIT DESCRIPTION': 'e',
-                'OPEN DESCRIPTION': 'd, l',
-                'ESCAPE': 't, Tab, Esc'
+            'MARKING': {
+                'QUICKMARKS': '',
+                'Save quickmark': 'm, then [1-9]',
+                'Open quickmark': '[1-9]',
+                'Clear quickmark': 'c, then [1-9] or a',
+                'BOOKMARKS': '',
+                'Create bookmark': 'B',
+                'Remove bookmark': 'x',
+                'Open description': 'd, l',
+                'Edit description': 'e',
             }
         }
         self.pages = []
@@ -105,17 +103,28 @@ class HelpPages(Pages):
         for section in navigation.keys():
             self.help_sections.append(section)
             for command in navigation[section].keys():
-                command_text = wrap(command + ': ' + navigation[section][command],
+                if navigation[section][command] != '':
+                    key_binds = '{' + navigation[section][command] + '}'
+                else:
+                    key_binds = navigation[section][command]
+                space = self.page_max_x - self.static_padding * 2 \
+                    - len(command) - 2 - len(key_binds)
+                if space > 0:
+                    key_binds = ' ' * space + key_binds
+                command_text = wrap(command + ': ' + key_binds,
                     self.page_max_x - self.static_padding * 2)
                 lines += len(command_text)
                 if lines <= self.page_lines:
                     for line_of_text in command_text:
                         page.append(line_of_text)
+                        command_text.pop(0)
                 else:
                     self.help_sections.append(section)
                     self.pages.append(page)
                     page = []
-                    lines = 0
+                    if len(command_text) > 0:
+                        page.extend(command_text)
+                    lines = len(page)
             if len(page) != 0:
                 self.pages.append(page)
                 page = []
