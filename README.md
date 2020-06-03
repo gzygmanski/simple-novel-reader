@@ -1,5 +1,11 @@
-# Simple Novel Reader
-<img src="snr.svg">
+<p align="center">
+  <img src="snr_h.svg">
+</p>
+
+[![GitHub license](https://img.shields.io/github/license/gzygmanski/simple-novel-reader)](https://github.com/gzygmanski/simple-novel-reader/blob/master/LICENSE)
+[![PyPI version](https://badge.fury.io/py/simple-novel-reader.svg)](https://badge.fury.io/py/simple-novel-reader)
+[![Downloads](https://pepy.tech/badge/simple-novel-reader)](https://pepy.tech/project/simple-novel-reader)
+
 CLI light novel reader written in Python for Linux.
 
 ## Dependencies:
