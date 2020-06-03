@@ -55,8 +55,8 @@ class HelpPages(Pages):
         navigation = {
             'READER NAVIGATION': {
                 'BASIC MOVEMENT': '',
-                'Page up': 'j, n, Space',
-                'Page down': 'k, p',
+                'Page/Move up': 'j, n, Space',
+                'Page/Move down': 'k, p',
                 'Next chapter': 'l, N',
                 'Previous chapter': 'h, P',
                 'Beginning of chapter': 'g, 0',
