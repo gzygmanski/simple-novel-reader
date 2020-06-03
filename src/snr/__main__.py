@@ -11,6 +11,7 @@ import os
 import sys
 import curses
 import snr.constants.keybinds as Key
+import snr.constants.messages as Msg
 import snr.reader as Reader
 import snr.parser as Parser
 import snr.screen as Screen
@@ -23,8 +24,13 @@ def main():
     try:
         fileinput = os.path.abspath(sys.argv[1])
     except IndexError:
-        fileinput = state.get_path()
-        default = True
+        try:
+            fileinput = state.get_path()
+            default = True
+        except KeyError:
+            print(Msg.HEADER)
+            print(Msg.ERR_NO_PATH)
+            exit()
     else:
         default = False
 
@@ -34,19 +40,25 @@ def main():
     path = reader.get_directory_path(toc_file)
     book = Parser.BookContent(path, toc_file, content_file)
     book_title = book.get_document_title()
+    number_of_chapters = book.get_number_of_chapters()
 
     # :::: READER CONFIG ::::::::::: #
 
     config = Reader.ConfigReader()
-    dark_mode = config.get_dark_mode()
-    speed_mode = config.get_speed_mode()
-    highlight = config.get_highlight()
-    double_page = config.get_double_page()
-    justify_full = config.get_justify_full()
-    h_padding = config.get_horizontal_padding()
-    v_padding = config.get_vertical_padding()
-    pe_line = config.get_pe_multiplier()
-    number_of_chapters = book.get_number_of_chapters()
+    try:
+        dark_mode = config.get_dark_mode()
+        speed_mode = config.get_speed_mode()
+        highlight = config.get_highlight()
+        double_page = config.get_double_page()
+        justify_full = config.get_justify_full()
+        h_padding = config.get_horizontal_padding()
+        v_padding = config.get_vertical_padding()
+        pe_line = config.get_pe_multiplier()
+    except KeyError as err:
+        print(Msg.HEADER)
+        print(Msg.MISSING_KEY + str(err))
+        print(Msg.ERR_INVALID_CONFIG)
+        exit()
 
     # :::: CURSES CONFIG ::::::::::: #
 
