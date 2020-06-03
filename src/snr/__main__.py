@@ -17,7 +17,6 @@ import snr.utilities as Utilities
 
 def main():
 
-
     # :::: APP INFO :::::::::::::::: #
 
     VERSION = 'v0.8.136-alpha'
@@ -111,7 +110,7 @@ def main():
 
     escape = False
     screen_update = True
-    content_update = False
+    content_update = True
 
     if default:
         current_chapter = state.get_chapter()
@@ -129,8 +128,7 @@ def main():
         quickmarks = Utilities.Quickmarks()
         bookmarks = Utilities.Bookmarks()
 
-    content_pages = Screen.ContentPages(
-        screen,
+    content_pages = Screen.ContentPages(screen,
         book,
         current_chapter,
         dark_mode,
@@ -142,44 +140,6 @@ def main():
         h_padding,
         pe_line
     )
-    toc_pages = Screen.TocPages(
-        screen,
-        book,
-        current_chapter,
-        dark_mode,
-        speed_mode,
-        highlight,
-        double_page,
-        justify_full,
-        v_padding,
-        h_padding
-    )
-    help_pages = Screen.HelpPages(
-        screen,
-        book,
-        current_chapter,
-        dark_mode,
-        speed_mode,
-        highlight,
-        double_page,
-        justify_full,
-        v_padding,
-        h_padding
-    )
-    bookmark_pages = Screen.BookmarkPages(
-        screen,
-        book,
-        current_chapter,
-        bookmarks,
-        dark_mode,
-        speed_mode,
-        highlight,
-        double_page,
-        justify_full,
-        v_padding,
-        h_padding
-    )
-
     current_page = content_pages.get_page_by_index(page_index)
     index = None
 
