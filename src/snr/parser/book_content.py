@@ -5,7 +5,7 @@ import urllib
 import os
 import json
 import snr.constants.messages as Msg
-from langcodes import closest_match
+from langcodes import closest_match, standardize_tag
 from hyphen.dictools import is_installed, install
 from hyphen import Hyphenator
 
@@ -38,7 +38,8 @@ class BookContent:
         self.content_soup = self.make_soup(self.content_file, 'xml')
 
     def _set_lang(self):
-        self.lang = self.content_soup.find('dc:language').text
+        lang = self.content_soup.find('dc:language').text
+        self.lang = standardize_tag(lang, macro=True)
 
     def _set_lang_codes(self):
         with open (os.path.join(os.path.dirname(__file__), 'locale.json')) as f:
