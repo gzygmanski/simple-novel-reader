@@ -2,7 +2,7 @@
 
 APP = 'Simple Novel Reader'
 SHORT_APP = 'SNR'
-VERSION = 'v0.8.136-alpha'
+VERSION = 'v0.9.166-beta'
 AUTHOR = 'Grzegorz Zygmański'
 EMAIL = 'gzygmanski@hotmail.com'
 SITE = 'https://github.com/gzygmanski/simple-novel-reader'

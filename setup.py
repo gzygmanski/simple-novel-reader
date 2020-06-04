@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='simple-novel-reader',
-    version='0.8.136',
+    version='0.9.166',
     description='An CLI light novel reader',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -16,7 +16,7 @@ setup(
     author='Grzegorz Zygmański',
     author_email='gzygmanski@hotmail.com',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Operating System :: Unix',
         'Environment :: Console :: Curses',
