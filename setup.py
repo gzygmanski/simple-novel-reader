@@ -24,6 +24,9 @@ setup(
     keywords='cli curses ebook epub epub-reader, light-novel-reader light-novels',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
+    package_data={
+        'snr': ['parser/locale.json'],
+    },
     python_requires='>=3.5, <4',
     install_requires=['beautifulsoup4', 'lxml', 'langcodes', 'PyHyphen'],
     entry_points={
