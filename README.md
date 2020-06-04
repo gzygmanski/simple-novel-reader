@@ -43,4 +43,4 @@ On the first run you need to specify a file, next time the file will be opened a
   + error handling.
 
 ## Screenshots:
-<img src="https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/0.9.x/images/screen.png" width="70%">
+<img src="https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/master/images/screen.png" width="70%">
