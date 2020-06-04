@@ -3,7 +3,11 @@
 from bs4 import BeautifulSoup
 import urllib
 import os
+import json
 import snr.constants.messages as Msg
+from langcodes import closest_match
+from hyphen.dictools import is_installed, install
+from hyphen import Hyphenator
 
 class BookContent:
     def __init__(self, path, toc_file, content_file):
@@ -13,8 +17,12 @@ class BookContent:
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         self.paragraph_tags = ['p']
         self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a']
+        self.lang_dict = None
         self._set_toc_soup()
         self._set_content_soup()
+        self._set_lang()
+        self._set_lang_codes()
+        self._set_lang_dict()
         self._set_toc_list()
         self._set_reference_toc()
         self._set_content_dict()
@@ -22,11 +30,29 @@ class BookContent:
         self._set_content()
         self._set_paragraphs()
 
+
     def _set_toc_soup(self):
         self.toc_soup = self.make_soup(self.toc_file, 'xml')
 
     def _set_content_soup(self):
         self.content_soup = self.make_soup(self.content_file, 'xml')
+
+    def _set_lang(self):
+        self.lang = self.content_soup.find('dc:language').text
+
+    def _set_lang_codes(self):
+        with open (os.path.join(os.path.dirname(__file__), 'locale.json')) as f:
+            data = json.load(f)
+        self.lang_codes = self._get_lang_codes(self.lang, data)
+
+    def _set_lang_dict(self):
+        lang_code = closest_match(self.lang, self.lang_codes)[0]
+        try:
+            if not is_installed(lang_code):
+                install(lang_code)
+            self.lang_dict = Hyphenator(lang_code)
+        except:
+            pass
 
     def _set_toc_list(self):
         self.toc_list = []
@@ -162,6 +188,16 @@ class BookContent:
                                     tag.text.lstrip()
                                 )
 
+    def _get_lang_codes(self, lang_code, data):
+        langs = data[lang_code]
+        return ['{lang}_{terr}'.format(lang=lang_code, terr=terr) for terr in langs]
+
+    def get_lang(self):
+        return self.lang
+
+    def get_lang_dict(self):
+        return self.lang_dict
+
     def get_toc_list(self):
         return self.toc_list
 
@@ -188,6 +224,9 @@ class BookContent:
 
     def has_text(self, chapter):
         return False if len(self.toc_list[chapter]['text']) == 0 else True
+
+    def has_dict(self):
+        return True if self.lang_dict is not None else False
 
     def make_soup(self, path, parser):
         with open(path) as f:

@@ -51,6 +51,7 @@ def main():
         highlight = config.get_highlight()
         double_page = config.get_double_page()
         justify_full = config.get_justify_full()
+        hyphenation = config.get_hyphenation()
         h_padding = config.get_horizontal_padding()
         v_padding = config.get_vertical_padding()
         pe_line = config.get_pe_multiplier()
@@ -68,7 +69,8 @@ def main():
         speed_mode,
         highlight,
         double_page,
-        justify_full
+        justify_full,
+        hyphenation
     )
     screen = std_screen.get_screen()
     curses.noecho()
@@ -106,6 +108,7 @@ def main():
         highlight,
         double_page,
         justify_full,
+        hyphenation,
         v_padding,
         h_padding,
         pe_line
@@ -134,7 +137,8 @@ def main():
                 speed_mode,
                 highlight,
                 double_page,
-                justify_full
+                justify_full,
+                hyphenation
             )
             screen = std_screen.get_screen()
             std_screen.redraw()
@@ -149,6 +153,7 @@ def main():
                 highlight,
                 double_page,
                 justify_full,
+                hyphenation,
                 v_padding,
                 h_padding,
                 pe_line
@@ -216,8 +221,20 @@ def main():
                 current_page -= 2
             if current_page < 0 and current_chapter != 0:
                 current_chapter -= 1
-                content_pages = Screen.ContentPages(screen, book, current_chapter, dark_mode, speed_mode, highlight, \
-                    double_page, justify_full, v_padding, h_padding, pe_line)
+                content_pages = Screen.ContentPages(
+                    screen,
+                    book,
+                    current_chapter,
+                    dark_mode,
+                    speed_mode,
+                    highlight,
+                    double_page,
+                    justify_full,
+                    hyphenation,
+                    v_padding,
+                    h_padding,
+                    pe_line
+                )
                 if not double_page or content_pages.get_number_of_pages() < 2:
                     current_page = content_pages.get_number_of_pages() - 1
                 else:
@@ -268,6 +285,11 @@ def main():
             screen_update = True
             content_update = True
 
+        if x in Key.HYPHENATION:
+            hyphenation = not hyphenation
+            screen_update = True
+            content_update = True
+
         if x in Key.V_PADDING_UP:
             v_padding = content_pages.increase_v_padding(v_padding)
             index = content_pages.get_current_page_index(current_page)
@@ -280,6 +302,7 @@ def main():
                 highlight,
                 double_page,
                 justify_full,
+                hyphenation,
                 v_padding,
                 h_padding,
                 pe_line
@@ -299,6 +322,7 @@ def main():
                 highlight,
                 double_page,
                 justify_full,
+                hyphenation,
                 v_padding,
                 h_padding,
                 pe_line
@@ -317,6 +341,7 @@ def main():
                 highlight,
                 double_page,
                 justify_full,
+                hyphenation,
                 v_padding,
                 h_padding,
                 pe_line
@@ -336,6 +361,7 @@ def main():
                 highlight,
                 double_page,
                 justify_full,
+                hyphenation,
                 v_padding,
                 h_padding,
                 pe_line
@@ -361,6 +387,7 @@ def main():
                     highlight,
                     double_page,
                     justify_full,
+                    hyphenation,
                     v_padding,
                     h_padding,
                     pe_line
@@ -443,6 +470,7 @@ def main():
                             highlight,
                             double_page,
                             justify_full,
+                            hyphenation,
                             v_padding,
                             h_padding,
                             pe_line
@@ -500,7 +528,8 @@ def main():
                             speed_mode,
                             highlight,
                             double_page,
-                            justify_full
+                            justify_full,
+                            hyphenation
                         )
                         screen = std_screen.get_screen()
                         std_screen.redraw()
@@ -514,6 +543,7 @@ def main():
                             highlight,
                             double_page,
                             justify_full,
+                            hyphenation,
                             v_padding,
                             h_padding,
                             pe_line
@@ -588,7 +618,8 @@ def main():
                                     speed_mode,
                                     highlight,
                                     double_page,
-                                    justify_full
+                                    justify_full,
+                                    hyphenation
                                 )
                                 screen = std_screen.get_screen()
                                 std_screen.redraw()
@@ -602,6 +633,7 @@ def main():
                                     highlight,
                                     double_page,
                                     justify_full,
+                                    hyphenation,
                                     v_padding,
                                     h_padding,
                                     pe_line
@@ -667,7 +699,8 @@ def main():
                         speed_mode,
                         highlight,
                         double_page,
-                        justify_full
+                        justify_full,
+                        hyphenation
                     )
                     screen = std_screen.get_screen()
                     std_screen.redraw()
@@ -681,6 +714,7 @@ def main():
                         highlight,
                         double_page,
                         justify_full,
+                        hyphenation,
                         v_padding,
                         h_padding,
                         pe_line
@@ -768,7 +802,8 @@ def main():
                         speed_mode,
                         highlight,
                         double_page,
-                        justify_full
+                        justify_full,
+                        hyphenation
                     )
                     screen = std_screen.get_screen()
                     std_screen.redraw()
@@ -782,6 +817,7 @@ def main():
                         highlight,
                         double_page,
                         justify_full,
+                        hyphenation,
                         v_padding,
                         h_padding,
                         pe_line
@@ -850,7 +886,8 @@ def main():
                         speed_mode,
                         highlight,
                         double_page,
-                        justify_full
+                        justify_full,
+                        hyphenation
                     )
                     screen = std_screen.get_screen()
                     std_screen.redraw()
@@ -864,6 +901,7 @@ def main():
                         highlight,
                         double_page,
                         justify_full,
+                        hyphenation,
                         v_padding,
                         h_padding,
                         pe_line
@@ -892,7 +930,8 @@ def main():
                 speed_mode,
                 highlight,
                 double_page,
-                justify_full
+                justify_full,
+                hyphenation
             )
             screen = std_screen.get_screen()
             screen_update = True
@@ -918,7 +957,8 @@ def main():
                 speed_mode,
                 highlight,
                 double_page,
-                justify_full
+                justify_full,
+                hyphenation
             )
             screen = std_screen.get_screen()
             index = content_pages.get_current_page_index(current_page)

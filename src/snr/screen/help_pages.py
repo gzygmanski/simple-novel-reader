@@ -71,6 +71,7 @@ class HelpPages(Pages):
                 'Highlight speech': 'v',
                 'Double page': 'd',
                 'Justify text': 'f',
+                'Hyphenation': 'e',
                 'PAGE SPACING': '',
                 'Increase vertical padding': '>',
                 'Decrease vertical padding': '<',

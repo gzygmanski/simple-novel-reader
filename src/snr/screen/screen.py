@@ -12,7 +12,8 @@ class Screen:
         speed_mode,
         highlight,
         double_page,
-        justify_full
+        justify_full,
+        hyphenation
     ):
         self.title = title
         self.dark_mode = dark_mode
@@ -20,6 +21,7 @@ class Screen:
         self.highlight = highlight
         self.double_page = double_page
         self.justify_full = justify_full
+        self.hyphenation = hyphenation
         self.padding = 2
         self._set_screen()
         self._set_colors()
@@ -104,7 +106,8 @@ class Screen:
             's': self.speed_mode,
             'v': self.highlight,
             'd': self.double_page,
-            'f': self.justify_full
+            'f': self.justify_full,
+            'e': self.hyphenation
         }
 
     def _get_primary(self):
