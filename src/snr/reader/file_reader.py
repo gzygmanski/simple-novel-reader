@@ -5,6 +5,7 @@ import tempfile
 import shutil
 import zipfile
 from pathlib import Path
+import snr.constants.messages as Msg
 
 class FileReader:
     def __init__(self, file_path, access_rights=0o755):
@@ -22,7 +23,9 @@ class FileReader:
             try:
                 os.mkdir(self.path, self.access_rights)
             except OSError:
-                print ("Creation of the directory %s failed" % self.path)
+                print(Msg.HEADER)
+                print("Creation of the directory %s failed" % self.path)
+                exit()
         else:
             for filename in os.listdir(self.path):
                 file_path = os.path.join(self.path, filename)
@@ -32,19 +35,40 @@ class FileReader:
                     elif os.path.isdir(file_path):
                         shutil.rmtree(file_path)
                 except OSError as e:
+                    print(Msg.HEADER)
                     print('Failed to delete %s, because of %s' % (file_path, e))
+                    exit()
 
     def _unzip_file(self):
-        with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
-            zip_ref.extractall(self.path)
+        try:
+            with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
+                zip_ref.extractall(self.path)
+        except IsADirectoryError as e:
+            print(Msg.HEADER)
+            print(Msg.ERR_INVALID_PATH)
+            exit()
 
     def get_toc_file(self):
+        toc_path = None
         for path in Path(self.path).rglob('*.ncx'):
-            return str(path)
+            toc_path = path
+            break
+        if toc_path is None:
+            print(Msg.HEADER)
+            print(Msg.ERR_TOC_NOT_FOUND)
+            exit()
+        return str(path)
 
     def get_content_file(self):
+        content_path = None
         for path in Path(self.path).rglob('*.opf'):
-            return str(path)
+            content_path = path
+            break
+        if content_path is None:
+            print(Msg.HEADER)
+            print(Msg.ERR_CONTENT_NOT_FOUND)
+            exit()
+        return str(path)
 
     def get_directory_path(self, toc_path):
         return toc_path[:toc_path.rfind('/')]
