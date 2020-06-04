@@ -71,7 +71,10 @@ class ContentPages(Pages):
             content = self.book.get_chapter_text(self.chapter)
             for index, paragraph in enumerate(content):
                 if self.book.has_dict() and self.hyphenation:
-                    lines_of_text = wrap2(paragraph, self.page_columns, use_hyphenator=self.book.get_lang_dict())
+                    try:
+                        lines_of_text = wrap2(paragraph, self.page_columns, use_hyphenator=self.book.get_lang_dict())
+                    except:
+                        lines_of_text = wrap(paragraph, self.page_columns)
                 else:
                     lines_of_text = wrap(paragraph, self.page_columns)
                 while len(lines_of_text) > 0:
@@ -98,7 +101,10 @@ class ContentPages(Pages):
         else:
             content = self.book.get_chapter_title(self.chapter)
             if self.book.has_dict() and self.hyphenation:
-                lines_of_text = wrap2(content, self.page_columns, use_hyphenator=self.book.get_lang_dict())
+                try:
+                    lines_of_text = wrap2(content, self.page_columns, use_hyphenator=self.book.get_lang_dict())
+                except:
+                    lines_of_text = wrap(content, self.page_columns)
             else:
                 lines_of_text = wrap(content, self.page_columns)
             for text in lines_of_text:

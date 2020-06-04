@@ -5,7 +5,7 @@ import urllib
 import os
 import json
 import snr.constants.messages as Msg
-from langcodes import closest_match, standardize_tag
+from langcodes import closest_match, Language
 from hyphen.dictools import is_installed, install
 from hyphen import Hyphenator
 
@@ -39,12 +39,15 @@ class BookContent:
 
     def _set_lang(self):
         lang = self.content_soup.find('dc:language').text
-        self.lang = standardize_tag(lang, macro=True)
+        self.lang = Language(lang)
 
     def _set_lang_codes(self):
         with open (os.path.join(os.path.dirname(__file__), 'locale.json')) as f:
             data = json.load(f)
-        self.lang_codes = self._get_lang_codes(self.lang, data)
+        if self.lang.territory is None:
+            self.lang_codes = self._get_lang_codes(self.lang.language, data)
+        else:
+            self.lang_codes = [self.lang.language.replace('-', '_')]
 
     def _set_lang_dict(self):
         lang_code = closest_match(self.lang, self.lang_codes)[0]
