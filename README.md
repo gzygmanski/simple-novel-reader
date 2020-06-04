@@ -1,4 +1,4 @@
-<img src="images/snr_h.svg">
+<img src="https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/0.9.x/images/snr_h.svg">
 
 [![GitHub license](https://img.shields.io/github/license/gzygmanski/simple-novel-reader)](https://github.com/gzygmanski/simple-novel-reader/blob/master/LICENSE)
 [![PyPI version](https://badge.fury.io/py/simple-novel-reader.svg)](https://badge.fury.io/py/simple-novel-reader)
@@ -9,6 +9,8 @@ CLI light novel reader written in Python for Linux.
 ## Dependencies:
 * BeautifulSoup4
 * lxml
+* langcodes
+* PyHyphen
 
 ## Setup/Usage:
 To install:
@@ -41,4 +43,4 @@ On the first run you need to specify a file, next time the file will be opened a
   + error handling.
 
 ## Screenshots:
-<img src="images/screen.png" width="70%">
+<img src="https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/0.9.x/images/screen.png" width="70%">

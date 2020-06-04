@@ -29,6 +29,7 @@ class ConfigReader(Config):
                 'highlight': 'off',
                 'double_page': 'off',
                 'justify_full': 'off',
+                'hyphenation': 'off',
                 'horizontal_padding': '2',
                 'vertical_padding': '2',
                 'pe_multiplier': '0.2'
@@ -64,6 +65,9 @@ class ConfigReader(Config):
 
     def get_justify_full(self):
         return bool(strtobool(self.config[self.general_section]['justify_full']))
+
+    def get_hyphenation(self):
+        return bool(strtobool(self.config[self.general_section]['hyphenation']))
 
     def get_horizontal_padding(self):
         return int(self.config[self.general_section]['horizontal_padding'])

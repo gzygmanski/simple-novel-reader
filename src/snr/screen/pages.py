@@ -139,7 +139,7 @@ class Pages:
         just_line = []
         words = line.split(" ")
         words_len = sum(len(word) for word in words)
-        if words_len < int(self.page_columns / 1.8):
+        if words_len < int(self.page_columns / 1.6):
             return line
         spaces_number = len(words) - 1
         spaces = [1 for _ in range(spaces_number)]

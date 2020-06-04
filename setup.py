@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='simple-novel-reader',
-    version='0.8.136',
+    version='0.9.166',
     description='An CLI light novel reader',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -16,7 +16,7 @@ setup(
     author='Grzegorz Zygmański',
     author_email='gzygmanski@hotmail.com',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Operating System :: Unix',
         'Environment :: Console :: Curses',
@@ -24,8 +24,11 @@ setup(
     keywords='cli curses ebook epub epub-reader, light-novel-reader light-novels',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
+    package_data={
+        'snr': ['parser/locale.json'],
+    },
     python_requires='>=3.5, <4',
-    install_requires=['beautifulsoup4', 'lxml'],
+    install_requires=['beautifulsoup4', 'lxml', 'langcodes', 'PyHyphen'],
     entry_points={
             'console_scripts': [
             'snr=snr.__main__:main',

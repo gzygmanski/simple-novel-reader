@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import curses
+import snr.constants.info as Constant
 from snr.reader import ConfigReader
 
 class Screen:
@@ -12,17 +13,15 @@ class Screen:
         highlight,
         double_page,
         justify_full,
-        version='2020',
-        app_name='Simple Novel Reader'
+        hyphenation
     ):
         self.title = title
-        self.version = version
-        self.app_name = app_name
         self.dark_mode = dark_mode
         self.speed_mode = speed_mode
         self.highlight = highlight
         self.double_page = double_page
         self.justify_full = justify_full
+        self.hyphenation = hyphenation
         self.padding = 2
         self._set_screen()
         self._set_colors()
@@ -107,7 +106,8 @@ class Screen:
             's': self.speed_mode,
             'v': self.highlight,
             'd': self.double_page,
-            'f': self.justify_full
+            'f': self.justify_full,
+            'e': self.hyphenation
         }
 
     def _get_primary(self):
@@ -117,7 +117,7 @@ class Screen:
             return curses.color_pair(1)
 
     def _get_modes_info(self):
-        modes_info = 'modes:['
+        modes_info = '['
         for mode in self.modes.keys():
             if self.modes[mode]:
                 modes_info += mode
@@ -137,11 +137,15 @@ class Screen:
             return text
 
     def _print_info(self):
-        app_text = self.app_name + ' ' + self.version
+        app_text = Constant.APP + ' ' + Constant.VERSION
         title_text = '[' + self.title + ']'
-        keys =  self._get_modes_info() + ' quit:[q] help:[?]'
-        self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary())
+        keys =  'modes:' + self._get_modes_info() + ' quit:[q] help:[?]'
+        if self.max_x <= len(keys) + len(app_text) + 4:
+            app_text = Constant.SHORT_APP + ' ' + Constant.VERSION
+        if self.max_x <= len(keys) + len(app_text) + 4:
+            keys = self._get_modes_info() + '[?]'
         if self.max_x > len(keys) + len(app_text) + 4:
+            self.screen.addstr(0, 2, self._shorten(app_text), self._get_primary())
             self.screen.addstr(
                 0,
                 self.max_x - len(keys) - self.padding,
@@ -150,8 +154,8 @@ class Screen:
             )
         else:
             self.screen.addstr(
-                1,
-                self.padding,
+                0,
+                self.max_x - len(keys) - self.padding,
                 keys,
                 self._get_primary()
             )

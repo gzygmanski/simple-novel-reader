@@ -2,6 +2,7 @@
 
 import curses
 from textwrap import wrap
+from textwrap2 import wrap as wrap2
 from .pages import Pages
 
 class ContentPages(Pages):
@@ -15,6 +16,7 @@ class ContentPages(Pages):
         highlight=False,
         double_page=False,
         justify_full=False,
+        hyphenation=False,
         v_padding=2,
         h_padding=2,
         pe_multiplier=.2
@@ -31,6 +33,7 @@ class ContentPages(Pages):
             v_padding,
             h_padding,
         )
+        self.hyphenation = hyphenation
         self.pe_multiplier = pe_multiplier
         self._set_page()
         self._set_pages()
@@ -67,7 +70,13 @@ class ContentPages(Pages):
         if self.book.has_text(self.chapter):
             content = self.book.get_chapter_text(self.chapter)
             for index, paragraph in enumerate(content):
-                lines_of_text = wrap(paragraph, self.page_columns)
+                if self.book.has_dict() and self.hyphenation:
+                    try:
+                        lines_of_text = wrap2(paragraph, self.page_columns, use_hyphenator=self.book.get_lang_dict())
+                    except:
+                        lines_of_text = wrap(paragraph, self.page_columns)
+                else:
+                    lines_of_text = wrap(paragraph, self.page_columns)
                 while len(lines_of_text) > 0:
                     if len(lines_of_text) + len(on_page) + 1 <= self.page_lines:
                         for text in lines_of_text:
@@ -91,11 +100,18 @@ class ContentPages(Pages):
                 self.pages.append(on_page)
         else:
             content = self.book.get_chapter_title(self.chapter)
-            for line_of_text in wrap(content, self.page_columns):
+            if self.book.has_dict() and self.hyphenation:
+                try:
+                    lines_of_text = wrap2(content, self.page_columns, use_hyphenator=self.book.get_lang_dict())
+                except:
+                    lines_of_text = wrap(content, self.page_columns)
+            else:
+                lines_of_text = wrap(content, self.page_columns)
+            for text in lines_of_text:
                 if self.justify_full:
-                    on_page.append([0, self.justify_line(line_of_text)])
+                    on_page.append([0, self.justify_line(text)])
                 else:
-                    on_page.append([0, line_of_text])
+                    on_page.append([0, text])
             on_page.append([1, '* * *'])
             self.pages.append(on_page)
 
