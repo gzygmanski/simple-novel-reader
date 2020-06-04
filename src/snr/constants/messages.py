@@ -9,6 +9,7 @@ CONTACT = _header_line \
     + info.SITE + '\n' \
     + info.EMAIL + '\n'
 MISSING_KEY = 'Missing key: '
+DICT_INSTALL = 'Downloading and installing dictionary: '
 ERR_NO_PATH = '''\
 ERR_NO_PATH:
     Path not provided. If this is the first time you start application provide path to the epub file.
