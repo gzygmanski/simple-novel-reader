@@ -9,6 +9,8 @@ CLI light novel reader written in Python for Linux.
 ## Dependencies:
 * BeautifulSoup4
 * lxml
+* langcodes
+* PyHyphen
 
 ## Setup/Usage:
 To install:
