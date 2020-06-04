@@ -38,16 +38,17 @@ class BookContent:
         self.content_soup = self.make_soup(self.content_file, 'xml')
 
     def _set_lang(self):
-        lang = self.content_soup.find('dc:language').text
-        self.lang = Language(lang)
+        self.lang = self.content_soup.find('dc:language').text
 
     def _set_lang_codes(self):
         with open (os.path.join(os.path.dirname(__file__), 'locale.json')) as f:
             data = json.load(f)
-        if self.lang.territory is None:
-            self.lang_codes = self._get_lang_codes(self.lang.language, data)
+        lang = Language.get(self.lang).language
+        terr = Language.get(self.lang).territory
+        if terr is None:
+            self.lang_codes = self._get_lang_codes(lang, data)
         else:
-            self.lang_codes = [self.lang.language.replace('-', '_')]
+            self.lang_codes = [self.lang.replace('-', '_')]
 
     def _set_lang_dict(self):
         lang_code = closest_match(self.lang, self.lang_codes)[0]
