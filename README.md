@@ -31,16 +31,5 @@ On the first run you need to specify a file, next time the file will be opened a
 * colored dialogs,
 * dual page view.
 
-## Todo:
-* Fixes:
-  + correct typos,
-  + update help page (forgot to add bookmark key binds),
-  + change edit template for new bookmark,
-  + change default editor (if $EDITOR is not set) if needed.
-* Chores:
-  + refactor and clean up code,
-  + add comments
-  + error handling.
-
 ## Screenshots:
 <img src="https://raw.githubusercontent.com/gzygmanski/simple-novel-reader/0.9.x/images/screen.png" width="70%">
