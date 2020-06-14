@@ -205,7 +205,7 @@ def main():
         x = screen.getch()
 
         if x in Key.PAGE_UP:
-                if not double_page:
+                if not content_pages.get_double_page():
                     current_page += 1
                 else:
                     current_page += 2
@@ -215,7 +215,7 @@ def main():
                     content_update = True
 
         if x in Key.PAGE_DOWN:
-            if not double_page:
+            if not content_pages.get_double_page():
                 current_page -= 1
             else:
                 current_page -= 2
@@ -235,7 +235,7 @@ def main():
                     h_padding,
                     pe_line
                 )
-                if not double_page or content_pages.get_number_of_pages() < 2:
+                if not content_pages.get_double_page() or content_pages.get_number_of_pages() < 2:
                     current_page = content_pages.get_number_of_pages() - 1
                 else:
                     current_page = content_pages.get_number_of_pages() - 2

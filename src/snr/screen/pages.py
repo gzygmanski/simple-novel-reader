@@ -127,6 +127,11 @@ class Pages:
             self.select_colors = curses.color_pair(4)
             self.perception_colors = curses.color_pair(5)
 
+    # :::: GETTERS ::::::::::::::::: #
+
+    def get_double_page(self):
+        return self.double_page
+
     # :::: OTHER ::::::::::::::::::: #
 
     def shorten_title(self, title):
