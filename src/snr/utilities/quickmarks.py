@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 class Quickmarks:
     def __init__(self, quickmarks=None):
