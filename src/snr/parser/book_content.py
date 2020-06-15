@@ -54,7 +54,7 @@ class BookContent:
         lang_code = closest_match(self.lang, self.lang_codes)[0]
         try:
             if not is_installed(lang_code):
-                print(Msg.DICT_INSTALL + lang_code)
+                print(Msg.DICT_INSTALL(lang_code))
                 install(lang_code)
             self.lang_dict = Hyphenator(lang_code)
         except:

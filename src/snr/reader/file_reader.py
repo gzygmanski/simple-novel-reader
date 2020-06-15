@@ -21,6 +21,7 @@ class FileReader:
     def _set_temp_dir(self):
         if not os.path.exists(self.path):
             try:
+                print(Msg.CREATE(self.path))
                 os.mkdir(self.path, self.access_rights)
             except OSError:
                 print(Msg.HEADER)
@@ -42,6 +43,7 @@ class FileReader:
     def _unzip_file(self):
         try:
             with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
+                print(Msg.ZIP_EXTRACT(self.file_path, self.path))
                 zip_ref.extractall(self.path)
         except IsADirectoryError as e:
             print(Msg.HEADER)
