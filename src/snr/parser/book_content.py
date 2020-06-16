@@ -10,11 +10,12 @@ from hyphen.dictools import is_installed, install
 from hyphen import Hyphenator
 
 class BookContent:
-    def __init__(self, path, toc_file, content_file, dict_download):
+    def __init__(self, path, toc_file, content_file, dict_download, verbose=False):
         self.path = path
         self.toc_file = toc_file
         self.content_file = content_file
         self.dict_download = dict_download
+        self.verbose = verbose
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         self.paragraph_tags = ['p']
         self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a']
@@ -59,15 +60,17 @@ class BookContent:
         if self.dict_download:
             try:
                 if not is_installed(self.lang_code):
-                    print(Msg.DICT_INSTALL(self.lang_code))
+                    if self.verbose:
+                        print(Msg.DICT_INSTALL(self.lang_code))
                     install(self.lang_code)
                 self.lang_dict = Hyphenator(self.lang_code)
             except:
                 pass
-            if is_installed(self.lang_code):
-                print(Msg.DICT_INSTALLED(self.lang_code))
-            else:
-                print(Msg.DICT_INSTALL_FAILED(self.lang_code))
+            if self.verbose:
+                if is_installed(self.lang_code):
+                    print(Msg.DICT_INSTALLED(self.lang_code))
+                else:
+                    print(Msg.DICT_INSTALL_FAILED(self.lang_code))
 
     def _set_toc_list(self):
         self.toc_list = []

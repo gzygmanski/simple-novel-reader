@@ -5,15 +5,17 @@ import appdirs
 import snr.constants.messages as Msg
 
 class Config:
-    def __init__(self, access_rights=0o755):
+    def __init__(self, access_rights=0o755, verbose=False):
         self.access_rights = access_rights
+        self.verbose = verbose
         self._set_config_dir()
 
     def _set_config_dir(self):
         self.config_dir = appdirs.user_config_dir('snr')
         if not os.path.exists(self.config_dir):
             try:
-                print(Msg.CREATE(self.config_dir))
+                if self.verbose:
+                    print(Msg.CREATE(self.config_dir))
                 os.mkdir(self.config_dir, self.access_rights)
             except OSError:
                 print ("Creation of the directory %s failed" % self.config_dir)

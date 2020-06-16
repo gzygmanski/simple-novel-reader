@@ -8,9 +8,10 @@ from pathlib import Path
 import snr.constants.messages as Msg
 
 class FileReader:
-    def __init__(self, file_path, access_rights=0o755):
+    def __init__(self, file_path, access_rights=0o755, verbose=False):
         self.file_path = file_path
         self.access_rights = access_rights
+        self.verbose = verbose
         self._set_path()
         self._set_temp_dir()
         self._unzip_file()
@@ -21,7 +22,8 @@ class FileReader:
     def _set_temp_dir(self):
         if not os.path.exists(self.path):
             try:
-                print(Msg.CREATE(self.path))
+                if self.verbose:
+                    print(Msg.CREATE(self.path))
                 os.mkdir(self.path, self.access_rights)
             except OSError:
                 print(Msg.HEADER)
@@ -43,7 +45,8 @@ class FileReader:
     def _unzip_file(self):
         try:
             with zipfile.ZipFile(self.file_path, 'r') as zip_ref:
-                print(Msg.ZIP_EXTRACT(self.file_path, self.path))
+                if self.verbose:
+                    print(Msg.ZIP_EXTRACT(self.file_path, self.path))
                 zip_ref.extractall(self.path)
         except IsADirectoryError as e:
             print(Msg.HEADER)

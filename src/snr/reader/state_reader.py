@@ -17,7 +17,8 @@ class StateReader(Config):
     def _set_state(self):
         if os.path.isfile(self.state_file):
             with open(self.state_file, 'r') as f:
-                print(Msg.LOAD_STATE)
+                if self.verbose:
+                    print(Msg.LOAD_STATE)
                 self.state = json.load(f)
         else:
             self.state = {'default': {}}
@@ -39,7 +40,8 @@ class StateReader(Config):
             'bookmarks': bookmarks
         }
         with open (self.state_file, 'w') as f:
-            print(Msg.SAVE_STATE)
+            if self.verbose:
+                print(Msg.SAVE_STATE)
             json.dump(self.state, f)
 
     def exists(self, title):

@@ -51,7 +51,8 @@ class ConfigReader(Config):
                 'speed_mode_line_dark': '12'
             }
             with open(self.config_file, 'w') as f:
-                print(Msg.CREATE(self.config_file))
+                if self.verbose:
+                    print(Msg.CREATE(self.config_file))
                 self.config.write(f)
 
     def get_dark_mode(self):
