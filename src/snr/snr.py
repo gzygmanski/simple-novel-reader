@@ -401,16 +401,29 @@ def snr():
                 quickmarks = Utilities.Quickmarks()
 
         if x in Key.QUICKMARK:
-            content_pages.print_page(current_page, bookmarks, quickmarks, True)
+            escape_quickmark = False
+            current_index = content_pages.get_current_page_index(current_page)
+            while escape_quickmark == False:
+                content_pages.print_page(current_page, bookmarks, quickmarks, True, current_index)
 
-            y = screen.getch()
+                y = screen.getch()
 
-            if y in Key.QUICKMARK_SLOT:
-                quickmarks.set_quickmark(
-                    chr(y),
-                    current_chapter,
-                    content_pages.get_current_page_index(current_page)
-                )
+                if y in Key.PAGE_UP:
+                    current_index = content_pages.increase_index(current_index, current_page)
+
+                if y in Key.PAGE_DOWN:
+                    current_index = content_pages.decrease_index(current_index, current_page)
+
+                if y in Key.QUICKMARK_SLOT:
+                    quickmarks.set_quickmark(
+                        chr(y),
+                        current_chapter,
+                        current_index
+                    )
+                    escape_quickmark = True
+
+                if y not in [*Key.PAGE_UP, *Key.PAGE_DOWN]:
+                    escape_quickmark = True
 
         if x in Key.BOOKMARK_NEW:
             index = content_pages.get_current_page_index(current_page)

@@ -171,7 +171,7 @@ class ContentPages(Pages):
                 previous_index = line[0]
         return coordinates_map
 
-    def _get_page_content(self, current_page, page):
+    def _get_page_content(self, current_page, page, quickmark_change, index):
         is_open = False
         is_speech = False
         is_info = False
@@ -179,40 +179,48 @@ class ContentPages(Pages):
             try:
                 for y, line in enumerate(self.pages[current_page]):
                     for x, character in enumerate(line[1]):
-                        if not is_open:
-                            if [y, x] in self.speech_map[current_page]['opening_coordinates']:
-                                page.addstr(y + self.v_padding, x + self.h_padding, \
-                                    character, self.speech_colors)
-                                is_open = True
-                                is_speech = True
-                            elif [y, x] in self.info_map[current_page]['opening_coordinates']:
-                                page.addstr(y + self.v_padding, x + self.h_padding, \
-                                    character, self.info_colors)
-                                is_open = True
-                                is_info = True
-                            else:
-                                page.addstr(y + self.v_padding, x + self.h_padding, \
-                                    character, self.normal_colors)
+                        if quickmark_change and line[0] == index:
+                            page.addstr(y + self.v_padding, x + self.h_padding, \
+                                character, self.select_colors)
                         else:
-                            if is_speech:
-                                page.addstr(y + self.v_padding, x + self.h_padding, \
-                                    character, self.speech_colors)
-                                if [y, x] in self.speech_map[current_page]['closing_coordinates']:
-                                    is_open = False
-                                    is_speech = False
-                            elif is_info:
-                                page.addstr(y + self.v_padding, x + self.h_padding, \
-                                    character, self.info_colors)
-                                if [y, x] in self.info_map[current_page]['closing_coordinates']:
-                                    is_open = False
-                                    is_info = False
+                            if not is_open:
+                                if [y, x] in self.speech_map[current_page]['opening_coordinates']:
+                                    page.addstr(y + self.v_padding, x + self.h_padding, \
+                                        character, self.speech_colors)
+                                    is_open = True
+                                    is_speech = True
+                                elif [y, x] in self.info_map[current_page]['opening_coordinates']:
+                                    page.addstr(y + self.v_padding, x + self.h_padding, \
+                                        character, self.info_colors)
+                                    is_open = True
+                                    is_info = True
+                                else:
+                                    page.addstr(y + self.v_padding, x + self.h_padding, \
+                                        character, self.normal_colors)
+                            else:
+                                if is_speech:
+                                    page.addstr(y + self.v_padding, x + self.h_padding, \
+                                        character, self.speech_colors)
+                                    if [y, x] in self.speech_map[current_page]['closing_coordinates']:
+                                        is_open = False
+                                        is_speech = False
+                                elif is_info:
+                                    page.addstr(y + self.v_padding, x + self.h_padding, \
+                                        character, self.info_colors)
+                                    if [y, x] in self.info_map[current_page]['closing_coordinates']:
+                                        is_open = False
+                                        is_info = False
             except IndexError:
                 pass
         else:
             try:
                 for y, line in enumerate(self.pages[current_page]):
-                     page.addstr(y + self.v_padding, self.h_padding, \
-                        line[1], self.normal_colors)
+                    if quickmark_change and line[0] == index:
+                        page.addstr(y + self.v_padding, self.h_padding, \
+                            line[1], self.select_colors)
+                    else:
+                        page.addstr(y + self.v_padding, self.h_padding, \
+                            line[1], self.normal_colors)
             except IndexError:
                 pass
 
@@ -257,10 +265,10 @@ class ContentPages(Pages):
         return 0
 
     def get_current_page_index(self, current_page):
-        if len(self.pages) != 1:
-            return self.pages[current_page][0][0] + 1
-        else:
-            return self.pages[current_page][0][0]
+        return self.pages[current_page][0][0]
+
+    def get_current_page_last_index(self, current_page):
+        return self.pages[current_page][-1][0]
 
     # :::: OTHER ::::::::::::::::::: #
 
@@ -294,6 +302,23 @@ class ContentPages(Pages):
             self.pe_multiplier -= .1
         return self.pe_multiplier
 
+    def increase_index(self, index, page):
+        if not self.double_page and index < self.get_current_page_last_index(page):
+            return index + 1
+        elif self.double_page:
+            try:
+                if index < self.get_current_page_last_index(page + 1):
+                    return index + 1
+            except IndexError:
+                if index < self.get_current_page_last_index(page):
+                    return index + 1
+        return index
+
+    def decrease_index(self, index, page):
+        if index > self.get_current_page_index(page):
+            return index - 1
+        return index
+
     # :::: PRINTERS :::::::::::::::: #
 
     def _print_header(self):
@@ -315,12 +340,12 @@ class ContentPages(Pages):
                 self.info_colors
             )
 
-    def _print_content(self, current_page):
+    def _print_content(self, current_page, quickmark_change, index):
         if not self.double_page:
-            self._get_page_content(current_page, self.page)
+            self._get_page_content(current_page, self.page, quickmark_change, index)
         else:
-            self._get_page_content(current_page, self.page_left)
-            self._get_page_content(current_page + 1, self.page_right)
+            self._get_page_content(current_page, self.page_left, quickmark_change, index)
+            self._get_page_content(current_page + 1, self.page_right, quickmark_change, index)
 
     def _print_footer(self, current_page, bookmarks, quickmarks, quickmark_change):
         if not self.double_page:
@@ -376,14 +401,16 @@ class ContentPages(Pages):
                 self.perception_colors
             )
 
-    def print_page(self, current_page, bookmarks, quickmarks, quickmark_change=False):
+    def print_page(self, current_page, bookmarks, quickmarks, quickmark_change=False, index=None):
+        if index is None:
+            index = self.get_current_page_index(current_page)
         if not self.double_page:
             self.page.erase()
             self.page.bkgd(' ', self.normal_colors)
             self.page.box()
             try:
                 self._print_header()
-                self._print_content(current_page)
+                self._print_content(current_page, quickmark_change, index)
                 self._print_footer(current_page, bookmarks, quickmarks, quickmark_change)
                 if self.speed_mode:
                     self.print_perception_expander(self.page)
@@ -399,7 +426,7 @@ class ContentPages(Pages):
             self.page_right.box()
             try:
                 self._print_header()
-                self._print_content(current_page)
+                self._print_content(current_page, quickmark_change, index)
                 self._print_footer(current_page, bookmarks, quickmarks, quickmark_change)
                 if self.speed_mode:
                     self.print_perception_expander(self.page_left)
