@@ -14,7 +14,7 @@ LOAD_STATE = 'Loading state ...'
 def DICT_INSTALL(target):
     return 'Downloading dictionary: ' + target + ' ...'
 def DICT_INSTALLED(target):
-    return target + ': downloaded'
+    return target + ': installed'
 def DICT_INSTALL_FAILED(target):
     return 'Failed to download: ' + target
 def ZIP_EXTRACT(target, destination):

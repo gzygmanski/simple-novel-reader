@@ -60,7 +60,7 @@ class BookContent:
             try:
                 if not is_installed(self.lang_code):
                     print(Msg.DICT_INSTALL(self.lang_code))
-                    install(lang_code)
+                    install(self.lang_code)
                 self.lang_dict = Hyphenator(self.lang_code)
             except:
                 pass
