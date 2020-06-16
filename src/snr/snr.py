@@ -11,7 +11,7 @@ import snr.screen as Screen
 import snr.utilities as Utilities
 
 def snr():
-    # :::: BOOK INIT ::::::::::::::: #
+    # :::: INIT :::::::::::::::::::: #
 
     state = Reader.StateReader()
     try:
@@ -27,14 +27,6 @@ def snr():
     else:
         default = False
 
-    reader = Reader.FileReader(fileinput)
-    toc_file = reader.get_toc_file()
-    content_file = reader.get_content_file()
-    path = reader.get_directory_path(toc_file)
-    book = Parser.BookContent(path, toc_file, content_file)
-    book_title = book.get_document_title()
-    number_of_chapters = book.get_number_of_chapters()
-
     # :::: READER CONFIG ::::::::::: #
 
     config = Reader.ConfigReader()
@@ -45,6 +37,7 @@ def snr():
         double_page = config.get_double_page()
         justify_full = config.get_justify_full()
         hyphenation = config.get_hyphenation()
+        dict_download = config.get_dict_download()
         h_padding = config.get_horizontal_padding()
         v_padding = config.get_vertical_padding()
         pe_line = config.get_pe_multiplier()
@@ -53,6 +46,16 @@ def snr():
         print(Msg.MISSING_KEY + str(err))
         print(Msg.ERR_INVALID_CONFIG)
         exit()
+
+    # :::: BOOK INIT ::::::::::::::: #
+
+    reader = Reader.FileReader(fileinput)
+    toc_file = reader.get_toc_file()
+    content_file = reader.get_content_file()
+    path = reader.get_directory_path(toc_file)
+    book = Parser.BookContent(path, toc_file, content_file, dict_download)
+    book_title = book.get_document_title()
+    number_of_chapters = book.get_number_of_chapters()
 
     # :::: CURSES CONFIG ::::::::::: #
 

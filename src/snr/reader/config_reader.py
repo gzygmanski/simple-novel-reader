@@ -31,6 +31,7 @@ class ConfigReader(Config):
                 'double_page': 'off',
                 'justify_full': 'off',
                 'hyphenation': 'off',
+                'dict_download': 'on',
                 'horizontal_padding': '2',
                 'vertical_padding': '2',
                 'pe_multiplier': '0.2'
@@ -70,6 +71,9 @@ class ConfigReader(Config):
 
     def get_hyphenation(self):
         return bool(strtobool(self.config[self.general_section]['hyphenation']))
+
+    def get_dict_download(self):
+        return bool(strtobool(self.config[self.general_section]['dict_download']))
 
     def get_horizontal_padding(self):
         return int(self.config[self.general_section]['horizontal_padding'])
