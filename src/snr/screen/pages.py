@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 import curses
 from textwrap import wrap
@@ -126,6 +126,11 @@ class Pages:
             self.speech_colors = curses.color_pair(3)
             self.select_colors = curses.color_pair(4)
             self.perception_colors = curses.color_pair(5)
+
+    # :::: GETTERS ::::::::::::::::: #
+
+    def get_double_page(self):
+        return self.double_page
 
     # :::: OTHER ::::::::::::::::::: #
 

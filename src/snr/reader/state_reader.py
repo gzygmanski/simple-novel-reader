@@ -1,12 +1,13 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 import os
 import json
+import snr.constants.messages as Msg
 from .config import Config
 
 class StateReader(Config):
-    def __init__(self):
-        Config.__init__(self)
+    def __init__(self, verbose=False):
+        Config.__init__(self, verbose)
         self._set_state_file()
         self._set_state()
 
@@ -16,6 +17,8 @@ class StateReader(Config):
     def _set_state(self):
         if os.path.isfile(self.state_file):
             with open(self.state_file, 'r') as f:
+                if self.verbose:
+                    print(Msg.LOAD_STATE)
                 self.state = json.load(f)
         else:
             self.state = {'default': {}}
@@ -37,6 +40,8 @@ class StateReader(Config):
             'bookmarks': bookmarks
         }
         with open (self.state_file, 'w') as f:
+            if self.verbose:
+                print(Msg.SAVE_STATE)
             json.dump(self.state, f)
 
     def exists(self, title):

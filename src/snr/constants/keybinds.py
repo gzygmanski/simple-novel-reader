@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 import curses
 
@@ -28,7 +28,7 @@ QUICKMARK_SLOT = [ord(str(x)) for x in range(1, 10)]
 QUICKMARK_CLEAR = [ord('c')]
 QUICKMARK_ALL = [ord('a')]
 BOOKMARK = [ord('b')]
-BOOKMARK_NEW = [ord('B')]
+BOOKMARK_NEW = [ord('B'), ord('M')]
 BOOKMARK_REMOVE = [ord('x')]
 BOOKMARK_EDIT = [ord('e')]
 BOOKMARK_DESCRIBE = [ord('l'), ord('d')]

@@ -3,12 +3,13 @@
 import os
 import configparser
 import appdirs
+import snr.constants.messages as Msg
 from distutils.util import strtobool
 from .config import Config
 
 class ConfigReader(Config):
-    def __init__(self, config_file=None):
-        Config.__init__(self)
+    def __init__(self, verbose=False, config_file=None):
+        Config.__init__(self, verbose)
         self.general_section = 'DEFAULT'
         self.colors_section = 'COLORS'
         self._set_config_file(config_file)
@@ -30,6 +31,7 @@ class ConfigReader(Config):
                 'double_page': 'off',
                 'justify_full': 'off',
                 'hyphenation': 'off',
+                'dict_download': 'on',
                 'horizontal_padding': '2',
                 'vertical_padding': '2',
                 'pe_multiplier': '0.2'
@@ -49,6 +51,8 @@ class ConfigReader(Config):
                 'speed_mode_line_dark': '12'
             }
             with open(self.config_file, 'w') as f:
+                if self.verbose:
+                    print(Msg.CREATE(self.config_file))
                 self.config.write(f)
 
     def get_dark_mode(self):
@@ -68,6 +72,9 @@ class ConfigReader(Config):
 
     def get_hyphenation(self):
         return bool(strtobool(self.config[self.general_section]['hyphenation']))
+
+    def get_dict_download(self):
+        return bool(strtobool(self.config[self.general_section]['dict_download']))
 
     def get_horizontal_padding(self):
         return int(self.config[self.general_section]['horizontal_padding'])

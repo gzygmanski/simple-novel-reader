@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 from bs4 import BeautifulSoup
 import urllib
@@ -10,10 +10,12 @@ from hyphen.dictools import is_installed, install
 from hyphen import Hyphenator
 
 class BookContent:
-    def __init__(self, path, toc_file, content_file):
+    def __init__(self, path, toc_file, content_file, dict_download, verbose=False):
         self.path = path
         self.toc_file = toc_file
         self.content_file = content_file
+        self.dict_download = dict_download
+        self.verbose = verbose
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         self.paragraph_tags = ['p']
         self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a']
@@ -22,6 +24,7 @@ class BookContent:
         self._set_content_soup()
         self._set_lang()
         self._set_lang_codes()
+        self._set_lang_code()
         self._set_lang_dict()
         self._set_toc_list()
         self._set_reference_toc()
@@ -50,15 +53,24 @@ class BookContent:
         else:
             self.lang_codes = [self.lang.replace('-', '_')]
 
+    def _set_lang_code(self):
+        self.lang_code = closest_match(self.lang, self.lang_codes)[0]
+
     def _set_lang_dict(self):
-        lang_code = closest_match(self.lang, self.lang_codes)[0]
-        try:
-            if not is_installed(lang_code):
-                print(Msg.DICT_INSTALL + lang_code)
-                install(lang_code)
-            self.lang_dict = Hyphenator(lang_code)
-        except:
-            pass
+        if self.dict_download:
+            try:
+                if not is_installed(self.lang_code):
+                    if self.verbose:
+                        print(Msg.DICT_INSTALL(self.lang_code))
+                    install(self.lang_code)
+                self.lang_dict = Hyphenator(self.lang_code)
+            except:
+                pass
+            if self.verbose:
+                if is_installed(self.lang_code):
+                    print(Msg.DICT_INSTALLED(self.lang_code))
+                else:
+                    print(Msg.DICT_INSTALL_FAILED(self.lang_code))
 
     def _set_toc_list(self):
         self.toc_list = []
@@ -222,6 +234,9 @@ class BookContent:
     def get_document_title(self):
         return self.content_soup.find('title').text
 
+    def get_document_language(self):
+        return self.lang_code
+
     def get_chapter_title(self, chapter):
         return self.toc_list[chapter]['name']
 
@@ -233,6 +248,9 @@ class BookContent:
 
     def has_dict(self):
         return True if self.lang_dict is not None else False
+
+    def is_dict_installed(self):
+        return is_installed(self.lang_code)
 
     def make_soup(self, path, parser):
         with open(path) as f:

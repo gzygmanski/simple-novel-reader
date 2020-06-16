@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 import curses
 import snr.constants.info as Constant
@@ -13,7 +13,9 @@ class Screen:
         highlight,
         double_page,
         justify_full,
-        hyphenation
+        hyphenation,
+        is_dict_installed,
+        language='-'
     ):
         self.title = title
         self.dark_mode = dark_mode
@@ -22,6 +24,8 @@ class Screen:
         self.double_page = double_page
         self.justify_full = justify_full
         self.hyphenation = hyphenation
+        self.is_dict_installed = is_dict_installed
+        self.language = language
         self.padding = 2
         self._set_screen()
         self._set_colors()
@@ -129,16 +133,20 @@ class Screen:
     def get_screen(self):
         return self.screen
 
-    def _shorten(self, text, bracer=''):
+    def _shorten(self, text, bracer='', text_after=''):
         text_end = '...' + bracer
-        if len(text) >= self.max_x - self.padding * 2:
-            return text[:self.max_x - self.padding * 2 - len(text_end)] + text_end
+        if len(text) >= self.max_x - self.padding * 2 - len(text_after):
+            return text[:self.max_x - self.padding * 2 - len(text_end) - len(text_after)] + text_end
         else:
             return text
 
     def _print_info(self):
         app_text = Constant.APP + ' ' + Constant.VERSION
         title_text = '[' + self.title + ']'
+        if not self.is_dict_installed:
+            language_text = '[*' + self.language + ']'
+        else:
+            language_text = '[' + self.language + ']'
         keys =  'modes:' + self._get_modes_info() + ' quit:[q] help:[?]'
         if self.max_x <= len(keys) + len(app_text) + 4:
             app_text = Constant.SHORT_APP + ' ' + Constant.VERSION
@@ -159,9 +167,16 @@ class Screen:
                 keys,
                 self._get_primary()
             )
-        self.screen.addstr(self.max_y - 1,
+        self.screen.addstr(
+            self.max_y - 1,
             self.padding,
-            self._shorten(title_text, ']'),
+            self._shorten(title_text, ']', language_text),
+            self._get_primary()
+        )
+        self.screen.addstr(
+            self.max_y - 1,
+            self.max_x - len(language_text) - self.padding,
+            language_text,
             self._get_primary()
         )
 
