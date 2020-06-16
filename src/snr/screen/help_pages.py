@@ -91,7 +91,7 @@ class HelpPages(Pages):
                 'Open quickmark': '[1-9]',
                 'Clear quickmark': 'c, then [1-9] or a',
                 'BOOKMARKS': '',
-                'Create bookmark': 'B',
+                'Create bookmark': 'B, M',
                 'Remove bookmark': 'x',
                 'Open description': 'd, l',
                 'Edit description': 'e',

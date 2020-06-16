@@ -404,7 +404,13 @@ def snr():
             escape_quickmark = False
             current_index = content_pages.get_current_page_index(current_page)
             while escape_quickmark == False:
-                content_pages.print_page(current_page, bookmarks, quickmarks, True, current_index)
+                content_pages.print_page(
+                    current_page,
+                    bookmarks,
+                    quickmarks,
+                    quickmark_change=True,
+                    index=current_index
+                )
 
                 y = screen.getch()
 
@@ -426,10 +432,33 @@ def snr():
                     escape_quickmark = True
 
         if x in Key.BOOKMARK_NEW:
-            index = content_pages.get_current_page_index(current_page)
-            bookmarks.create(current_chapter, index)
-            screen_update = True
-            content_update = True
+            escape_bookmark = False
+            current_index = content_pages.get_current_page_index(current_page)
+            while escape_bookmark == False:
+                content_pages.print_page(
+                    current_page,
+                    bookmarks,
+                    quickmarks,
+                    bookmark_change=True,
+                    index=current_index
+                )
+
+                y = screen.getch()
+
+                if y in Key.PAGE_UP:
+                    current_index = content_pages.increase_index(current_index, current_page)
+
+                if y in Key.PAGE_DOWN:
+                    current_index = content_pages.decrease_index(current_index, current_page)
+
+                if y in Key.SELECT:
+                    bookmarks.create(current_chapter, current_index)
+                    escape_bookmark = True
+                    screen_update = True
+                    content_update = True
+
+                if y not in [*Key.PAGE_UP, *Key.PAGE_DOWN]:
+                    escape_bookmark = True
 
         if x in Key.BOOKMARK:
             escape_bookmark = False

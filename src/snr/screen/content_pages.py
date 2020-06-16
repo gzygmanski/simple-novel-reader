@@ -171,7 +171,7 @@ class ContentPages(Pages):
                 previous_index = line[0]
         return coordinates_map
 
-    def _get_page_content(self, current_page, page, quickmark_change, index):
+    def _get_page_content(self, current_page, page, mark_change, index):
         is_open = False
         is_speech = False
         is_info = False
@@ -179,7 +179,7 @@ class ContentPages(Pages):
             try:
                 for y, line in enumerate(self.pages[current_page]):
                     for x, character in enumerate(line[1]):
-                        if quickmark_change and line[0] == index:
+                        if mark_change and line[0] == index:
                             page.addstr(y + self.v_padding, x + self.h_padding, \
                                 character, self.select_colors)
                         else:
@@ -215,7 +215,7 @@ class ContentPages(Pages):
         else:
             try:
                 for y, line in enumerate(self.pages[current_page]):
-                    if quickmark_change and line[0] == index:
+                    if mark_change and line[0] == index:
                         page.addstr(y + self.v_padding, self.h_padding, \
                             line[1], self.select_colors)
                     else:
@@ -226,19 +226,21 @@ class ContentPages(Pages):
 
     def _get_quickmark_tag(self, current_page, quickmarks, quickmark_change, tag=''):
         mark_tag = ''
+        if quickmark_change:
+            mark_tag = tag
         for mark in quickmarks.get_slots():
-            if quickmark_change:
-                mark_tag = tag
-            elif quickmarks.get_chapter(mark) == self.chapter \
+            if quickmarks.get_chapter(mark) == self.chapter \
                 and self.get_page_by_index(quickmarks.get_index(mark)) \
                 == current_page:
                 mark_tag = '[Q:' + str(mark) + ']'
         return mark_tag
 
-    def _get_bookmark_tag(self, current_page, bookmarks):
+    def _get_bookmark_tag(self, current_page, bookmarks, bookmark_change, tag=''):
         mark_tag = ''
         keys = []
         bookmarks = bookmarks.get_bookmarks()
+        if bookmark_change:
+            mark_tag = tag
         for bookmark in bookmarks.keys():
             if self.chapter == bookmarks[bookmark]['chapter'] \
                 and current_page == self.get_page_by_index(bookmarks[bookmark]['index']):
@@ -340,17 +342,18 @@ class ContentPages(Pages):
                 self.info_colors
             )
 
-    def _print_content(self, current_page, quickmark_change, index):
+    def _print_content(self, current_page, bookmark_change, quickmark_change, index):
+        mark_change = True if bookmark_change or quickmark_change else False
         if not self.double_page:
-            self._get_page_content(current_page, self.page, quickmark_change, index)
+            self._get_page_content(current_page, self.page, mark_change, index)
         else:
-            self._get_page_content(current_page, self.page_left, quickmark_change, index)
-            self._get_page_content(current_page + 1, self.page_right, quickmark_change, index)
+            self._get_page_content(current_page, self.page_left, mark_change, index)
+            self._get_page_content(current_page + 1, self.page_right, mark_change, index)
 
-    def _print_footer(self, current_page, bookmarks, quickmarks, quickmark_change):
+    def _print_footer(self, current_page, bookmarks, quickmarks, bookmark_change, quickmark_change):
         if not self.double_page:
             mark_tag = self._get_quickmark_tag(current_page, quickmarks, quickmark_change, '[Q:+]') \
-                + self._get_bookmark_tag(current_page, bookmarks)
+                + self._get_bookmark_tag(current_page, bookmarks, bookmark_change, '[B:+]')
             current_page += 1
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
@@ -359,7 +362,7 @@ class ContentPages(Pages):
             self.page.addstr(pos_y, pos_x - len(page_number) - len(mark_tag), page_number, self.info_colors)
         else:
             mark_tag = self._get_quickmark_tag(current_page, quickmarks, quickmark_change, '[Q:+]') \
-                + self._get_bookmark_tag(current_page, bookmarks)
+                + self._get_bookmark_tag(current_page, bookmarks, bookmark_change, '[B:+]')
             current_page += 1
             page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
             pos_y = self.page_max_y - 1
@@ -401,7 +404,15 @@ class ContentPages(Pages):
                 self.perception_colors
             )
 
-    def print_page(self, current_page, bookmarks, quickmarks, quickmark_change=False, index=None):
+    def print_page(
+        self,
+        current_page,
+        bookmarks,
+        quickmarks,
+        bookmark_change=False,
+        quickmark_change=False,
+        index=None
+    ):
         if index is None:
             index = self.get_current_page_index(current_page)
         if not self.double_page:
@@ -410,8 +421,14 @@ class ContentPages(Pages):
             self.page.box()
             try:
                 self._print_header()
-                self._print_content(current_page, quickmark_change, index)
-                self._print_footer(current_page, bookmarks, quickmarks, quickmark_change)
+                self._print_content(current_page, bookmark_change, quickmark_change, index)
+                self._print_footer(
+                    current_page,
+                    bookmarks,
+                    quickmarks,
+                    bookmark_change,
+                    quickmark_change
+                )
                 if self.speed_mode:
                     self.print_perception_expander(self.page)
             except:
@@ -426,8 +443,14 @@ class ContentPages(Pages):
             self.page_right.box()
             try:
                 self._print_header()
-                self._print_content(current_page, quickmark_change, index)
-                self._print_footer(current_page, bookmarks, quickmarks, quickmark_change)
+                self._print_content(current_page, bookmark_change, quickmark_change, index)
+                self._print_footer(
+                    current_page,
+                    bookmarks,
+                    quickmarks,
+                    bookmark_change,
+                    quickmark_change
+                )
                 if self.speed_mode:
                     self.print_perception_expander(self.page_left)
                     self.print_perception_expander(self.page_right)
