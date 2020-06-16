@@ -251,7 +251,10 @@ class ContentPages(Pages):
             mark_tag = '[B:'
             for index, key in enumerate(keys):
                 if index == len(keys) - 1:
-                    mark_tag += key + ']'
+                    if bookmark_change:
+                        mark_tag += key + ',+]'
+                    else:
+                        mark_tag += key + ']'
                 else:
                     mark_tag += key + ','
             return mark_tag

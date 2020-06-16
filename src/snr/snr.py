@@ -428,6 +428,19 @@ def snr():
                     )
                     escape_quickmark = True
 
+                if y in Key.QUIT:
+                    escape = True
+                    escape_bookmark = True
+                    state.save(
+                        fileinput,
+                        book_title,
+                        current_chapter,
+                        content_pages.get_current_page_index(current_page),
+                        quickmarks.get_quickmarks(),
+                        bookmarks.get_bookmarks()
+                    )
+                    curses.endwin()
+
                 if y not in [*Key.PAGE_UP, *Key.PAGE_DOWN]:
                     escape_quickmark = True
 
@@ -456,6 +469,19 @@ def snr():
                     escape_bookmark = True
                     screen_update = True
                     content_update = True
+
+                if y in Key.QUIT:
+                    escape = True
+                    escape_bookmark = True
+                    state.save(
+                        fileinput,
+                        book_title,
+                        current_chapter,
+                        content_pages.get_current_page_index(current_page),
+                        quickmarks.get_quickmarks(),
+                        bookmarks.get_bookmarks()
+                    )
+                    curses.endwin()
 
                 if y not in [*Key.PAGE_UP, *Key.PAGE_DOWN]:
                     escape_bookmark = True
