@@ -23,6 +23,7 @@ class BookContent:
         self._set_content_soup()
         self._set_lang()
         self._set_lang_codes()
+        self._set_lang_code()
         self._set_lang_dict()
         self._set_toc_list()
         self._set_reference_toc()
@@ -51,16 +52,22 @@ class BookContent:
         else:
             self.lang_codes = [self.lang.replace('-', '_')]
 
+    def _set_lang_code(self):
+        self.lang_code = closest_match(self.lang, self.lang_codes)[0]
+
     def _set_lang_dict(self):
-        lang_code = closest_match(self.lang, self.lang_codes)[0]
         if self.dict_download:
             try:
-                if not is_installed(lang_code):
-                    print(Msg.DICT_INSTALL(lang_code))
+                if not is_installed(self.lang_code):
+                    print(Msg.DICT_INSTALL(self.lang_code))
                     install(lang_code)
-                self.lang_dict = Hyphenator(lang_code)
+                self.lang_dict = Hyphenator(self.lang_code)
             except:
                 pass
+            if is_installed(self.lang_code):
+                print(Msg.DICT_INSTALLED(self.lang_code))
+            else:
+                print(Msg.DICT_INSTALL_FAILED(self.lang_code))
 
     def _set_toc_list(self):
         self.toc_list = []
@@ -224,6 +231,9 @@ class BookContent:
     def get_document_title(self):
         return self.content_soup.find('title').text
 
+    def get_document_language(self):
+        return self.lang_code
+
     def get_chapter_title(self, chapter):
         return self.toc_list[chapter]['name']
 
@@ -235,6 +245,9 @@ class BookContent:
 
     def has_dict(self):
         return True if self.lang_dict is not None else False
+
+    def is_dict_installed(self):
+        return is_installed(self.lang_code)
 
     def make_soup(self, path, parser):
         with open(path) as f:

@@ -13,6 +13,10 @@ SAVE_STATE = 'Saving state ...'
 LOAD_STATE = 'Loading state ...'
 def DICT_INSTALL(target):
     return 'Downloading dictionary: ' + target + ' ...'
+def DICT_INSTALLED(target):
+    return target + ': downloaded'
+def DICT_INSTALL_FAILED(target):
+    return 'Failed to download: ' + target
 def ZIP_EXTRACT(target, destination):
     return 'Extracting file: ' + target + ' to ' + destination + ' ...'
 def CREATE(target):

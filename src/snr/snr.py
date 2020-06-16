@@ -55,6 +55,8 @@ def snr():
     path = reader.get_directory_path(toc_file)
     book = Parser.BookContent(path, toc_file, content_file, dict_download)
     book_title = book.get_document_title()
+    book_language = book.get_document_language()
+    is_dict_installed = book.is_dict_installed()
     number_of_chapters = book.get_number_of_chapters()
 
     # :::: CURSES CONFIG ::::::::::: #
@@ -66,7 +68,9 @@ def snr():
         highlight,
         double_page,
         justify_full,
-        hyphenation
+        hyphenation,
+        is_dict_installed,
+        book_language
     )
     screen = std_screen.get_screen()
     curses.noecho()
@@ -134,7 +138,9 @@ def snr():
                 highlight,
                 double_page,
                 justify_full,
-                hyphenation
+                hyphenation,
+                is_dict_installed,
+                book_language
             )
             screen = std_screen.get_screen()
             std_screen.redraw()
@@ -593,7 +599,9 @@ def snr():
                             highlight,
                             double_page,
                             justify_full,
-                            hyphenation
+                            hyphenation,
+                            is_dict_installed,
+                            book_language
                         )
                         screen = std_screen.get_screen()
                         std_screen.redraw()
@@ -650,7 +658,8 @@ def snr():
                             if z in Key.PAGE_DOWN:
                                 current_description_page -= 1
                                 if current_description_page < 0:
-                                    current_description_page = bookmark_description_pages.get_number_of_pages() - 1
+                                    current_description_page =  \
+                                        bookmark_description_pages.get_number_of_pages() - 1
 
                             if z in Key.BOOKMARK_DESCRIBE or z in Key.ESCAPE:
                                 content_update = True
@@ -683,7 +692,9 @@ def snr():
                                     highlight,
                                     double_page,
                                     justify_full,
-                                    hyphenation
+                                    hyphenation,
+                                    is_dict_installed,
+                                    book_language
                                 )
                                 screen = std_screen.get_screen()
                                 std_screen.redraw()
@@ -764,7 +775,9 @@ def snr():
                         highlight,
                         double_page,
                         justify_full,
-                        hyphenation
+                        hyphenation,
+                        is_dict_installed,
+                        book_language
                     )
                     screen = std_screen.get_screen()
                     std_screen.redraw()
@@ -867,7 +880,9 @@ def snr():
                         highlight,
                         double_page,
                         justify_full,
-                        hyphenation
+                        hyphenation,
+                        is_dict_installed,
+                        book_language
                     )
                     screen = std_screen.get_screen()
                     std_screen.redraw()
@@ -951,7 +966,9 @@ def snr():
                         highlight,
                         double_page,
                         justify_full,
-                        hyphenation
+                        hyphenation,
+                        is_dict_installed,
+                        book_language
                     )
                     screen = std_screen.get_screen()
                     std_screen.redraw()
@@ -995,7 +1012,9 @@ def snr():
                 highlight,
                 double_page,
                 justify_full,
-                hyphenation
+                hyphenation,
+                is_dict_installed,
+                book_language
             )
             screen = std_screen.get_screen()
             screen_update = True
@@ -1022,7 +1041,9 @@ def snr():
                 highlight,
                 double_page,
                 justify_full,
-                hyphenation
+                hyphenation,
+                is_dict_installed,
+                book_language
             )
             screen = std_screen.get_screen()
             index = content_pages.get_current_page_index(current_page)
