@@ -2,6 +2,7 @@
 
 import os
 import sys
+import argparse
 import curses
 import snr.constants.keybinds as Key
 import snr.constants.messages as Msg
@@ -13,10 +14,17 @@ import snr.utilities as Utilities
 def snr():
     # :::: INIT :::::::::::::::::::: #
 
-    state = Reader.StateReader()
-    try:
-        fileinput = os.path.abspath(sys.argv[1])
-    except IndexError:
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-v', '--verbose', help='show output', action='store_true')
+    arg_parser.add_argument('FILE', help='path/to/epub/file', nargs='?', default=None)
+    args = arg_parser.parse_args()
+
+    state = Reader.StateReader(args.verbose)
+    default = False
+
+    if args.FILE is not None:
+        fileinput = os.path.abspath(args.FILE)
+    else:
         try:
             fileinput = state.get_path()
             default = True
@@ -24,12 +32,10 @@ def snr():
             print(Msg.HEADER)
             print(Msg.ERR_NO_PATH)
             exit()
-    else:
-        default = False
 
     # :::: READER CONFIG ::::::::::: #
 
-    config = Reader.ConfigReader()
+    config = Reader.ConfigReader(args.verbose)
     try:
         dark_mode = config.get_dark_mode()
         speed_mode = config.get_speed_mode()
@@ -49,11 +55,11 @@ def snr():
 
     # :::: BOOK INIT ::::::::::::::: #
 
-    reader = Reader.FileReader(fileinput)
+    reader = Reader.FileReader(fileinput, args.verbose)
     toc_file = reader.get_toc_file()
     content_file = reader.get_content_file()
     path = reader.get_directory_path(toc_file)
-    book = Parser.BookContent(path, toc_file, content_file, dict_download)
+    book = Parser.BookContent(path, toc_file, content_file, dict_download, args.verbose)
     book_title = book.get_document_title()
     book_language = book.get_document_language()
     is_dict_installed = book.is_dict_installed()

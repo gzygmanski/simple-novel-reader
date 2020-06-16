@@ -6,8 +6,8 @@ import snr.constants.messages as Msg
 from .config import Config
 
 class StateReader(Config):
-    def __init__(self):
-        Config.__init__(self)
+    def __init__(self, verbose=False):
+        Config.__init__(self, verbose)
         self._set_state_file()
         self._set_state()
 

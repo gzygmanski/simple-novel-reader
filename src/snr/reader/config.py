@@ -5,9 +5,9 @@ import appdirs
 import snr.constants.messages as Msg
 
 class Config:
-    def __init__(self, access_rights=0o755, verbose=False):
-        self.access_rights = access_rights
+    def __init__(self, verbose=False, access_rights=0o755):
         self.verbose = verbose
+        self.access_rights = access_rights
         self._set_config_dir()
 
     def _set_config_dir(self):

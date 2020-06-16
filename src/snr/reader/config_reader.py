@@ -8,8 +8,8 @@ from distutils.util import strtobool
 from .config import Config
 
 class ConfigReader(Config):
-    def __init__(self, config_file=None):
-        Config.__init__(self)
+    def __init__(self, verbose=False, config_file=None):
+        Config.__init__(self, verbose)
         self.general_section = 'DEFAULT'
         self.colors_section = 'COLORS'
         self._set_config_file(config_file)
