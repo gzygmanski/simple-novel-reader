@@ -23,7 +23,7 @@ def CREATE(target):
     return 'Creating: ' + target + ' ...'
 ERR_NO_PATH = '''\
 ERR_NO_PATH:
-    Path not provided. If this is the first time you start application provide path to the epub file.
+    Path not provided. If this is the first time you start application or path of book changed provide path to the epub file.
 
 USAGE: snr path/to/epub/file
 E.G.: snr ~/Book.epub''' + '\n'
