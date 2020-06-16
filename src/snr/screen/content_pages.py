@@ -378,8 +378,8 @@ class ContentPages(Pages):
             )
             self.page_left.addstr(pos_y, self.static_padding, page_number, self.info_colors)
             if current_page + 1 <= self.get_number_of_pages():
-                mark_tag = self._get_bookmark_tag(current_page, bookmarks) \
-                    + self._get_quickmark_tag(current_page, quickmarks, quickmark_change)
+                mark_tag = self._get_bookmark_tag(current_page, bookmarks, bookmark_change, '[B:+]') \
+                    + self._get_quickmark_tag(current_page, quickmarks, quickmark_change, '[Q:+]')
                 current_page += 1
                 page_number = '[' + str(current_page) + '/' + str(self.get_number_of_pages()) + ']'
                 pos_x = self.page_max_x - self.static_padding - len(page_number)
