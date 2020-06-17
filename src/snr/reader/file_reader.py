@@ -8,10 +8,10 @@ from pathlib import Path
 import snr.constants.messages as Msg
 
 class FileReader:
-    def __init__(self, file_path, access_rights=0o755, verbose=False):
+    def __init__(self, file_path, verbose=False, access_rights=0o755):
         self.file_path = file_path
-        self.access_rights = access_rights
         self.verbose = verbose
+        self.access_rights = access_rights
         self._set_path()
         self._set_temp_dir()
         self._unzip_file()
