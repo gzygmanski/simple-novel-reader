@@ -51,7 +51,7 @@ class BookmarkDescribePages(Pages):
         bookmarks = self.bookmarks.get_bookmarks()
         self.pages = []
         on_page = []
-        on_page.append('Chapter: ' + str(bookmarks[self.bookmark]['chapter']))
+        on_page.append('Chapter: ' + str(bookmarks[self.bookmark]['chapter'] + 1))
         on_page.append('Index: ' + str(bookmarks[self.bookmark]['index']))
         on_page.append('* * *')
         if self.bookmarks.has_description(self.bookmark):
