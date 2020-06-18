@@ -320,21 +320,37 @@ class ContentPages(Pages):
         return self.pe_multiplier
 
     def increase_index(self, index, page):
-        if not self.double_page and index < self.get_current_page_last_index(page):
-            return index + 1
-        elif self.double_page:
+        if not self.double_page:
+            if index < self.get_current_page_last_index(page):
+                return index + 1
+            else:
+                return self.get_current_page_index(page)
+        else:
             try:
                 if index < self.get_current_page_last_index(page + 1):
                     return index + 1
+                else:
+                    return self.get_current_page_index(page)
             except IndexError:
                 if index < self.get_current_page_last_index(page):
                     return index + 1
-        return index
+                else:
+                    return self.get_current_page_index(page)
 
     def decrease_index(self, index, page):
-        if index > self.get_current_page_index(page):
-            return index - 1
-        return index
+        if not self.double_page:
+            if index > self.get_current_page_index(page):
+                return index - 1
+            else:
+                return self.get_current_page_last_index(page)
+        else:
+            try:
+                if index > self.get_current_page_index(page):
+                    return index - 1
+                else:
+                    return self.get_current_page_last_index(page + 1)
+            except IndexError:
+                return self.get_current_page_last_index(page)
 
     # :::: PRINTERS :::::::::::::::: #
 
