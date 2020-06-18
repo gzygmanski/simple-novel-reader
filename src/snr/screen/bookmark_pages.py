@@ -101,7 +101,7 @@ class BookmarkPages(Pages):
                     self.select_colors
                 )
                 bookmark_index = ' ' * abs((len(str(bookmark['id'])) - 3) * -1) \
-                    + str(bookmark['id']) + self.index_suffix
+                    + str(int(bookmark['id']) + 1) + self.index_suffix
                 self.page.addstr(
                     pos_y,
                     self.static_padding + self.pointer_margin,

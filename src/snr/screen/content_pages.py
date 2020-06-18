@@ -254,11 +254,11 @@ class ContentPages(Pages):
             for index, key in enumerate(keys):
                 if index == len(keys) - 1:
                     if bookmark_change:
-                        mark_tag += key + ',+]'
+                        mark_tag += str(int(key) + 1) + ',+]'
                     else:
-                        mark_tag += key + ']'
+                        mark_tag += str(int(key) + 1) + ']'
                 else:
-                    mark_tag += key + ','
+                    mark_tag += str(int(key) + 1) + ','
             return mark_tag
 
     def get_number_of_pages(self):
