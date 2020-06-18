@@ -8,22 +8,17 @@ class Screen:
     def __init__(
         self,
         title,
-        dark_mode,
-        speed_mode,
-        highlight,
-        double_page,
-        justify_full,
-        hyphenation,
+        modes,
         is_dict_installed,
         language='-'
     ):
         self.title = title
-        self.dark_mode = dark_mode
-        self.speed_mode = speed_mode
-        self.highlight = highlight
-        self.double_page = double_page
-        self.justify_full = justify_full
-        self.hyphenation = hyphenation
+        self.dark_mode = modes['dark_mode']
+        self.speed_mode = modes['speed_mode']
+        self.highlight = modes['highlight']
+        self.double_page = modes['double_page']
+        self.justify_full = modes['justify_full']
+        self.hyphenation = modes['hyphenation']
         self.is_dict_installed = is_dict_installed
         self.language = language
         self.padding = 2

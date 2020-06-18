@@ -11,12 +11,7 @@ class ContentPages(Pages):
         screen,
         book,
         chapter,
-        dark_mode=False,
-        speed_mode=False,
-        highlight=False,
-        double_page=False,
-        justify_full=False,
-        hyphenation=False,
+        modes,
         v_padding=2,
         h_padding=2,
         pe_multiplier=.2
@@ -25,15 +20,10 @@ class ContentPages(Pages):
             screen,
             book,
             chapter,
-            dark_mode,
-            speed_mode,
-            highlight,
-            double_page,
-            justify_full,
+            modes,
             v_padding,
             h_padding,
         )
-        self.hyphenation = hyphenation
         self.pe_multiplier = pe_multiplier
         self._set_page()
         self._set_pages()

@@ -13,6 +13,7 @@ def snr(state, fileinput, args, default):
     # :::: READER CONFIG ::::::::::: #
 
     config = Reader.ConfigReader(args.verbose)
+
     try:
         dark_mode = args.dark_mode or config.get_dark_mode()
         speed_mode = args.speed_mode or config.get_speed_mode()
@@ -30,6 +31,15 @@ def snr(state, fileinput, args, default):
         print(Msg.ERR_INVALID_CONFIG)
         exit()
 
+    modes = {
+        'dark_mode': dark_mode,
+        'speed_mode': speed_mode,
+        'highlight': highlight,
+        'double_page': double_page,
+        'justify_full': justify_full,
+        'hyphenation': hyphenation
+    }
+
     # :::: BOOK INIT ::::::::::::::: #
 
     reader = Reader.FileReader(fileinput, args.verbose)
@@ -46,12 +56,7 @@ def snr(state, fileinput, args, default):
 
     std_screen = Screen.Screen(
         book_title,
-        dark_mode,
-        speed_mode,
-        highlight,
-        double_page,
-        justify_full,
-        hyphenation,
+        modes,
         is_dict_installed,
         book_language
     )
@@ -86,12 +91,7 @@ def snr(state, fileinput, args, default):
     content_pages = Screen.ContentPages(screen,
         book,
         current_chapter,
-        dark_mode,
-        speed_mode,
-        highlight,
-        double_page,
-        justify_full,
-        hyphenation,
+        modes,
         v_padding,
         h_padding,
         pe_line
@@ -116,12 +116,7 @@ def snr(state, fileinput, args, default):
             curses.endwin()
             std_screen = Screen.Screen(
                 book_title,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 is_dict_installed,
                 book_language
             )
@@ -133,12 +128,7 @@ def snr(state, fileinput, args, default):
             content_pages = Screen.ContentPages(screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 v_padding,
                 h_padding,
                 pe_line
@@ -147,11 +137,7 @@ def snr(state, fileinput, args, default):
                 screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
+                modes,
                 v_padding,
                 h_padding
             )
@@ -159,11 +145,7 @@ def snr(state, fileinput, args, default):
                 screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
+                modes,
                 v_padding,
                 h_padding
             )
@@ -172,11 +154,7 @@ def snr(state, fileinput, args, default):
                 book,
                 current_chapter,
                 bookmarks,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
+                modes,
                 v_padding,
                 h_padding,
             )
@@ -210,12 +188,7 @@ def snr(state, fileinput, args, default):
                     screen,
                     book,
                     current_chapter,
-                    dark_mode,
-                    speed_mode,
-                    highlight,
-                    double_page,
-                    justify_full,
-                    hyphenation,
+                    modes,
                     v_padding,
                     h_padding,
                     pe_line
@@ -246,32 +219,32 @@ def snr(state, fileinput, args, default):
             current_page = content_pages.get_number_of_pages() - 1
 
         if x in Key.DARK_MODE:
-            dark_mode = not dark_mode
+            modes['dark_mode'] = not modes['dark_mode']
             screen_update = True
             content_update = True
 
         if x in Key.SPEED_MODE:
-            speed_mode = not speed_mode
+            modes['speed_mode'] = not modes['speed_mode']
             screen_update = True
             content_update = True
 
         if x in Key.HIGHLIGHT:
-            highlight = not highlight
+            modes['highlight'] = not modes['highlight']
             screen_update = True
             content_update = True
 
         if x in Key.DOUBLE_PAGE:
-            double_page = not double_page
+            modes['double_page'] = not modes['double_page']
             screen_update = True
             content_update = True
 
         if x in Key.JUSTIFY_FULL:
-            justify_full = not justify_full
+            modes ['justify_full'] = not modes['justify_full']
             screen_update = True
             content_update = True
 
         if x in Key.HYPHENATION:
-            hyphenation = not hyphenation
+            modes['hyphenation'] = not modes['hyphenation']
             screen_update = True
             content_update = True
 
@@ -282,12 +255,7 @@ def snr(state, fileinput, args, default):
                 screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 v_padding,
                 h_padding,
                 pe_line
@@ -302,12 +270,7 @@ def snr(state, fileinput, args, default):
                 screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 v_padding,
                 h_padding,
                 pe_line
@@ -321,12 +284,7 @@ def snr(state, fileinput, args, default):
             content_pages = Screen.ContentPages(screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 v_padding,
                 h_padding,
                 pe_line
@@ -341,12 +299,7 @@ def snr(state, fileinput, args, default):
                 screen,
                 book,
                 current_chapter,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 v_padding,
                 h_padding,
                 pe_line
@@ -367,12 +320,7 @@ def snr(state, fileinput, args, default):
                     screen,
                     book,
                     current_chapter,
-                    dark_mode,
-                    speed_mode,
-                    highlight,
-                    double_page,
-                    justify_full,
-                    hyphenation,
+                    modes,
                     v_padding,
                     h_padding,
                     pe_line
@@ -518,12 +466,7 @@ def snr(state, fileinput, args, default):
                             screen,
                             book,
                             current_chapter,
-                            dark_mode,
-                            speed_mode,
-                            highlight,
-                            double_page,
-                            justify_full,
-                            hyphenation,
+                            modes,
                             v_padding,
                             h_padding,
                             pe_line
@@ -542,11 +485,7 @@ def snr(state, fileinput, args, default):
                             book,
                             current_chapter,
                             bookmarks,
-                            dark_mode,
-                            speed_mode,
-                            highlight,
-                            double_page,
-                            justify_full,
+                            modes,
                             v_padding,
                             h_padding
                         )
@@ -566,23 +505,14 @@ def snr(state, fileinput, args, default):
                             book,
                             current_chapter,
                             bookmarks,
-                            dark_mode,
-                            speed_mode,
-                            highlight,
-                            double_page,
-                            justify_full,
+                            modes,
                             v_padding,
                             h_padding
                         )
                         curses.endwin()
                         std_screen = Screen.Screen(
                             book_title,
-                            dark_mode,
-                            speed_mode,
-                            highlight,
-                            double_page,
-                            justify_full,
-                            hyphenation,
+                            modes,
                             is_dict_installed,
                             book_language
                         )
@@ -593,12 +523,7 @@ def snr(state, fileinput, args, default):
                             screen,
                             book,
                             current_chapter,
-                            dark_mode,
-                            speed_mode,
-                            highlight,
-                            double_page,
-                            justify_full,
-                            hyphenation,
+                            modes,
                             v_padding,
                             h_padding,
                             pe_line
@@ -619,11 +544,7 @@ def snr(state, fileinput, args, default):
                             current_chapter,
                             bookmarks,
                             bookmark_key,
-                            dark_mode,
-                            speed_mode,
-                            highlight,
-                            double_page,
-                            justify_full,
+                            modes,
                             v_padding,
                             h_padding
                         )
@@ -670,12 +591,7 @@ def snr(state, fileinput, args, default):
                                 curses.endwin()
                                 std_screen = Screen.Screen(
                                     book_title,
-                                    dark_mode,
-                                    speed_mode,
-                                    highlight,
-                                    double_page,
-                                    justify_full,
-                                    hyphenation,
+                                    modes,
                                     is_dict_installed,
                                     book_language
                                 )
@@ -686,12 +602,7 @@ def snr(state, fileinput, args, default):
                                     screen,
                                     book,
                                     current_chapter,
-                                    dark_mode,
-                                    speed_mode,
-                                    highlight,
-                                    double_page,
-                                    justify_full,
-                                    hyphenation,
+                                    modes,
                                     v_padding,
                                     h_padding,
                                     pe_line
@@ -702,11 +613,7 @@ def snr(state, fileinput, args, default):
                                     current_chapter,
                                     bookmarks,
                                     bookmark_key,
-                                    dark_mode,
-                                    speed_mode,
-                                    highlight,
-                                    double_page,
-                                    justify_full,
+                                    modes,
                                     v_padding,
                                     h_padding
                                 )
@@ -715,11 +622,7 @@ def snr(state, fileinput, args, default):
                                     book,
                                     current_chapter,
                                     bookmarks,
-                                    dark_mode,
-                                    speed_mode,
-                                    highlight,
-                                    double_page,
-                                    justify_full,
+                                    modes,
                                     v_padding,
                                     h_padding
                                 )
@@ -753,12 +656,7 @@ def snr(state, fileinput, args, default):
                     curses.endwin()
                     std_screen = Screen.Screen(
                         book_title,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        hyphenation,
+                        modes,
                         is_dict_installed,
                         book_language
                     )
@@ -769,12 +667,7 @@ def snr(state, fileinput, args, default):
                         screen,
                         book,
                         current_chapter,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        hyphenation,
+                        modes,
                         v_padding,
                         h_padding,
                         pe_line
@@ -784,11 +677,7 @@ def snr(state, fileinput, args, default):
                         book,
                         current_chapter,
                         bookmarks,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
+                        modes,
                         v_padding,
                         h_padding
                     )
@@ -858,12 +747,7 @@ def snr(state, fileinput, args, default):
                     curses.endwin()
                     std_screen = Screen.Screen(
                         book_title,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        hyphenation,
+                        modes,
                         is_dict_installed,
                         book_language
                     )
@@ -874,12 +758,7 @@ def snr(state, fileinput, args, default):
                         screen,
                         book,
                         current_chapter,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        hyphenation,
+                        modes,
                         v_padding,
                         h_padding,
                         pe_line
@@ -888,11 +767,7 @@ def snr(state, fileinput, args, default):
                         screen,
                         book,
                         current_chapter,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
+                        modes,
                         v_padding,
                         h_padding
                     )
@@ -944,12 +819,7 @@ def snr(state, fileinput, args, default):
                     curses.endwin()
                     std_screen = Screen.Screen(
                         book_title,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        hyphenation,
+                        modes,
                         is_dict_installed,
                         book_language
                     )
@@ -960,12 +830,7 @@ def snr(state, fileinput, args, default):
                         screen,
                         book,
                         current_chapter,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
-                        hyphenation,
+                        modes,
                         v_padding,
                         h_padding,
                         pe_line
@@ -974,11 +839,7 @@ def snr(state, fileinput, args, default):
                         screen,
                         book,
                         current_chapter,
-                        dark_mode,
-                        speed_mode,
-                        highlight,
-                        double_page,
-                        justify_full,
+                        modes,
                         v_padding,
                         h_padding
                     )
@@ -990,12 +851,7 @@ def snr(state, fileinput, args, default):
             curses.endwin()
             std_screen = Screen.Screen(
                 book_title,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 is_dict_installed,
                 book_language
             )
@@ -1019,12 +875,7 @@ def snr(state, fileinput, args, default):
             curses.endwin()
             std_screen = Screen.Screen(
                 book_title,
-                dark_mode,
-                speed_mode,
-                highlight,
-                double_page,
-                justify_full,
-                hyphenation,
+                modes,
                 is_dict_installed,
                 book_language
             )
