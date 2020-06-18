@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import argparse
 import curses
 import snr.constants.keybinds as Key
 import snr.constants.messages as Msg
@@ -11,39 +8,19 @@ import snr.parser as Parser
 import snr.screen as Screen
 import snr.utilities as Utilities
 
-def snr():
-    # :::: INIT :::::::::::::::::::: #
-
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-v', '--verbose', help='show output', action='store_true')
-    arg_parser.add_argument('FILE', help='path/to/epub/file', nargs='?', default=None)
-    args = arg_parser.parse_args()
-
-    state = Reader.StateReader(args.verbose)
-    default = False
-
-    if args.FILE is not None:
-        fileinput = os.path.abspath(args.FILE)
-    else:
-        try:
-            fileinput = state.get_path()
-            default = True
-        except KeyError:
-            print(Msg.HEADER)
-            print(Msg.ERR_NO_PATH)
-            exit()
+def snr(state, fileinput, args, default):
 
     # :::: READER CONFIG ::::::::::: #
 
     config = Reader.ConfigReader(args.verbose)
     try:
-        dark_mode = config.get_dark_mode()
-        speed_mode = config.get_speed_mode()
-        highlight = config.get_highlight()
-        double_page = config.get_double_page()
-        justify_full = config.get_justify_full()
-        hyphenation = config.get_hyphenation()
-        dict_download = config.get_dict_download()
+        dark_mode = args.dark_mode or config.get_dark_mode()
+        speed_mode = args.speed_mode or config.get_speed_mode()
+        highlight = args.highlight or config.get_highlight()
+        double_page = args.double_page or config.get_double_page()
+        justify_full = args.justify_full or config.get_justify_full()
+        hyphenation = args.hyphenation or config.get_hyphenation()
+        dict_download = args.dict_download or config.get_dict_download()
         h_padding = config.get_horizontal_padding()
         v_padding = config.get_vertical_padding()
         pe_line = config.get_pe_multiplier()
