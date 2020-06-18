@@ -226,13 +226,25 @@ class ContentPages(Pages):
 
     def _get_quickmark_tag(self, current_page, quickmarks, quickmark_change, tag=''):
         mark_tag = ''
+        slots = []
         if quickmark_change:
             mark_tag = tag
         for mark in quickmarks.get_slots():
             if quickmarks.get_chapter(mark) == self.chapter \
                 and self.get_page_by_index(quickmarks.get_index(mark)) \
                 == current_page:
-                mark_tag = '[Q:' + str(mark) + ']'
+                slots.append(str(mark))
+        if len(slots) == 0:
+            return mark_tag
+        mark_tag = '[Q:'
+        for index, slot in enumerate(slots):
+            if index == len(slots) - 1:
+                if quickmark_change:
+                    mark_tag += slot + ',+]'
+                else:
+                    mark_tag += slot + ']'
+            else:
+                mark_tag += slot + ','
         return mark_tag
 
     def _get_bookmark_tag(self, current_page, bookmarks, bookmark_change, tag=''):
