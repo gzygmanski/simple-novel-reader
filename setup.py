@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='simple-novel-reader',
-    version='0.9.183',
+    version='0.9.184',
     description='An CLI light novel reader',
     long_description=long_description,
     long_description_content_type='text/markdown',
