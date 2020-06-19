@@ -125,11 +125,10 @@ class BookContent:
 
     def _set_toc_list(self):
         self.toc_list = []
-        index = 1
+        index = 0
         try:
-            for nav_item in self.toc_soup.navMap.find_all(recursive=True):
+            for index, nav_item in enumerate(self.toc_soup.navMap.find_all(recursive=True)):
                 if nav_item.name == 'navPoint':
-                    toc_id = index
                     toc_name = nav_item.select('navLabel > text')[0].string
                     toc_content = nav_item.content['src'].split('#')
                     toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
@@ -138,7 +137,6 @@ class BookContent:
                     else:
                         toc_inner_id = None
                     toc_dict = {
-                        'id': toc_id,
                         'inner_id': toc_inner_id,
                         'name': toc_name,
                         'src': [toc_content[0]],
@@ -146,7 +144,17 @@ class BookContent:
                     }
                     if toc_dict['src'][0] in list(self.content_dict.values()):
                         self.toc_list.append(toc_dict)
-                        index += 1
+            for i in range(len(self.toc_list)):
+                try:
+                    if self.toc_list[i]['inner_id'] is None \
+                        and self.toc_list[i + 1]['inner_id'] is not None \
+                        and self.toc_list[i]['src'] == self.toc_list[i + 1]['src']:
+                        self.toc_list.pop(i)
+                except IndexError:
+                    pass
+            for i in range(len(self.toc_list)):
+                self.toc_list[i]['id'] = i + 1
+
         except AttributeError:
             print(Msg.HEADER)
             print(Msg.ERR_PARSER_FAILED)
