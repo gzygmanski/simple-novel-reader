@@ -18,7 +18,7 @@ class BookContent:
         self.verbose = verbose
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         self.paragraph_tags = ['p']
-        self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a']
+        self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a', 'blockquote']
         self.lang_dict = None
         self._set_toc_soup()
         self._set_content_soup()
@@ -78,7 +78,14 @@ class BookContent:
             for item in self.content_soup.guide.find_all('reference'):
                 if item['type'] == 'toc':
                     reference = item['href'].split('#')
-                    self.reference_toc_src = self.path + '/' + urllib.parse.unquote(reference[0])
+                    self.reference_toc_src = os.path.join(
+                        self.path,
+                        urllib.parse.unquote(reference[0])
+                    )
+                    try:
+                        self.reference_toc_id = reference[1]
+                    except IndexError:
+                        self.reference_toc_id = None
         except AttributeError:
             print(Msg.HEADER)
             print(Msg.ERR_PARSER_FAILED)
@@ -92,8 +99,8 @@ class BookContent:
             for item in self.content_soup.find_all('item'):
                 if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
                     content_id = item['id']
-                    content_src = self.path + '/' + urllib.parse.unquote(item['href'])
-                    if content_src != self.reference_toc_src:
+                    content_src = os.path.join(self.path, urllib.parse.unquote(item['href']))
+                    if content_src != self.reference_toc_src or self.reference_toc_id is not None:
                         self.content_dict[content_id] = content_src
                     else:
                         self.content_toc_id = content_id
