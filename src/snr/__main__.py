@@ -7,6 +7,7 @@
 # https://github.com/gzygmanski: #
 # gzygmanski@hotmail.com:::::::: #
 
+import os
 import argparse
 import snr.reader.state_reader as State
 from snr.snr import snr
