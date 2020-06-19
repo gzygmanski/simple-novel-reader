@@ -26,10 +26,10 @@ class BookContent:
         self._set_lang_codes()
         self._set_lang_code()
         self._set_lang_dict()
-        self._set_toc_list()
         self._set_reference_toc()
         self._set_content_dict()
         self._set_order_list()
+        self._set_toc_list()
         self._set_content()
         self._set_paragraphs()
 
@@ -71,33 +71,6 @@ class BookContent:
                     print(Msg.DICT_INSTALLED(self.lang_code))
                 else:
                     print(Msg.DICT_INSTALL_FAILED(self.lang_code))
-
-    def _set_toc_list(self):
-        self.toc_list = []
-        try:
-            for index, nav_item in enumerate(self.toc_soup.navMap.find_all(recursive=False)):
-                if nav_item.name == 'navPoint':
-                    toc_id = index + 1
-                    toc_name = nav_item.select('navLabel > text')[0].string
-                    toc_content = nav_item.content['src'].split('#')
-                    toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
-                    if len(toc_content) == 2:
-                        toc_inner_id = toc_content[1]
-                    else:
-                        toc_inner_id = None
-                    toc_dict = {
-                        'id': toc_id,
-                        'inner_id': toc_inner_id,
-                        'name': toc_name,
-                        'src': [toc_content[0]],
-                        'text': []
-                    }
-                    self.toc_list.append(toc_dict)
-        except AttributeError:
-            print(Msg.HEADER)
-            print(Msg.ERR_PARSER_FAILED)
-            print(Msg.ERR_PARSER_NO_TOC)
-            exit()
 
     def _set_reference_toc(self):
         self.reference_toc_src = None
@@ -141,6 +114,36 @@ class BookContent:
             print(Msg.HEADER)
             print(Msg.ERR_PARSER_FAILED)
             print(Msg.ERR_PARSER_NO_ORDER)
+            exit()
+
+    def _set_toc_list(self):
+        self.toc_list = []
+        index = 1
+        try:
+            for nav_item in self.toc_soup.navMap.find_all(recursive=True):
+                if nav_item.name == 'navPoint':
+                    toc_id = index
+                    toc_name = nav_item.select('navLabel > text')[0].string
+                    toc_content = nav_item.content['src'].split('#')
+                    toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
+                    if len(toc_content) == 2:
+                        toc_inner_id = toc_content[1]
+                    else:
+                        toc_inner_id = None
+                    toc_dict = {
+                        'id': toc_id,
+                        'inner_id': toc_inner_id,
+                        'name': toc_name,
+                        'src': [toc_content[0]],
+                        'text': []
+                    }
+                    if toc_dict['src'][0] in list(self.content_dict.values()):
+                        self.toc_list.append(toc_dict)
+                        index += 1
+        except AttributeError:
+            print(Msg.HEADER)
+            print(Msg.ERR_PARSER_FAILED)
+            print(Msg.ERR_PARSER_NO_TOC)
             exit()
 
     def _set_content(self):
@@ -244,7 +247,10 @@ class BookContent:
         return self.toc_list[chapter]['text']
 
     def has_text(self, chapter):
-        return False if len(self.toc_list[chapter]['text']) == 0 else True
+        try:
+            return False if len(self.toc_list[chapter]['text']) == 0 else True
+        except IndexError:
+            return False
 
     def has_dict(self):
         return True if self.lang_dict is not None else False
