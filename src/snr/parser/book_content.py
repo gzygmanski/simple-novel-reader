@@ -140,7 +140,8 @@ class BookContent:
                         'inner_id': toc_inner_id,
                         'name': toc_name,
                         'src': [toc_content[0]],
-                        'text': []
+                        'text': [],
+                        'is_container': False
                     }
                     if toc_dict['src'][0] in list(self.content_dict.values()):
                         self.toc_list.append(toc_dict)
@@ -149,7 +150,7 @@ class BookContent:
                     if self.toc_list[i]['inner_id'] is None \
                         and self.toc_list[i + 1]['inner_id'] is not None \
                         and self.toc_list[i]['src'] == self.toc_list[i + 1]['src']:
-                        self.toc_list.pop(i)
+                        self.toc_list[i]['is_container'] = True
                 except IndexError:
                     pass
             for i in range(len(self.toc_list)):
@@ -189,40 +190,41 @@ class BookContent:
         current_id = ''
         has_content = False
         for item in self.toc_list:
-            for document in item['src']:
-                new_file = document
-                current_heading = item['name']
-                if item['inner_id'] is not None:
-                    current_id = item['inner_id']
-                if new_file != current_file:
-                    soup = self.make_soup(document, 'html.parser')
-                    current_file = new_file
-                if soup.body.find_all('p') == []:
-                    if 'div' not in self.paragraph_tags:
-                        self.paragraph_tags.append('div')
-                else:
-                    if 'div' in self.paragraph_tags:
-                        self.paragraph_tags.remove('div')
-                for tag in soup.body.find_all():
-                    try:
-                        if tag.name in self.heading_tags or tag.has_attr('id'):
-                            if tag.text == current_heading or tag['id'] == current_id:
-                                has_content = True
-                            else:
-                                has_content = False
-                    except KeyError:
-                        has_content = False
-                    if item['inner_id'] is None or has_content:
-                        if tag.name in self.paragraph_tags:
-                            if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
-                                item['text'].append(tag.text.lstrip())
-                        if tag.name in self.style_tags \
-                            and (tag.parent.name not in self.paragraph_tags \
-                            and tag.parent.name not in self.style_tags):
-                            if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
-                                item['text'].append(
-                                    tag.text.lstrip()
-                                )
+            if not item['is_container']:
+                for document in item['src']:
+                    new_file = document
+                    current_heading = item['name']
+                    if item['inner_id'] is not None:
+                        current_id = item['inner_id']
+                    if new_file != current_file:
+                        soup = self.make_soup(document, 'html.parser')
+                        current_file = new_file
+                    if soup.body.find_all('p') == []:
+                        if 'div' not in self.paragraph_tags:
+                            self.paragraph_tags.append('div')
+                    else:
+                        if 'div' in self.paragraph_tags:
+                            self.paragraph_tags.remove('div')
+                    for tag in soup.body.find_all():
+                        try:
+                            if tag.name in self.heading_tags or tag.has_attr('id'):
+                                if tag.text == current_heading or tag['id'] == current_id:
+                                    has_content = True
+                                else:
+                                    has_content = False
+                        except KeyError:
+                            has_content = False
+                        if item['inner_id'] is None or has_content:
+                            if tag.name in self.paragraph_tags:
+                                if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
+                                    item['text'].append(tag.text.lstrip())
+                            if tag.name in self.style_tags \
+                                and (tag.parent.name not in self.paragraph_tags \
+                                and tag.parent.name not in self.style_tags):
+                                if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
+                                    item['text'].append(
+                                        tag.text.lstrip()
+                                    )
 
     def _get_lang_codes(self, lang_code, data):
         langs = data[lang_code]
