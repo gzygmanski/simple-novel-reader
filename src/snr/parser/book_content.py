@@ -10,7 +10,7 @@ from hyphen.dictools import is_installed, install
 from hyphen import Hyphenator
 
 class BookContent:
-    def __init__(self, path, toc_file, content_file, dict_download, verbose=False):
+    def __init__(self, path, toc_file, content_file, dict_download, lang_code=None, verbose=False):
         self.path = path
         self.toc_file = toc_file
         self.content_file = content_file
@@ -20,6 +20,7 @@ class BookContent:
         self.paragraph_tags = ['p']
         self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a', 'blockquote']
         self.lang_dict = None
+        self.lang_code = lang_code
         self._set_toc_soup()
         self._set_content_soup()
         self._set_lang()
@@ -54,7 +55,8 @@ class BookContent:
             self.lang_codes = [self.lang.replace('-', '_')]
 
     def _set_lang_code(self):
-        self.lang_code = closest_match(self.lang, self.lang_codes)[0]
+        if self.lang_code is None:
+            self.lang_code = closest_match(self.lang, self.lang_codes)[0]
 
     def _set_lang_dict(self):
         if self.dict_download:

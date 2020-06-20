@@ -46,7 +46,7 @@ def snr(state, fileinput, args, default):
     toc_file = reader.get_toc_file()
     content_file = reader.get_content_file()
     path = reader.get_directory_path(toc_file)
-    book = Parser.BookContent(path, toc_file, content_file, dict_download, args.verbose)
+    book = Parser.BookContent(path, toc_file, content_file, dict_download, args.lang, args.verbose)
     book_title = book.get_document_title()
     book_language = book.get_document_language()
     is_dict_installed = book.is_dict_installed()

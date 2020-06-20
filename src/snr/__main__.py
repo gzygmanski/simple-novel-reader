@@ -22,9 +22,10 @@ def main():
     arg_parser.add_argument('-d', '--double_page', help='enable double page mode', action='store_true')
     arg_parser.add_argument('-f', '--justify_full', help='enable justify full mode', action='store_true')
     arg_parser.add_argument('-e', '--hyphenation', help='enable hyphenation, requires dictionary', action='store_true')
+    arg_parser.add_argument('--lang', help='specify dictionary language e.g. en_US, pl_PL', type=str)
     arg_parser.add_argument('--dict_download', help='allow to download dictionary', action='store_true')
-    arg_parser.add_argument('FILE', help='path/to/epub/file', nargs='?', default=None)
     arg_parser.add_argument('--verbose', help='show output', action='store_true')
+    arg_parser.add_argument('FILE', help='path/to/epub/file', nargs='?', default=None)
 
     args = arg_parser.parse_args()
 
