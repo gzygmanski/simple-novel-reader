@@ -171,16 +171,17 @@ class ContentPages(Pages):
             try:
                 for y, line in enumerate(self.pages[current_page]):
                     if line[0] in keys:
-                        if self.pages[current_page][y - 1][0] != line[0]:
-                            page.addch(
-                                y + self.v_padding,
-                                self.h_padding - 2,
-                                curses.ACS_BLOCK,
-                                self.select_colors
-                            )
-                        elif self.pages[current_page][y + 1][0] != line[0]:
-                            pass
-                        else:
+                        try:
+                            if self.pages[current_page][y + 1][0] != line[0]:
+                                pass
+                            else:
+                                page.addch(
+                                    y + self.v_padding,
+                                    self.h_padding - 2,
+                                    curses.ACS_BLOCK,
+                                    self.select_colors
+                                )
+                        except IndexError:
                             page.addch(
                                 y + self.v_padding,
                                 self.h_padding - 2,
@@ -188,22 +189,23 @@ class ContentPages(Pages):
                                 self.select_colors
                             )
                     if line[0] in slots:
-                        if self.pages[current_page][y - 1][0] != line[0]:
-                            page.addch(
-                                y + self.v_padding,
-                                self.page_max_x - self.h_padding + 1,
-                                curses.ACS_BLOCK,
-                                self.select_colors
-                            )
-                        elif self.pages[current_page][y + 1][0] != line[0]:
-                            pass
-                        else:
-                            page.addch(
-                                y + self.v_padding,
-                                self.page_max_x - self.h_padding + 1,
-                                curses.ACS_BLOCK,
-                                self.select_colors
-                            )
+                        try:
+                            if self.pages[current_page][y + 1][0] != line[0]:
+                                pass
+                            else:
+                                page.addch(
+                                    y + self.v_padding,
+                                    self.page_max_x - self.h_padding + 1,
+                                    curses.ACS_BLOCK,
+                                    self.select_colors
+                                )
+                        except IndexError:
+                                page.addch(
+                                    y + self.v_padding,
+                                    self.page_max_x - self.h_padding + 1,
+                                    curses.ACS_BLOCK,
+                                    self.select_colors
+                                )
                     for x, character in enumerate(line[1]):
                         if mark_change and line[0] == index:
                             page.addstr(y + self.v_padding, x + self.h_padding, \
