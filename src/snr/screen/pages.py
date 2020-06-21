@@ -25,7 +25,7 @@ class Pages:
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
         self._set_page_max_y()
         self._set_page_max_x()
-        self.static_padding = 2
+        self.static_padding = 3
         self._set_v_padding_max()
         self._set_v_padding_min()
         self._set_h_padding_max()
