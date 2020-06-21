@@ -93,6 +93,8 @@ class BookmarkPages(Pages):
     def _print_content(self, current_page, pointer_pos):
         pos_y = self.static_padding
         for y, bookmark in enumerate(self.pages[current_page]):
+            bookmark_index = ' ' * abs((len(str(int(bookmark['id']) + 1)) - 3) * -1) \
+                + str(int(bookmark['id']) + 1) + self.index_suffix
             if pointer_pos == y:
                 self.page.addstr(
                     pos_y,
@@ -100,8 +102,6 @@ class BookmarkPages(Pages):
                     self.pointer,
                     self.select_colors
                 )
-                bookmark_index = ' ' * abs((len(str(bookmark['id'])) - 3) * -1) \
-                    + str(int(bookmark['id']) + 1) + self.index_suffix
                 self.page.addstr(
                     pos_y,
                     self.static_padding + self.pointer_margin,
@@ -117,8 +117,6 @@ class BookmarkPages(Pages):
                     )
                     pos_y += 1
             else:
-                bookmark_index = ' ' * abs((len(str(bookmark['id'])) - 3) * -1) \
-                    + str(bookmark['id']) + ':'
                 self.page.addstr(
                     pos_y,
                     self.static_padding + self.pointer_margin,
