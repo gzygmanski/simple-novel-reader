@@ -11,12 +11,7 @@ class ContentPages(Pages):
         screen,
         book,
         chapter,
-        dark_mode=False,
-        speed_mode=False,
-        highlight=False,
-        double_page=False,
-        justify_full=False,
-        hyphenation=False,
+        modes,
         v_padding=2,
         h_padding=2,
         pe_multiplier=.2
@@ -25,15 +20,10 @@ class ContentPages(Pages):
             screen,
             book,
             chapter,
-            dark_mode,
-            speed_mode,
-            highlight,
-            double_page,
-            justify_full,
+            modes,
             v_padding,
             h_padding,
         )
-        self.hyphenation = hyphenation
         self.pe_multiplier = pe_multiplier
         self._set_page()
         self._set_pages()
@@ -171,13 +161,51 @@ class ContentPages(Pages):
                 previous_index = line[0]
         return coordinates_map
 
-    def _get_page_content(self, current_page, page, mark_change, index):
+    def _get_page_content(self, current_page, page, bookmarks, quickmarks, mark_change, index):
         is_open = False
         is_speech = False
         is_info = False
+        keys = self._get_bookmark_index_list(current_page, bookmarks)[1]
+        slots = self._get_quickmark_index_list(current_page, quickmarks)[1]
         if self.highlight:
             try:
                 for y, line in enumerate(self.pages[current_page]):
+                    if line[0] in keys:
+                        try:
+                            if self.pages[current_page][y + 1][0] != line[0]:
+                                pass
+                            else:
+                                page.addch(
+                                    y + self.v_padding,
+                                    self.h_padding - 2,
+                                    curses.ACS_BLOCK,
+                                    self.select_colors
+                                )
+                        except IndexError:
+                            page.addch(
+                                y + self.v_padding,
+                                self.h_padding - 2,
+                                curses.ACS_BLOCK,
+                                self.select_colors
+                            )
+                    if line[0] in slots:
+                        try:
+                            if self.pages[current_page][y + 1][0] != line[0]:
+                                pass
+                            else:
+                                page.addch(
+                                    y + self.v_padding,
+                                    self.page_max_x - self.h_padding + 1,
+                                    curses.ACS_BLOCK,
+                                    self.select_colors
+                                )
+                        except IndexError:
+                                page.addch(
+                                    y + self.v_padding,
+                                    self.page_max_x - self.h_padding + 1,
+                                    curses.ACS_BLOCK,
+                                    self.select_colors
+                                )
                     for x, character in enumerate(line[1]):
                         if mark_change and line[0] == index:
                             page.addstr(y + self.v_padding, x + self.h_padding, \
@@ -224,27 +252,50 @@ class ContentPages(Pages):
             except IndexError:
                 pass
 
-    def _get_quickmark_tag(self, current_page, quickmarks, quickmark_change, tag=''):
-        mark_tag = ''
-        if quickmark_change:
-            mark_tag = tag
+    def _get_quickmark_index_list(self, current_page, quickmarks):
+        slots = []
+        index_list = []
         for mark in quickmarks.get_slots():
             if quickmarks.get_chapter(mark) == self.chapter \
-                and self.get_page_by_index(quickmarks.get_index(mark)) \
-                == current_page:
-                mark_tag = '[Q:' + str(mark) + ']'
+                and current_page in self.get_pages_by_index(quickmarks.get_index(mark)):
+                slots.append(str(mark))
+                index_list.append(quickmarks.get_index(mark))
+        return slots, index_list
+
+    def _get_bookmark_index_list(self, current_page, bookmarks):
+        keys = []
+        index_list = []
+        bookmarks = bookmarks.get_bookmarks()
+        for bookmark in bookmarks.keys():
+            if self.chapter == bookmarks[bookmark]['chapter'] \
+                and current_page in self.get_pages_by_index(bookmarks[bookmark]['index']):
+                keys.append(bookmark)
+                index_list.append(bookmarks[bookmark]['index'])
+        return keys, index_list
+
+    def _get_quickmark_tag(self, current_page, quickmarks, quickmark_change, tag=''):
+        mark_tag = ''
+        slots = self._get_quickmark_index_list(current_page, quickmarks)[0]
+        if quickmark_change:
+            mark_tag = tag
+        if len(slots) == 0:
+            return mark_tag
+        mark_tag = '[Q:'
+        for index, slot in enumerate(slots):
+            if index == len(slots) - 1:
+                if quickmark_change:
+                    mark_tag += slot + ',+]'
+                else:
+                    mark_tag += slot + ']'
+            else:
+                mark_tag += slot + ','
         return mark_tag
 
     def _get_bookmark_tag(self, current_page, bookmarks, bookmark_change, tag=''):
         mark_tag = ''
-        keys = []
-        bookmarks = bookmarks.get_bookmarks()
+        keys = self._get_bookmark_index_list(current_page, bookmarks)[0]
         if bookmark_change:
             mark_tag = tag
-        for bookmark in bookmarks.keys():
-            if self.chapter == bookmarks[bookmark]['chapter'] \
-                and current_page == self.get_page_by_index(bookmarks[bookmark]['index']):
-                keys.append(bookmark)
         if len(keys) == 0:
             return mark_tag
         else:
@@ -252,11 +303,11 @@ class ContentPages(Pages):
             for index, key in enumerate(keys):
                 if index == len(keys) - 1:
                     if bookmark_change:
-                        mark_tag += key + ',+]'
+                        mark_tag += str(int(key) + 1) + ',+]'
                     else:
-                        mark_tag += key + ']'
+                        mark_tag += str(int(key) + 1) + ']'
                 else:
-                    mark_tag += key + ','
+                    mark_tag += str(int(key) + 1) + ','
             return mark_tag
 
     def get_number_of_pages(self):
@@ -268,6 +319,14 @@ class ContentPages(Pages):
                 if index == line[0]:
                     return current_page
         return 0
+
+    def get_pages_by_index(self, index):
+        pages = []
+        for current_page, page in enumerate(self.pages):
+            for line in page:
+                if index == line[0]:
+                    pages.append(current_page)
+        return pages
 
     def get_current_page_index(self, current_page):
         return self.pages[current_page][0][0]
@@ -308,21 +367,37 @@ class ContentPages(Pages):
         return self.pe_multiplier
 
     def increase_index(self, index, page):
-        if not self.double_page and index < self.get_current_page_last_index(page):
-            return index + 1
-        elif self.double_page:
+        if not self.double_page:
+            if index < self.get_current_page_last_index(page):
+                return index + 1
+            else:
+                return self.get_current_page_index(page)
+        else:
             try:
                 if index < self.get_current_page_last_index(page + 1):
                     return index + 1
+                else:
+                    return self.get_current_page_index(page)
             except IndexError:
                 if index < self.get_current_page_last_index(page):
                     return index + 1
-        return index
+                else:
+                    return self.get_current_page_index(page)
 
     def decrease_index(self, index, page):
-        if index > self.get_current_page_index(page):
-            return index - 1
-        return index
+        if not self.double_page:
+            if index > self.get_current_page_index(page):
+                return index - 1
+            else:
+                return self.get_current_page_last_index(page)
+        else:
+            try:
+                if index > self.get_current_page_index(page):
+                    return index - 1
+                else:
+                    return self.get_current_page_last_index(page + 1)
+            except IndexError:
+                return self.get_current_page_last_index(page)
 
     # :::: PRINTERS :::::::::::::::: #
 
@@ -345,13 +420,13 @@ class ContentPages(Pages):
                 self.info_colors
             )
 
-    def _print_content(self, current_page, bookmark_change, quickmark_change, index):
+    def _print_content(self, current_page, bookmarks, quickmarks, bookmark_change, quickmark_change, index):
         mark_change = True if bookmark_change or quickmark_change else False
         if not self.double_page:
-            self._get_page_content(current_page, self.page, mark_change, index)
+            self._get_page_content(current_page, self.page, bookmarks, quickmarks, mark_change, index)
         else:
-            self._get_page_content(current_page, self.page_left, mark_change, index)
-            self._get_page_content(current_page + 1, self.page_right, mark_change, index)
+            self._get_page_content(current_page, self.page_left, bookmarks, quickmarks, mark_change, index)
+            self._get_page_content(current_page + 1, self.page_right, bookmarks, quickmarks, mark_change, index)
 
     def _print_footer(self, current_page, bookmarks, quickmarks, bookmark_change, quickmark_change):
         if not self.double_page:
@@ -424,7 +499,14 @@ class ContentPages(Pages):
             self.page.box()
             try:
                 self._print_header()
-                self._print_content(current_page, bookmark_change, quickmark_change, index)
+                self._print_content(
+                    current_page,
+                    bookmarks,
+                    quickmarks,
+                    bookmark_change,
+                    quickmark_change,
+                    index
+                )
                 self._print_footer(
                     current_page,
                     bookmarks,
@@ -446,7 +528,14 @@ class ContentPages(Pages):
             self.page_right.box()
             try:
                 self._print_header()
-                self._print_content(current_page, bookmark_change, quickmark_change, index)
+                self._print_content(
+                    current_page,
+                    bookmarks,
+                    quickmarks,
+                    bookmark_change,
+                    quickmark_change,
+                    index
+                )
                 self._print_footer(
                     current_page,
                     bookmarks,

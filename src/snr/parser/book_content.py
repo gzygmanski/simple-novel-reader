@@ -10,7 +10,7 @@ from hyphen.dictools import is_installed, install
 from hyphen import Hyphenator
 
 class BookContent:
-    def __init__(self, path, toc_file, content_file, dict_download, verbose=False):
+    def __init__(self, path, toc_file, content_file, dict_download, lang_code=None, verbose=False):
         self.path = path
         self.toc_file = toc_file
         self.content_file = content_file
@@ -18,18 +18,19 @@ class BookContent:
         self.verbose = verbose
         self.heading_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
         self.paragraph_tags = ['p']
-        self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a']
+        self.style_tags = ['span', 'i', 'b', 'em', 'strong', 'a', 'blockquote']
         self.lang_dict = None
+        self.lang_code = lang_code
         self._set_toc_soup()
         self._set_content_soup()
         self._set_lang()
         self._set_lang_codes()
         self._set_lang_code()
         self._set_lang_dict()
-        self._set_toc_list()
         self._set_reference_toc()
         self._set_content_dict()
         self._set_order_list()
+        self._set_toc_list()
         self._set_content()
         self._set_paragraphs()
 
@@ -54,7 +55,8 @@ class BookContent:
             self.lang_codes = [self.lang.replace('-', '_')]
 
     def _set_lang_code(self):
-        self.lang_code = closest_match(self.lang, self.lang_codes)[0]
+        if self.lang_code is None:
+            self.lang_code = closest_match(self.lang, self.lang_codes)[0]
 
     def _set_lang_dict(self):
         if self.dict_download:
@@ -72,40 +74,20 @@ class BookContent:
                 else:
                     print(Msg.DICT_INSTALL_FAILED(self.lang_code))
 
-    def _set_toc_list(self):
-        self.toc_list = []
-        try:
-            for index, nav_item in enumerate(self.toc_soup.navMap.find_all(recursive=False)):
-                if nav_item.name == 'navPoint':
-                    toc_id = index + 1
-                    toc_name = nav_item.select('navLabel > text')[0].string
-                    toc_content = nav_item.content['src'].split('#')
-                    toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
-                    if len(toc_content) == 2:
-                        toc_inner_id = toc_content[1]
-                    else:
-                        toc_inner_id = None
-                    toc_dict = {
-                        'id': toc_id,
-                        'inner_id': toc_inner_id,
-                        'name': toc_name,
-                        'src': [toc_content[0]],
-                        'text': []
-                    }
-                    self.toc_list.append(toc_dict)
-        except AttributeError:
-            print(Msg.HEADER)
-            print(Msg.ERR_PARSER_FAILED)
-            print(Msg.ERR_PARSER_NO_TOC)
-            exit()
-
     def _set_reference_toc(self):
         self.reference_toc_src = None
         try:
             for item in self.content_soup.guide.find_all('reference'):
                 if item['type'] == 'toc':
                     reference = item['href'].split('#')
-                    self.reference_toc_src = self.path + '/' + urllib.parse.unquote(reference[0])
+                    self.reference_toc_src = os.path.join(
+                        self.path,
+                        urllib.parse.unquote(reference[0])
+                    )
+                    try:
+                        self.reference_toc_id = reference[1]
+                    except IndexError:
+                        self.reference_toc_id = None
         except AttributeError:
             print(Msg.HEADER)
             print(Msg.ERR_PARSER_FAILED)
@@ -119,8 +101,8 @@ class BookContent:
             for item in self.content_soup.find_all('item'):
                 if item.has_attr('media-type') and item['media-type'] == 'application/xhtml+xml':
                     content_id = item['id']
-                    content_src = self.path + '/' + urllib.parse.unquote(item['href'])
-                    if content_src != self.reference_toc_src:
+                    content_src = os.path.join(self.path, urllib.parse.unquote(item['href']))
+                    if content_src != self.reference_toc_src or self.reference_toc_id is not None:
                         self.content_dict[content_id] = content_src
                     else:
                         self.content_toc_id = content_id
@@ -141,6 +123,45 @@ class BookContent:
             print(Msg.HEADER)
             print(Msg.ERR_PARSER_FAILED)
             print(Msg.ERR_PARSER_NO_ORDER)
+            exit()
+
+    def _set_toc_list(self):
+        self.toc_list = []
+        index = 0
+        try:
+            for index, nav_item in enumerate(self.toc_soup.navMap.find_all(recursive=True)):
+                if nav_item.name == 'navPoint':
+                    toc_name = nav_item.select('navLabel > text')[0].string
+                    toc_content = nav_item.content['src'].split('#')
+                    toc_content[0] = os.path.join(self.path, urllib.parse.unquote(toc_content[0]))
+                    if len(toc_content) == 2:
+                        toc_inner_id = toc_content[1]
+                    else:
+                        toc_inner_id = None
+                    toc_dict = {
+                        'inner_id': toc_inner_id,
+                        'name': toc_name,
+                        'src': [toc_content[0]],
+                        'text': [],
+                        'is_container': False
+                    }
+                    if toc_dict['src'][0] in list(self.content_dict.values()):
+                        self.toc_list.append(toc_dict)
+            for i in range(len(self.toc_list)):
+                try:
+                    if self.toc_list[i]['inner_id'] is None \
+                        and self.toc_list[i + 1]['inner_id'] is not None \
+                        and self.toc_list[i]['src'] == self.toc_list[i + 1]['src']:
+                        self.toc_list[i]['is_container'] = True
+                except IndexError:
+                    pass
+            for i in range(len(self.toc_list)):
+                self.toc_list[i]['id'] = i + 1
+
+        except AttributeError:
+            print(Msg.HEADER)
+            print(Msg.ERR_PARSER_FAILED)
+            print(Msg.ERR_PARSER_NO_TOC)
             exit()
 
     def _set_content(self):
@@ -171,40 +192,41 @@ class BookContent:
         current_id = ''
         has_content = False
         for item in self.toc_list:
-            for document in item['src']:
-                new_file = document
-                current_heading = item['name']
-                if item['inner_id'] is not None:
-                    current_id = item['inner_id']
-                if new_file != current_file:
-                    soup = self.make_soup(document, 'html.parser')
-                    current_file = new_file
-                if soup.body.find_all('p') == []:
-                    if 'div' not in self.paragraph_tags:
-                        self.paragraph_tags.append('div')
-                else:
-                    if 'div' in self.paragraph_tags:
-                        self.paragraph_tags.remove('div')
-                for tag in soup.body.find_all():
-                    try:
-                        if tag.name in self.heading_tags or tag.has_attr('id'):
-                            if tag.text == current_heading or tag['id'] == current_id:
-                                has_content = True
-                            else:
-                                has_content = False
-                    except KeyError:
-                        has_content = False
-                    if item['inner_id'] is None or has_content:
-                        if tag.name in self.paragraph_tags:
-                            if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
-                                item['text'].append(tag.text.lstrip())
-                        if tag.name in self.style_tags \
-                            and (tag.parent.name not in self.paragraph_tags \
-                            and tag.parent.name not in self.style_tags):
-                            if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
-                                item['text'].append(
-                                    tag.text.lstrip()
-                                )
+            if not item['is_container']:
+                for document in item['src']:
+                    new_file = document
+                    current_heading = item['name']
+                    if item['inner_id'] is not None:
+                        current_id = item['inner_id']
+                    if new_file != current_file:
+                        soup = self.make_soup(document, 'html.parser')
+                        current_file = new_file
+                    if soup.body.find_all('p') == []:
+                        if 'div' not in self.paragraph_tags:
+                            self.paragraph_tags.append('div')
+                    else:
+                        if 'div' in self.paragraph_tags:
+                            self.paragraph_tags.remove('div')
+                    for tag in soup.body.find_all():
+                        try:
+                            if tag.name in self.heading_tags or tag.has_attr('id'):
+                                if tag.text == current_heading or tag['id'] == current_id:
+                                    has_content = True
+                                else:
+                                    has_content = False
+                        except KeyError:
+                            has_content = False
+                        if item['inner_id'] is None or has_content:
+                            if tag.name in self.paragraph_tags:
+                                if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
+                                    item['text'].append(tag.text.lstrip())
+                            if tag.name in self.style_tags \
+                                and (tag.parent.name not in self.paragraph_tags \
+                                and tag.parent.name not in self.style_tags):
+                                if tag.text.lstrip() != '' and tag.text.lstrip() != '\xa0':
+                                    item['text'].append(
+                                        tag.text.lstrip()
+                                    )
 
     def _get_lang_codes(self, lang_code, data):
         langs = data[lang_code]
@@ -244,7 +266,10 @@ class BookContent:
         return self.toc_list[chapter]['text']
 
     def has_text(self, chapter):
-        return False if len(self.toc_list[chapter]['text']) == 0 else True
+        try:
+            return False if len(self.toc_list[chapter]['text']) == 0 else True
+        except IndexError:
+            return False
 
     def has_dict(self):
         return True if self.lang_dict is not None else False

@@ -12,11 +12,7 @@ class BookmarkDescribePages(Pages):
         chapter,
         bookmarks,
         bookmark,
-        dark_mode=False,
-        speed_mode=False,
-        highlight=False,
-        double_page=False,
-        justify_full=False,
+        modes,
         v_padding=2,
         h_padding=2,
     ):
@@ -24,11 +20,7 @@ class BookmarkDescribePages(Pages):
             screen,
             book,
             chapter,
-            dark_mode,
-            speed_mode,
-            highlight,
-            double_page,
-            justify_full,
+            modes,
             v_padding,
             h_padding,
         )
@@ -59,7 +51,7 @@ class BookmarkDescribePages(Pages):
         bookmarks = self.bookmarks.get_bookmarks()
         self.pages = []
         on_page = []
-        on_page.append('Chapter: ' + str(bookmarks[self.bookmark]['chapter']))
+        on_page.append('Chapter: ' + str(bookmarks[self.bookmark]['chapter'] + 1))
         on_page.append('Index: ' + str(bookmarks[self.bookmark]['index']))
         on_page.append('* * *')
         if self.bookmarks.has_description(self.bookmark):

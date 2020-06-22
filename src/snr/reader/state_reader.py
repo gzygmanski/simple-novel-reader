@@ -42,7 +42,7 @@ class StateReader(Config):
         with open (self.state_file, 'w') as f:
             if self.verbose:
                 print(Msg.SAVE_STATE)
-            json.dump(self.state, f)
+            json.dump(self.state, f, indent=2)
 
     def exists(self, title):
         if self.key_parser(title) in self.state.keys():

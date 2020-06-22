@@ -9,26 +9,23 @@ class Pages:
         screen,
         book,
         chapter,
-        dark_mode=False,
-        speed_mode=False,
-        highlight=False,
-        double_page=False,
-        justify_full=False,
+        modes,
         v_padding=2,
         h_padding=2,
     ):
         self.screen = screen
         self.book = book
         self.chapter = chapter
-        self.dark_mode = dark_mode
-        self.speed_mode = speed_mode
-        self.highlight = highlight
-        self.double_page = double_page
-        self.justify_full = justify_full
+        self.dark_mode = modes['dark_mode']
+        self.speed_mode = modes['speed_mode']
+        self.highlight = modes['highlight']
+        self.double_page = modes['double_page']
+        self.justify_full = modes['justify_full']
+        self.hyphenation = modes['hyphenation']
         self.screen_max_y, self.screen_max_x = screen.getmaxyx()
         self._set_page_max_y()
         self._set_page_max_x()
-        self.static_padding = 2
+        self.static_padding = 3
         self._set_v_padding_max()
         self._set_v_padding_min()
         self._set_h_padding_max()

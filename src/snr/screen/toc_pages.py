@@ -10,11 +10,7 @@ class TocPages(Pages):
         screen,
         book,
         chapter,
-        dark_mode=False,
-        speed_mode=False,
-        highlight=False,
-        double_page=False,
-        justify_full=False,
+        modes,
         v_padding=2,
         h_padding=2,
     ):
@@ -22,11 +18,7 @@ class TocPages(Pages):
             screen,
             book,
             chapter,
-            dark_mode,
-            speed_mode,
-            highlight,
-            double_page,
-            justify_full,
+            modes,
             v_padding,
             h_padding,
         )
@@ -61,16 +53,23 @@ class TocPages(Pages):
                 toc[key],
                 self.page_max_x - self.id_margin - self.static_padding
             )
-            if lines + len(chapter) <= self.page_lines:
+            if len(chapter) + lines < self.page_max_y - self.static_padding * 2:
                 page.append({
                     'id': key,
                     'name': chapter
                 })
                 lines += len(chapter)
+                chapter = []
             else:
                 self.pages.append(page)
                 page = []
                 lines = 0
+                if len(chapter) != 0:
+                    page.append({
+                        'id': key,
+                        'name': chapter
+                    })
+                    lines += len(chapter)
         if len(page) != 0:
             self.pages.append(page)
 
